@@ -1,0 +1,33 @@
+# .github/workflows/build-frc-project.yml
+name: Reusable FRC Build
+
+on:
+  workflow_call:
+    inputs:
+      project_path:
+        required: true
+        type: string
+      java_version:
+        required: true
+        type: string
+    secrets:
+      # Define any necessary secrets, e.g., for deployment if you add that later
+      # DEPLOY_SECRET: required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK ${{ inputs.java_version }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java_version }}
+        distribution: 'temurin'
+        cache: 'gradle'
+
+    - name: Run FRC build
+      # The working-directory ensures the command runs in the correct project folder
+      working-directory: ${{ inputs.project_path }}
+      run: ./gradlew build
