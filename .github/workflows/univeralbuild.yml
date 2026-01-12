@@ -1,4 +1,3 @@
-# .github/workflows/build-frc-project.yml
 name: Reusable FRC Build
 
 on:
