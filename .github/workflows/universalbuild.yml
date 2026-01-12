@@ -1,31 +1,63 @@
+# Name of this reusable workflow
 name: Reusable FRC Build
 
+# This workflow can only be called by other workflows (not triggered directly)
 on:
   workflow_call:
+    # Define inputs that calling workflows must provide
     inputs:
       project_path:
         required: true
         type: string
+        # Path to the FRC project folder (e.g., "." for root or "MyRobot/")
       java_version:
         required: true
         type: string
+        # Java version to use (e.g., "17" or "11")
 
 jobs:
   build:
+    # Run on Ubuntu (Linux) virtual machine
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Check out the repository code
     - uses: actions/checkout@v4
+    
+    # Step 2: Set up Java Development Kit
     - name: Set up JDK ${{ inputs.java_version }}
       uses: actions/setup-java@v4
       with:
         java-version: ${{ inputs.java_version }}
-        distribution: 'temurin'
-        cache: 'gradle'
+        distribution: 'temurin'  # Eclipse Temurin JDK distribution
+        cache: 'gradle'  # Cache Gradle dependencies to speed up builds
+
+    # Step 3: Make the Gradle wrapper executable
+    # (Git doesn't always preserve executable permissions)
     - name: Make gradlew executable
       working-directory: ${{ inputs.project_path }}
       run: chmod +x ./gradlew
-    - name: Run FRC build
-      # The working-directory ensures the command runs in the correct project folder
+
+    # Step 4: Run unit tests
+    - name: Run tests
+      working-directory: ${{ inputs.project_path }}
+      run: ./gradlew test
+
+    # Step 5: Run code quality checks (includes tests + linting)
+    - name: Run code checks
+      working-directory: ${{ inputs.project_path }}
+      run: ./gradlew check
+
+    # Step 6: Build the robot code (compile and package)
+    - name: Build robot code
       working-directory: ${{ inputs.project_path }}
       run: ./gradlew build
+
+    # Step 7: Upload test results if any step failed
+    # Helps debug what went wrong
+    - name: Upload test results
+      if: failure()  # Only runs if previous steps failed
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: ${{ inputs.project_path }}/build/reports/
