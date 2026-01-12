@@ -1,6 +1,6 @@
 {
   "name": "FRC Development",
-  "image": "wpilib/roborio-cross-ubuntu:2026-22.04",
+  "image": "wpilib/roborio-cross-ubuntu:2026-22.04-py314",
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
       "version": "17"
