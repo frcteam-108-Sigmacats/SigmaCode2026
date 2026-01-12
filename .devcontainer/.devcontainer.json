@@ -1,0 +1,21 @@
+{
+  "name": "FRC Development",
+  "image": "wpilib/roborio-cross-ubuntu:2026-22.04",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17"
+    },
+    "ghcr.io/devcontainers/features/gradle:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "wpilibsuite.vscode-wpilib",
+        "redhat.java",
+        "vscjava.vscode-java-debug"
+      ]
+    }
+  },
+  "postCreateCommand": "echo 'FRC Codespace Ready!'",
+  "forwardPorts": [5800, 5801]
+}
