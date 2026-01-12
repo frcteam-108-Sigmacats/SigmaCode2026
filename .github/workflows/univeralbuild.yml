@@ -9,9 +9,6 @@ on:
       java_version:
         required: true
         type: string
-    secrets:
-      # Define any necessary secrets, e.g., for deployment if you add that later
-      # DEPLOY_SECRET: required: false
 
 jobs:
   build:
