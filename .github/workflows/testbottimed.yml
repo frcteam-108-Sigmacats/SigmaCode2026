@@ -14,7 +14,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   call_build:
-    uses: /.github/workflows/universalbuild.yml
+    uses: ./.github/workflows/universalbuild.yml
     with:
       project_path: 2026TestBotTimed
       java_version: '17'
