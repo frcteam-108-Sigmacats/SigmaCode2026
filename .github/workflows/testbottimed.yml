@@ -16,5 +16,5 @@ jobs:
   call_build:
     uses: ./.github/workflows/universalbuild.yml
     with:
-      project_path: 2026TestBotTimed
+      project_path: '2026TestBotTimed'
       java_version: '17'
