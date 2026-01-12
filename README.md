@@ -1,2 +1,3 @@
 # SigmaCode2026
 [![CI Test Bot](https://github.com/frcteam-108-Sigmacats/SigmaCode2026/actions/workflows/testbottimed.yml/badge.svg)](https://github.com/frcteam-108-Sigmacats/SigmaCode2026/actions/workflows/testbottimed.yml)
+[![CI Real Bot](https://github.com/frcteam-108-Sigmacats/SigmaCode2026/actions/workflows/realbot.yml/badge.svg)](https://github.com/frcteam-108-Sigmacats/SigmaCode2026/actions/workflows/realbot.yml)
