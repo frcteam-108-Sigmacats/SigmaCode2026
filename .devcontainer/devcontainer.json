@@ -4,8 +4,7 @@
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
       "version": "17"
-    },
-    "ghcr.io/devcontainers/features/gradle:1": {}
+    }
   },
   "customizations": {
     "vscode": {
@@ -16,6 +15,6 @@
       ]
     }
   },
-  "postCreateCommand": "echo 'FRC Codespace Ready!'",
+  "postCreateCommand": "git lfs install && echo 'FRC Codespace Ready!'",
   "forwardPorts": [5800, 5801]
 }
