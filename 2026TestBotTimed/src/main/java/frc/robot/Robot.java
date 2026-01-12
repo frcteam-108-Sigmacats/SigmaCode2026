@@ -4,9 +4,12 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.KxNSwerve.SwerveDrive;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -14,10 +17,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * this project, you must also update the Main.java file in the project.
  */
 public class Robot extends TimedRobot {
+  //Set up for some auto routines to add into a sendable chooser so user can pick which auto to run
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
+
+  //Creating the xbox controller to drive the robot
+  private final CommandXboxController driver = new CommandXboxController(0); //0 is the first controller that is plugged into the computer
+  //Grabbing the swerve drive that will run all the wheels
+  private final SwerveDrive swerveDrive = new SwerveDrive();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -76,7 +85,21 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    // Grabs the Left joystick x and y direction that the user is pushing the joystick to (Has the robot drive to that direction that the joystick is facing)
+    double xAxis = -driver.getLeftX();
+    double yAxis = -driver.getLeftY();
+    //Grabs the x direction of the right joystick that the user is pushing the joystick to (Rotates the whole robot)
+    double rotAxis = -driver.getRightX();
+    //Checks if the driver is pushing the joystick more than 20% of its full throttle just to check for stick drift
+    xAxis = (Math.abs(xAxis) < 0.2) ? 0.0 : xAxis * 4.0; // Tertiary statement (inline if statement) Ex: Condition ? if true run this task : if not true run this task
+    yAxis = (Math.abs(yAxis) < 0.2) ? 0.0 : yAxis * 4.0;
+    rotAxis = (Math.abs(rotAxis) < 0.2) ? 0.0 : rotAxis * 2 * Math.PI;
+    //Stores the x and y axis in a translation variable
+    Translation2d translation = new Translation2d(yAxis, xAxis);
+    //Calling the drive task inside SwerveDrive class to have the robot use the data from the joysticks to tell the robot where its supposed to be going
+    swerveDrive.drive(translation, rotAxis, true);
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
