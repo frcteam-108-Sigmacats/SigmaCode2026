@@ -26,10 +26,6 @@ import java.util.Arrays;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
-import frc.robot.subsystems.drive.ModuleIO.ModuleIOInputs;
-import frc.robot.subsystems.drive.ModuleSim;
-import frc.robot.subsystems.drive.SparkXPhoenixOdometryThread;
-
 /**
  * Module IO implementation for Spark Flex drive motor controller, Spark Max turn motor controller,
  * and duty cycle absolute encoder.
@@ -144,7 +140,7 @@ public class ModuleMix implements ModuleIO {
   }
 
   @Override
-  public void updateInputs(ModuleIOInputs inputs) {
+  public void updateInputs(ModuleInputs inputs) {
     // Update drive inputs
     sparkStickyFault = false;
     inputs.drivePositionRad = driveMotor.getPosition().getValueAsDouble();

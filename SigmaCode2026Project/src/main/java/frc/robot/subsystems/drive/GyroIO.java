@@ -22,7 +22,7 @@ public class GyroIO implements Gyro {
   public GyroIO() {
     pigeon.getConfigurator().apply(new Pigeon2Configuration());
     pigeon.getConfigurator().setYaw(0.0);
-    yaw.setUpdateFrequency(0);//set later idk
+    yaw.setUpdateFrequency(0); // set later idk
     yawVelocity.setUpdateFrequency(50.0);
     pigeon.optimizeBusUtilization();
     yawTimestampQueue = SparkXPhoenixOdometryThread.getInstance().makeTimestampQueue();
@@ -30,7 +30,7 @@ public class GyroIO implements Gyro {
   }
 
   @Override
-  public void updateInputs(GyroIOInputs inputs) {
+  public void updateInputs(GyroInputs inputs) {
     inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
     inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());

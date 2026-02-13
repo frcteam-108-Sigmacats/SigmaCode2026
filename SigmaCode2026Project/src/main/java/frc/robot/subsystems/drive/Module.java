@@ -1,4 +1,5 @@
 package frc.robot.subsystems.drive;
+
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -8,18 +9,21 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.littletonrobotics.junction.Logger;
 
-
 public class Module {
-
+  // Creates the interface thats going to be used to run the code
   private final ModuleIO io;
-  private final ModuleIO InputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
-  private final int index; 
+  // Creates an object that stores one instance of the inputs to be logged
+  private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
+  // Index of which module we are currently configuring
+  private final int index;
+
+  // Creates alerts to notify if motors are disconnected
   private final Alert driveDisconnectedAlert;
   private final Alert turnDisconnectedAlert;
+  // Creates an object to store all modules position
+  private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
- private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
-
-public Module(ModuleIO io, int index) {
+  public Module(ModuleIO io, int index) {
     this.io = io;
     this.index = index;
     driveDisconnectedAlert =
@@ -30,7 +34,8 @@ public Module(ModuleIO io, int index) {
         new Alert(
             "Disconnected turn motor on module " + Integer.toString(index) + ".", AlertType.kError);
   }
-   public void periodic() {
+
+  public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
 
@@ -41,10 +46,15 @@ public Module(ModuleIO io, int index) {
       double positionMeters = inputs.odometryDrivePositionsRad[i] * wheelRadiusMeters;
       Rotation2d angle = inputs.odometryTurnPositions[i];
       odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
-        }
-    
-    /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */
-  public Void runSetpoint(SwerveModuleState state) {
+    }
+
+    // Update alerts
+    driveDisconnectedAlert.set(!inputs.driveConnected);
+    turnDisconnectedAlert.set(!inputs.turnConnected);
+  }
+
+  /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */
+  public void runSetpoint(SwerveModuleState state) {
     // Optimize velocity setpoint
     state.optimize(getAngle());
     state.cosineScale(inputs.turnPosition);
@@ -109,6 +119,5 @@ public Module(ModuleIO io, int index) {
   /** Returns the module velocity in rad/sec. */
   public double getFFCharacterizationVelocity() {
     return inputs.driveVelocityRadPerSec;
-  
-}}
+  }
 }
