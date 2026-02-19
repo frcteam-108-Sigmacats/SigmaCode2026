@@ -32,8 +32,8 @@ public class DriveConstants {
   public static final double maxSpeedMetersPerSec = 4.8;
   public static final double slowSpeedMetersPerSec = 1.0;
   public static final double odometryFrequency = 100.0; // Hz
-  public static final double trackWidth = Units.inchesToMeters(22.4375);
-  public static final double wheelBase = Units.inchesToMeters(22.4375);
+  public static final double trackWidth = Units.inchesToMeters(21.564);
+  public static final double wheelBase = Units.inchesToMeters(21.564);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
@@ -105,7 +105,7 @@ public class DriveConstants {
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
 
   // PathPlanner configuration
-  public static final double robotMassKg = 61.144;
+  public static final double robotMassKg = 45.3592; //110lbs
   public static final double robotMOI = 4.083;
   public static final double wheelCOF = 1.6;
   public static final RobotConfig ppConfig =
