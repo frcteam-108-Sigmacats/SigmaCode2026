@@ -1,4 +1,3 @@
-
 package frc.robot.subsystems.drive;
 
 import static frc.robot.subsystems.drive.DriveConstants.*;
@@ -27,11 +26,9 @@ import java.util.Arrays;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
-
 public class ModuleIOMix implements ModuleIO {
   private final Rotation2d zeroRotation;
 
-  
   private final TalonFX driveMotor;
   private final SparkBase turnMotor;
 
@@ -40,12 +37,10 @@ public class ModuleIOMix implements ModuleIO {
   private final VelocityVoltage velocity = new VelocityVoltage(0);
   private final SparkClosedLoopController turnController;
 
-  
   private final Queue<Double> timestampQueue;
   private final Queue<Double> drivePositionQueue;
   private final Queue<Double> turnPositionQueue;
 
-  
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
@@ -81,7 +76,6 @@ public class ModuleIOMix implements ModuleIO {
     turnEncoder = turnMotor.getAbsoluteEncoder();
     turnController = turnMotor.getClosedLoopController();
 
-    
     var driveConfig = new TalonFXConfiguration();
     driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     driveConfig.CurrentLimits.StatorCurrentLimit = DriveConstants.driveMotorCurrentLimit;
@@ -92,7 +86,6 @@ public class ModuleIOMix implements ModuleIO {
     driveMotor.getConfigurator().apply(driveConfig);
     driveMotor.setPosition(0);
 
-    
     var turnConfig = new SparkMaxConfig();
     turnConfig
         .inverted(turnInverted)
@@ -127,7 +120,6 @@ public class ModuleIOMix implements ModuleIO {
             turnMotor.configure(
                 turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    
     timestampQueue = SparkXPhoenixOdometryThread.getInstance().makeTimestampQueue();
     drivePositionQueue =
         SparkXPhoenixOdometryThread.getInstance().registerSignal(driveMotor.getPosition());
@@ -138,7 +130,7 @@ public class ModuleIOMix implements ModuleIO {
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    
+
     sparkStickyFault = false;
     inputs.drivePositionRad = driveMotor.getPosition().getValueAsDouble();
     inputs.driveVelocityRadPerSec = driveMotor.getVelocity().getValueAsDouble();
@@ -146,7 +138,6 @@ public class ModuleIOMix implements ModuleIO {
     inputs.driveCurrentAmps = driveMotor.getStatorCurrent().getValueAsDouble();
     inputs.driveConnected = driveMotor.isConnected();
 
-  
     sparkStickyFault = false;
     ifOk(
         turnMotor,
@@ -160,7 +151,6 @@ public class ModuleIOMix implements ModuleIO {
     ifOk(turnMotor, turnMotor::getOutputCurrent, (value) -> inputs.turnCurrentAmps = value);
     inputs.turnConnected = turnMotor.getLastError() == REVLibError.kOk;
 
-    
     inputs.odometryTimestamps =
         timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.odometryDrivePositionsRad =
@@ -184,7 +174,6 @@ public class ModuleIOMix implements ModuleIO {
     if (n < inputs.odometryTurnPositions.length) {
       inputs.odometryTurnPositions = Arrays.copyOf(inputs.odometryTurnPositions, n);
     }
-    
 
     timestampQueue.clear();
     drivePositionQueue.clear();

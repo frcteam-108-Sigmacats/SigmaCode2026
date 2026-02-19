@@ -28,7 +28,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
-import frc.robot.subsystems.drive.Drive;
+
 /**
  * Provides an interface for asynchronously reading high-frequency measurements to a set of queues.
  *

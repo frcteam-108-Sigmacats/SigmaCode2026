@@ -1,10 +1,3 @@
-// Copyright (c) 2021-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
-
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
@@ -91,8 +84,8 @@ public class DriveCommands {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
                   isFlipped
-                      ? drive.getGyroRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getGyroRotation()));
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRotation()));
         },
         drive);
   }
@@ -112,7 +105,7 @@ public class DriveCommands {
     ProfiledPIDController angleController =
         new ProfiledPIDController(
             ANGLE_KP,
-            0.0,
+            0.5,
             ANGLE_KD,
             new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
@@ -127,7 +120,7 @@ public class DriveCommands {
               // Calculate angular speed
               double omega =
                   angleController.calculate(
-                      drive.getGyroRotation().getRadians(), rotationSupplier.get().getRadians());
+                      drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
 
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
@@ -142,13 +135,13 @@ public class DriveCommands {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       speeds,
                       isFlipped
-                          ? drive.getGyroRotation().plus(new Rotation2d(Math.PI))
-                          : drive.getGyroRotation()));
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
             },
             drive)
 
         // Reset PID controller when command starts
-        .beforeStarting(() -> angleController.reset(drive.getGyroRotation().getRadians()));
+        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
 
   /**
@@ -245,14 +238,14 @@ public class DriveCommands {
             Commands.runOnce(
                 () -> {
                   state.positions = drive.getWheelRadiusCharacterizationPositions();
-                  state.lastAngle = drive.getGyroRotation();
+                  state.lastAngle = drive.getRotation();
                   state.gyroDelta = 0.0;
                 }),
 
             // Update gyro delta
             Commands.run(
                     () -> {
-                      var rotation = drive.getGyroRotation();
+                      var rotation = drive.getRotation();
                       state.gyroDelta += Math.abs(rotation.minus(state.lastAngle).getRadians());
                       state.lastAngle = rotation;
                     })
