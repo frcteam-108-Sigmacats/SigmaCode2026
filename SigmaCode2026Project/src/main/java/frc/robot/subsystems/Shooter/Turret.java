@@ -2,8 +2,6 @@ package frc.robot.subsystems.Shooter;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Turret.TurretIOInputsAutoLogged;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Turret extends SubsystemBase {

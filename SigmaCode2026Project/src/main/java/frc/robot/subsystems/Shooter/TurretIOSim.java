@@ -1,6 +1,6 @@
-package frc.robot.subsystems.Turret;
+package frc.robot.subsystems.Shooter;
 
-import static frc.robot.subsystems.Turret.TurretConstants.*;
+import static frc.robot.subsystems.Shooter.TurretConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -8,132 +8,139 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 /**
- * Physics-simulation implementation of {@link TurretIO}.
+ * Physics-simulation implementation (IOSim) for the Turret subsystem.
  *
- * <p>Three independent {@link DCMotorSim} instances model:
+ * <p>All three mechanism groups are modelled with WPILib {@link DCMotorSim}:
  *
  * <ul>
- *   <li>Turret rotation (Vortex)
- *   <li>Left shooter wheel (Kraken X60)
- *   <li>Right shooter wheel (Kraken X60)
- *   <li>Hood angle (Neo 550)
+ *   <li>Turret rotation (Vortex sim)
+ *   <li>Shooter left wheel (Kraken X60 sim)
+ *   <li>Shooter right wheel (Kraken X60 sim)
+ *   <li>Hood (Neo 550 sim)
  * </ul>
  */
 public class TurretIOSim implements TurretIO {
 
-  private static final double DT = 0.02; // 50 Hz loop period (seconds)
+  private static final double DT = 0.02; // 50 Hz loop period
 
-  // ── Simulated plants ──────────────────────────────────────────────────────
-  private final DCMotorSim turretSim =
-      new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(turretMotorModel, turretMOI, turretGearRatio),
-          turretMotorModel);
-
-  private final DCMotorSim shooterLeftSim =
-      new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(
-              shooterMotorModel, shooterWheelMOI, shooterWheelGearRatio),
-          shooterMotorModel);
-
-  private final DCMotorSim shooterRightSim =
-      new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(
-              shooterMotorModel, shooterWheelMOI, shooterWheelGearRatio),
-          shooterMotorModel);
-
-  private final DCMotorSim hoodSim =
-      new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(hoodMotorModel, hoodMOI, hoodGearRatio),
-          hoodMotorModel);
+  // ── Sim motors ───────────────────────────────────────────────────────────
+  private final DCMotorSim turretSim;
+  private final DCMotorSim shooterLeftSim;
+  private final DCMotorSim shooterRightSim;
+  private final DCMotorSim hoodSim;
 
   // ── Applied voltages ──────────────────────────────────────────────────────
-  private double turretVolts = 0.0;
-  private double shooterLeftVolts = 0.0;
-  private double shooterRightVolts = 0.0;
-  private double hoodVolts = 0.0;
+  private double turretAppliedVolts = 0.0;
+  private double shooterLeftAppliedVolts = 0.0;
+  private double shooterRightAppliedVolts = 0.0;
+  private double hoodAppliedVolts = 0.0;
 
-  // ── Closed-loop controllers ───────────────────────────────────────────────
-  private final PIDController turretPID = new PIDController(turretSimKp, 0.0, turretSimKd);
-  private final PIDController shooterPID = new PIDController(shooterSimKp, 0.0, shooterSimKd);
-  private final PIDController hoodPID = new PIDController(hoodSimKp, 0.0, hoodSimKd);
-
+  // ── Closed-loop flags & controllers ──────────────────────────────────────
   private boolean turretClosedLoop = false;
   private boolean shooterClosedLoop = false;
   private boolean hoodClosedLoop = false;
+
+  private final PIDController turretPID = new PIDController(turretSimKp, 0.0, turretSimKd);
+  private final PIDController shooterPID = new PIDController(shooterSimKp, 0.0, shooterSimKd);
+  private final PIDController hoodPID = new PIDController(hoodSimKp, 0.0, hoodSimKd);
 
   private double turretSetpointRad = 0.0;
   private double shooterSetpointRadPerSec = 0.0;
   private double hoodSetpointDeg = 0.0;
 
   public TurretIOSim() {
-    // Turret wraps; hood does not
+    turretSim =
+        new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(turretMotorModel, turretMOI, turretGearRatio),
+            turretMotorModel);
+
+    shooterLeftSim =
+        new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(
+                shooterMotorModel, shooterWheelMOI, shooterWheelGearRatio),
+            shooterMotorModel);
+
+    shooterRightSim =
+        new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(
+                shooterMotorModel, shooterWheelMOI, shooterWheelGearRatio),
+            shooterMotorModel);
+
+    hoodSim =
+        new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(hoodMotorModel, hoodMOI, hoodGearRatio),
+            hoodMotorModel);
+
+    // Turret can wrap around; hood cannot
     turretPID.enableContinuousInput(-Math.PI, Math.PI);
   }
-
-  // ── updateInputs ─────────────────────────────────────────────────────────
 
   @Override
   public void updateInputs(TurretIOInputs inputs) {
 
-    // Run closed-loop calculations before stepping the plant
+    // ── Turret closed-loop ────────────────────────────────────────────────
     if (turretClosedLoop) {
-      turretVolts = turretPID.calculate(turretSim.getAngularPositionRad(), turretSetpointRad);
+      turretAppliedVolts =
+          turretPID.calculate(turretSim.getAngularPositionRad(), turretSetpointRad);
     }
+
+    // ── Shooter closed-loop ───────────────────────────────────────────────
     if (shooterClosedLoop) {
       double effort =
           shooterPID.calculate(
               shooterLeftSim.getAngularVelocityRadPerSec(), shooterSetpointRadPerSec);
-      shooterLeftVolts = effort;
-      shooterRightVolts = effort;
+      shooterLeftAppliedVolts = effort;
+      shooterRightAppliedVolts = effort;
     }
+
+    // ── Hood closed-loop ──────────────────────────────────────────────────
     if (hoodClosedLoop) {
-      hoodVolts =
+      hoodAppliedVolts =
           hoodPID.calculate(Math.toDegrees(hoodSim.getAngularPositionRad()), hoodSetpointDeg);
     }
 
-    // Apply voltages and step all plants
-    turretSim.setInputVoltage(MathUtil.clamp(turretVolts, -12.0, 12.0));
-    shooterLeftSim.setInputVoltage(MathUtil.clamp(shooterLeftVolts, -12.0, 12.0));
-    shooterRightSim.setInputVoltage(MathUtil.clamp(shooterRightVolts, -12.0, 12.0));
-    hoodSim.setInputVoltage(MathUtil.clamp(hoodVolts, -12.0, 12.0));
+    // ── Step simulations ──────────────────────────────────────────────────
+    turretSim.setInputVoltage(MathUtil.clamp(turretAppliedVolts, -12.0, 12.0));
+    shooterLeftSim.setInputVoltage(MathUtil.clamp(shooterLeftAppliedVolts, -12.0, 12.0));
+    shooterRightSim.setInputVoltage(MathUtil.clamp(shooterRightAppliedVolts, -12.0, 12.0));
+    hoodSim.setInputVoltage(MathUtil.clamp(hoodAppliedVolts, -12.0, 12.0));
 
     turretSim.update(DT);
     shooterLeftSim.update(DT);
     shooterRightSim.update(DT);
     hoodSim.update(DT);
 
-    // Turret
+    // ── Populate inputs ───────────────────────────────────────────────────
     inputs.turretConnected = true;
     inputs.turretPositionRad = turretSim.getAngularPositionRad();
     inputs.turretVelocityRadPerSec = turretSim.getAngularVelocityRadPerSec();
-    inputs.turretAppliedVolts = turretVolts;
+    inputs.turretAppliedVolts = turretAppliedVolts;
     inputs.turretCurrentAmps = Math.abs(turretSim.getCurrentDrawAmps());
 
-    // Shooter wheels
     inputs.shooterLeftConnected = true;
     inputs.shooterRightConnected = true;
     inputs.shooterLeftVelocityRadPerSec = shooterLeftSim.getAngularVelocityRadPerSec();
     inputs.shooterRightVelocityRadPerSec = shooterRightSim.getAngularVelocityRadPerSec();
-    inputs.shooterLeftAppliedVolts = shooterLeftVolts;
-    inputs.shooterRightAppliedVolts = shooterRightVolts;
+    inputs.shooterLeftAppliedVolts = shooterLeftAppliedVolts;
+    inputs.shooterRightAppliedVolts = shooterRightAppliedVolts;
     inputs.shooterLeftCurrentAmps = Math.abs(shooterLeftSim.getCurrentDrawAmps());
     inputs.shooterRightCurrentAmps = Math.abs(shooterRightSim.getCurrentDrawAmps());
 
-    // Hood – hoodSim stores radians internally; the IO contract exposes degrees
     inputs.hoodConnected = true;
+    // hoodSim angular position is stored in radians internally; convert to degrees for the API
     inputs.hoodPositionDeg = Math.toDegrees(hoodSim.getAngularPositionRad());
     inputs.hoodVelocityDegPerSec = Math.toDegrees(hoodSim.getAngularVelocityRadPerSec());
-    inputs.hoodAppliedVolts = hoodVolts;
+    inputs.hoodAppliedVolts = hoodAppliedVolts;
     inputs.hoodCurrentAmps = Math.abs(hoodSim.getCurrentDrawAmps());
   }
 
-  // ── Turret rotation ───────────────────────────────────────────────────────
+  // ── Turret Commands ───────────────────────────────────────────────────────
 
   @Override
   public void setTurretOpenLoop(double outputVolts) {
     turretClosedLoop = false;
     turretPID.reset();
-    turretVolts = outputVolts;
+    turretAppliedVolts = outputVolts;
   }
 
   @Override
@@ -142,14 +149,14 @@ public class TurretIOSim implements TurretIO {
     turretSetpointRad = angleRad;
   }
 
-  // ── Shooter wheels ────────────────────────────────────────────────────────
+  // ── Shooter Wheel Commands ────────────────────────────────────────────────
 
   @Override
   public void setShooterOpenLoop(double outputVolts) {
     shooterClosedLoop = false;
     shooterPID.reset();
-    shooterLeftVolts = outputVolts;
-    shooterRightVolts = outputVolts;
+    shooterLeftAppliedVolts = outputVolts;
+    shooterRightAppliedVolts = outputVolts;
   }
 
   @Override
@@ -158,13 +165,13 @@ public class TurretIOSim implements TurretIO {
     shooterSetpointRadPerSec = velocityRadPerSec;
   }
 
-  // ── Hood ──────────────────────────────────────────────────────────────────
+  // ── Hood Commands ─────────────────────────────────────────────────────────
 
   @Override
   public void setHoodOpenLoop(double outputVolts) {
     hoodClosedLoop = false;
     hoodPID.reset();
-    hoodVolts = outputVolts;
+    hoodAppliedVolts = outputVolts;
   }
 
   @Override

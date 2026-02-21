@@ -1,6 +1,7 @@
-package frc.robot.subsystems.Turret;
+package frc.robot.subsystems.Shooter;
 
 import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 /**
  * Hardware abstraction layer for the Turret subsystem.
@@ -12,27 +13,24 @@ import org.littletonrobotics.junction.AutoLog;
  *   <li>Shooter wheels – 2× Kraken X60 (TalonFX)
  *   <li>Hood – 1× Neo 550 (SparkMax)
  * </ul>
- *
- * <p>All three concrete implementations (IOSim, IOMix, IOReal) override every method so the public
- * surface is identical across all variants.
  */
 public interface TurretIO {
-
   @AutoLog
   public static class TurretIOInputs {
 
-    // ── Turret Rotation ──────────────────────────────────────────────────
+    // ── Turret Rotation ──────────────────────────────────────────────────────
     public boolean turretConnected = false;
-    /** Current turret yaw in radians, wrapped to [-π, π]. */
+    /** Current turret angle in radians (0 = forward). */
     public double turretPositionRad = 0.0;
 
     public double turretVelocityRadPerSec = 0.0;
     public double turretAppliedVolts = 0.0;
     public double turretCurrentAmps = 0.0;
 
-    // ── Shooter Wheels ───────────────────────────────────────────────────
+    // ── Shooter Wheels ───────────────────────────────────────────────────────
     public boolean shooterLeftConnected = false;
     public boolean shooterRightConnected = false;
+
     public double shooterLeftVelocityRadPerSec = 0.0;
     public double shooterRightVelocityRadPerSec = 0.0;
     public double shooterLeftAppliedVolts = 0.0;
@@ -40,9 +38,9 @@ public interface TurretIO {
     public double shooterLeftCurrentAmps = 0.0;
     public double shooterRightCurrentAmps = 0.0;
 
-    // ── Hood ─────────────────────────────────────────────────────────────
+    // ── Hood ─────────────────────────────────────────────────────────────────
     public boolean hoodConnected = false;
-    /** Hood elevation in degrees – 0 = flat, 90 = straight up. */
+    /** Hood position in degrees (0 = lowest / flat). */
     public double hoodPositionDeg = 0.0;
 
     public double hoodVelocityDegPerSec = 0.0;
@@ -50,35 +48,31 @@ public interface TurretIO {
     public double hoodCurrentAmps = 0.0;
   }
 
-  // ── Periodic update ──────────────────────────────────────────────────────
-
-  /** Refresh all sensor readings into {@code inputs}. Called every loop cycle. */
+  @AutoLogOutput
+  /** Push sensor data into the {@link TurretIOInputs} snapshot. */
   public default void updateInputs(TurretIOInputs inputs) {}
 
-  // ── Turret rotation ──────────────────────────────────────────────────────
+  // ── Turret Rotation Commands ─────────────────────────────────────────────
 
-  /** Drive the turret motor at a fixed voltage (-12 to +12 V). */
+  /** Run the turret rotation motor at the given open-loop voltage (-12 … +12 V). */
   public default void setTurretOpenLoop(double outputVolts) {}
 
-  /** Servo the turret to {@code angleRad} using onboard closed-loop control. */
+  /** Command the turret to a target angle (radians) using closed-loop control. */
   public default void setTurretPosition(double angleRad) {}
 
-  // ── Shooter wheels ───────────────────────────────────────────────────────
+  // ── Shooter Wheel Commands ───────────────────────────────────────────────
 
-  /** Drive both shooter wheels at a fixed voltage (-12 to +12 V). */
+  /** Run both shooter wheels at the given open-loop voltage. */
   public default void setShooterOpenLoop(double outputVolts) {}
 
-  /**
-   * Run both shooter wheels at {@code velocityRadPerSec} using onboard closed-loop velocity control
-   * with feedforward.
-   */
+  /** Command both shooter wheels to a target surface velocity (rad/s) using closed-loop control. */
   public default void setShooterVelocity(double velocityRadPerSec) {}
 
-  // ── Hood ─────────────────────────────────────────────────────────────────
+  // ── Hood Commands ────────────────────────────────────────────────────────
 
-  /** Drive the hood motor at a fixed voltage (-12 to +12 V). */
+  /** Run the hood motor at the given open-loop voltage. */
   public default void setHoodOpenLoop(double outputVolts) {}
 
-  /** Servo the hood to {@code angleDeg} using onboard closed-loop control. */
+  /** Command the hood to a target angle (degrees) using closed-loop control. */
   public default void setHoodPosition(double angleDeg) {}
 }
