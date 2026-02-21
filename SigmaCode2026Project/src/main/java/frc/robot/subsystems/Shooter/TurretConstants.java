@@ -2,6 +2,7 @@ package frc.robot.subsystems.Shooter;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import java.util.TreeMap;
 
 public class TurretConstants {
 
@@ -25,6 +26,7 @@ public class TurretConstants {
   // ── Turret Rotation (Vortex / SparkFlex) ─────────────────────────────────
   public static final boolean turretInverted = false;
   public static final int turretCurrentLimitAmps = 40;
+
   /** Gear ratio: motor rotations per 1 turret rotation. */
   public static final double turretGearRatio = 100.0 / 1.0;
 
@@ -33,12 +35,12 @@ public class TurretConstants {
   public static final double turretEncoderVelocityFactor =
       turretEncoderPositionFactor / 60.0; // rad/s per RPM
 
-  /** Soft limits in radians (±180 °). */
+  /** Soft limits in radians (+/- 180 deg). */
   public static final double turretMinAngleRad = -Math.PI;
 
   public static final double turretMaxAngleRad = Math.PI;
 
-  // Closed-loop gains (real)
+  // Closed-loop gains (real hardware)
   public static final double turretKp = 1.5;
   public static final double turretKd = 0.0;
 
@@ -55,7 +57,7 @@ public class TurretConstants {
   public static final double shooterKp = 0.05;
   public static final double shooterKd = 0.0;
   public static final double shooterKs = 0.05; // V
-  public static final double shooterKv = 0.12; // V·s/rad
+  public static final double shooterKv = 0.12; // V*s/rad
 
   // Sim
   public static final double shooterSimKp = 0.5;
@@ -64,6 +66,7 @@ public class TurretConstants {
   // ── Hood (Neo 550 / SparkMax) ─────────────────────────────────────────────
   public static final boolean hoodInverted = false;
   public static final int hoodCurrentLimitAmps = 20;
+
   /** Gear ratio: motor rotations per 1 hood degree. */
   public static final double hoodGearRatio = 50.0 / 1.0;
 
@@ -77,7 +80,7 @@ public class TurretConstants {
 
   public static final double hoodMaxDeg = 90.0;
 
-  // Closed-loop gains (real)
+  // Closed-loop gains (real hardware)
   public static final double hoodKp = 0.1;
   public static final double hoodKd = 0.0;
 
@@ -90,11 +93,56 @@ public class TurretConstants {
   public static final DCMotor shooterMotorModel = DCMotor.getKrakenX60(2);
   public static final DCMotor hoodMotorModel = DCMotor.getNeo550(1);
 
-  // Moments of inertia for sim (kg·m²)
+  // Moments of inertia for sim (kg*m^2)
   public static final double turretMOI = 0.5;
   public static final double shooterWheelMOI = 0.025;
   public static final double hoodMOI = 0.01;
 
   // Shooter wheel radius (m) – used for surface-speed calcs
   public static final double shooterWheelRadiusMeters = Units.inchesToMeters(3.0);
+
+  // ── Shooter lookup tables ─────────────────────────────────────────────────
+  /**
+   * Distance-to-setpoint lookup tables used by {@link frc.robot.commands.TrackHubCommand}.
+   *
+   * <p>Key = distance from robot to target in metres.
+   *
+   * <p>Value = shooter wheel RPM / hood angle in degrees.
+   *
+   * <p>Add or adjust rows after characterising the shooter on your field.
+   */
+  public static final class ShooterStates {
+
+    private ShooterStates() {}
+
+    /**
+     * Shooter wheel speed in RPM as a function of distance (metres). Interpolated linearly between
+     * known points.
+     */
+    public static final TreeMap<Double, Double> shooterRPMMap = new TreeMap<>();
+
+    /**
+     * Hood elevation in degrees as a function of distance (metres). Interpolated linearly between
+     * known points.
+     */
+    public static final TreeMap<Double, Double> shooterHoodAngleMap = new TreeMap<>();
+
+    static {
+      // Distance (m) -> RPM
+      shooterRPMMap.put(1.5, 2800.0);
+      shooterRPMMap.put(2.0, 3000.0);
+      shooterRPMMap.put(3.0, 3400.0);
+      shooterRPMMap.put(4.0, 3900.0);
+      shooterRPMMap.put(5.0, 4500.0);
+      shooterRPMMap.put(6.0, 5200.0);
+
+      // Distance (m) -> hood angle (deg)
+      shooterHoodAngleMap.put(1.5, 60.0);
+      shooterHoodAngleMap.put(2.0, 55.0);
+      shooterHoodAngleMap.put(3.0, 48.0);
+      shooterHoodAngleMap.put(4.0, 42.0);
+      shooterHoodAngleMap.put(5.0, 36.0);
+      shooterHoodAngleMap.put(6.0, 30.0);
+    }
+  }
 }
