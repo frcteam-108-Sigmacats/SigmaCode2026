@@ -6,14 +6,15 @@ import org.littletonrobotics.junction.AutoLog;
  * Hardware abstraction layer for the Turret subsystem.
  *
  * <p>Motors on the real robot:
+ *
  * <ul>
  *   <li>Turret rotation – 1× Neo Vortex (SparkFlex)
- *   <li>Shooter wheels  – 2× Kraken X60 (TalonFX)
- *   <li>Hood            – 1× Neo 550 (SparkMax)
+ *   <li>Shooter wheels – 2× Kraken X60 (TalonFX)
+ *   <li>Hood – 1× Neo 550 (SparkMax)
  * </ul>
  *
- * <p>All three concrete implementations (IOSim, IOMix, IOReal) override every
- * method so the public surface is identical across all variants.
+ * <p>All three concrete implementations (IOSim, IOMix, IOReal) override every method so the public
+ * surface is identical across all variants.
  */
 public interface TurretIO {
 
@@ -21,30 +22,32 @@ public interface TurretIO {
   public static class TurretIOInputs {
 
     // ── Turret Rotation ──────────────────────────────────────────────────
-    public boolean turretConnected          = false;
+    public boolean turretConnected = false;
     /** Current turret yaw in radians, wrapped to [-π, π]. */
-    public double  turretPositionRad        = 0.0;
-    public double  turretVelocityRadPerSec  = 0.0;
-    public double  turretAppliedVolts       = 0.0;
-    public double  turretCurrentAmps        = 0.0;
+    public double turretPositionRad = 0.0;
+
+    public double turretVelocityRadPerSec = 0.0;
+    public double turretAppliedVolts = 0.0;
+    public double turretCurrentAmps = 0.0;
 
     // ── Shooter Wheels ───────────────────────────────────────────────────
-    public boolean shooterLeftConnected          = false;
-    public boolean shooterRightConnected         = false;
-    public double  shooterLeftVelocityRadPerSec  = 0.0;
-    public double  shooterRightVelocityRadPerSec = 0.0;
-    public double  shooterLeftAppliedVolts       = 0.0;
-    public double  shooterRightAppliedVolts      = 0.0;
-    public double  shooterLeftCurrentAmps        = 0.0;
-    public double  shooterRightCurrentAmps       = 0.0;
+    public boolean shooterLeftConnected = false;
+    public boolean shooterRightConnected = false;
+    public double shooterLeftVelocityRadPerSec = 0.0;
+    public double shooterRightVelocityRadPerSec = 0.0;
+    public double shooterLeftAppliedVolts = 0.0;
+    public double shooterRightAppliedVolts = 0.0;
+    public double shooterLeftCurrentAmps = 0.0;
+    public double shooterRightCurrentAmps = 0.0;
 
     // ── Hood ─────────────────────────────────────────────────────────────
-    public boolean hoodConnected         = false;
+    public boolean hoodConnected = false;
     /** Hood elevation in degrees – 0 = flat, 90 = straight up. */
-    public double  hoodPositionDeg       = 0.0;
-    public double  hoodVelocityDegPerSec = 0.0;
-    public double  hoodAppliedVolts      = 0.0;
-    public double  hoodCurrentAmps       = 0.0;
+    public double hoodPositionDeg = 0.0;
+
+    public double hoodVelocityDegPerSec = 0.0;
+    public double hoodAppliedVolts = 0.0;
+    public double hoodCurrentAmps = 0.0;
   }
 
   // ── Periodic update ──────────────────────────────────────────────────────
@@ -66,8 +69,8 @@ public interface TurretIO {
   public default void setShooterOpenLoop(double outputVolts) {}
 
   /**
-   * Run both shooter wheels at {@code velocityRadPerSec} using onboard
-   * closed-loop velocity control with feedforward.
+   * Run both shooter wheels at {@code velocityRadPerSec} using onboard closed-loop velocity control
+   * with feedforward.
    */
   public default void setShooterVelocity(double velocityRadPerSec) {}
 

@@ -9,38 +9,39 @@ import java.util.function.DoubleSupplier;
 /**
  * Static factory class for Turret commands.
  *
- * <p>Naming convention mirrors {@link DriveCommands}: every method returns a
- * {@link Command} and is named for what it does, not how it does it.
+ * <p>Naming convention mirrors {@link DriveCommands}: every method returns a {@link Command} and is
+ * named for what it does, not how it does it.
  *
  * <p>Basic commands:
+ *
  * <ul>
- *   <li>{@link #stopAll}           – coast everything to zero immediately
- *   <li>{@link #manualTurret}      – operator jogs the turret with a joystick axis
- *   <li>{@link #manualHood}        – operator jogs the hood with a joystick axis
- *   <li>{@link #spinUpShooter}     – run wheels to a target surface speed (m/s)
- *   <li>{@link #idleShooter}       – coast wheels (does NOT hold speed)
- *   <li>{@link #setHoodAngle}      – servo hood to a fixed angle and finish when there
- *   <li>{@link #prepareToShoot}    – spin wheels + servo hood together, finishes when both ready
+ *   <li>{@link #stopAll} – coast everything to zero immediately
+ *   <li>{@link #manualTurret} – operator jogs the turret with a joystick axis
+ *   <li>{@link #manualHood} – operator jogs the hood with a joystick axis
+ *   <li>{@link #spinUpShooter} – run wheels to a target surface speed (m/s)
+ *   <li>{@link #idleShooter} – coast wheels (does NOT hold speed)
+ *   <li>{@link #setHoodAngle} – servo hood to a fixed angle and finish when there
+ *   <li>{@link #prepareToShoot} – spin wheels + servo hood together, finishes when both ready
  * </ul>
  */
 public class TurretCommands {
 
-  private static final double TURRET_DEADBAND  = 0.08;
-  private static final double HOOD_DEADBAND    = 0.08;
+  private static final double TURRET_DEADBAND = 0.08;
+  private static final double HOOD_DEADBAND = 0.08;
 
   /** Maximum turret jog voltage when an axis is fully deflected. */
   private static final double TURRET_MAX_VOLTS = 4.0;
 
   /** Maximum hood jog voltage when an axis is fully deflected. */
-  private static final double HOOD_MAX_VOLTS   = 3.0;
+  private static final double HOOD_MAX_VOLTS = 3.0;
 
   private TurretCommands() {}
 
   // ── Basic stop ────────────────────────────────────────────────────────────
 
   /**
-   * Immediately cut power to every motor on the turret subsystem and coast to a
-   * stop. This command runs forever so it is suitable as a default command.
+   * Immediately cut power to every motor on the turret subsystem and coast to a stop. This command
+   * runs forever so it is suitable as a default command.
    */
   public static Command stopAll(Turret turret) {
     return Commands.run(turret::stopAll, turret).withName("Turret.StopAll");
@@ -51,17 +52,16 @@ public class TurretCommands {
   /**
    * Jog the turret rotation ring open-loop from a joystick axis.
    *
-   * <p>Applies a deadband and squares the input for finer control near centre.
-   * Safe to use as the turret default command because it emits 0 V when the
-   * axis is inside the deadband.
+   * <p>Applies a deadband and squares the input for finer control near centre. Safe to use as the
+   * turret default command because it emits 0 V when the axis is inside the deadband.
    *
-   * @param turret       the turret subsystem
+   * @param turret the turret subsystem
    * @param axisSupplier raw joystick axis in [-1, +1]
    */
   public static Command manualTurret(Turret turret, DoubleSupplier axisSupplier) {
     return Commands.run(
             () -> {
-              double raw  = MathUtil.applyDeadband(axisSupplier.getAsDouble(), TURRET_DEADBAND);
+              double raw = MathUtil.applyDeadband(axisSupplier.getAsDouble(), TURRET_DEADBAND);
               double volts = Math.copySign(raw * raw, raw) * TURRET_MAX_VOLTS;
               turret.setTurretOpenLoop(volts);
             },
@@ -73,16 +73,16 @@ public class TurretCommands {
   /**
    * Jog the hood angle open-loop from a joystick axis.
    *
-   * <p>Applies a deadband and squares the input. The SparkMax soft-limits on the
-   * hood prevent the motor from driving past the physical travel range.
+   * <p>Applies a deadband and squares the input. The SparkMax soft-limits on the hood prevent the
+   * motor from driving past the physical travel range.
    *
-   * @param turret       the turret subsystem
+   * @param turret the turret subsystem
    * @param axisSupplier raw joystick axis in [-1, +1] (positive = increase angle)
    */
   public static Command manualHood(Turret turret, DoubleSupplier axisSupplier) {
     return Commands.run(
             () -> {
-              double raw   = MathUtil.applyDeadband(axisSupplier.getAsDouble(), HOOD_DEADBAND);
+              double raw = MathUtil.applyDeadband(axisSupplier.getAsDouble(), HOOD_DEADBAND);
               double volts = Math.copySign(raw * raw, raw) * HOOD_MAX_VOLTS;
               turret.setHoodOpenLoop(volts);
             },
@@ -94,16 +94,17 @@ public class TurretCommands {
   // ── Shooter wheels ────────────────────────────────────────────────────────
 
   /**
-   * Spin the shooter wheels to {@code targetMPS} surface speed and keep running
-   * until interrupted. The command does NOT finish on its own; use
-   * {@link Command#until} or bind it to a button to interrupt it.
+   * Spin the shooter wheels to {@code targetMPS} surface speed and keep running until interrupted.
+   * The command does NOT finish on its own; use {@link Command#until} or bind it to a button to
+   * interrupt it.
    *
    * <p>Example – hold A to spin up:
+   *
    * <pre>
    *   controller.a().whileTrue(TurretCommands.spinUpShooter(turret, 15.0));
    * </pre>
    *
-   * @param turret    the turret subsystem
+   * @param turret the turret subsystem
    * @param targetMPS desired surface speed in metres per second
    */
   public static Command spinUpShooter(Turret turret, double targetMPS) {
@@ -113,8 +114,8 @@ public class TurretCommands {
   }
 
   /**
-   * Coast the shooter wheels to a stop by cutting motor output.
-   * Finishes immediately (instant command).
+   * Coast the shooter wheels to a stop by cutting motor output. Finishes immediately (instant
+   * command).
    */
   public static Command idleShooter(Turret turret) {
     return Commands.runOnce(turret::stopShooter, turret).withName("Turret.IdleShooter");
@@ -123,10 +124,10 @@ public class TurretCommands {
   // ── Hood positioning ──────────────────────────────────────────────────────
 
   /**
-   * Servo the hood to a fixed angle and finish once the hood is within
-   * tolerance. Times out after 2 seconds to avoid hanging if the hood is stuck.
+   * Servo the hood to a fixed angle and finish once the hood is within tolerance. Times out after 2
+   * seconds to avoid hanging if the hood is stuck.
    *
-   * @param turret   the turret subsystem
+   * @param turret the turret subsystem
    * @param angleDeg target elevation in degrees [0, 90]
    */
   public static Command setHoodAngle(Turret turret, double angleDeg) {
@@ -139,9 +140,9 @@ public class TurretCommands {
   // ── Composite ─────────────────────────────────────────────────────────────
 
   /**
-   * Simultaneously spin the shooter wheels and servo the hood to the requested
-   * positions. Finishes once both the wheels are at speed <em>and</em> the hood
-   * is at the target angle. Times out after 3 seconds.
+   * Simultaneously spin the shooter wheels and servo the hood to the requested positions. Finishes
+   * once both the wheels are at speed <em>and</em> the hood is at the target angle. Times out after
+   * 3 seconds.
    *
    * <p>Typical use: run this command before firing so you know the robot is ready.
    *
@@ -151,9 +152,9 @@ public class TurretCommands {
    *           .andThen(/* fire command *\/));
    * </pre>
    *
-   * @param turret    the turret subsystem
+   * @param turret the turret subsystem
    * @param targetMPS shooter surface speed in metres per second
-   * @param hoodDeg   hood elevation in degrees
+   * @param hoodDeg hood elevation in degrees
    */
   public static Command prepareToShoot(Turret turret, double targetMPS, double hoodDeg) {
     return Commands.run(

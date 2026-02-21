@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-
 public class Turret extends SubsystemBase {
 
   private final TurretIO io;
@@ -29,13 +28,14 @@ public class Turret extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Turret", inputs);
-    
+
     // Derived outputs for dashboard / logging
     Logger.recordOutput("Turret/OnTarget", isOnTarget());
     Logger.recordOutput("Turret/ShooterAtSpeed", isShooterAtSpeed());
     Logger.recordOutput("Turret/HoodAtPosition", isHoodAtPosition());
     Logger.recordOutput("Turret/ReadyToShoot", isReadyToShoot());
-    Logger.recordOutput("Turret/ShooterSurfaceMPS",
+    Logger.recordOutput(
+        "Turret/ShooterSurfaceMPS",
         inputs.shooterLeftVelocityRadPerSec * TurretConstants.shooterWheelRadiusMeters);
   }
 
@@ -138,8 +138,8 @@ public class Turret extends SubsystemBase {
   // ── Composite ─────────────────────────────────────────────────────────────
 
   /**
-   * Returns {@code true} when the turret is on target, shooter wheels are at speed, and the
-   * hood is at the desired elevation – i.e. the robot is ready to fire.
+   * Returns {@code true} when the turret is on target, shooter wheels are at speed, and the hood is
+   * at the desired elevation – i.e. the robot is ready to fire.
    */
   public boolean isReadyToShoot() {
     return isOnTarget() && isShooterAtSpeed() && isHoodAtPosition();
