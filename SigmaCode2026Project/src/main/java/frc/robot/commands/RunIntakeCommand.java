@@ -10,6 +10,7 @@ import frc.robot.subsystems.Intake.IntakeMech;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class RunIntakeCommand extends Command {
   private IntakeMech intakeMech;
+  private boolean fullyExtended;
   /** Creates a new IntakeCommand. */
   public RunIntakeCommand(IntakeMech intakeMech) {
     this.intakeMech = intakeMech;
@@ -19,12 +20,23 @@ public class RunIntakeCommand extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    fullyExtended = false;
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intakeMech.setIntakeOut();
+    if(!fullyExtended){
+      intakeMech.setIntakeOut();
+    }
+    else{
+      intakeMech.stopActuaterMotor();
+    }
+    if(intakeMech.isIntakeExtended()){
+      fullyExtended = true;
+    }
+    
     intakeMech.setIntakeRoller();
   }
 
