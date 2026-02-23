@@ -4,7 +4,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import java.util.TreeMap;
 
-public class TurretConstants {
+public class ShooterConstants {
 
   // ── CAN IDs ──────────────────────────────────────────────────────────────
   /** SparkFlex (Vortex) driving the turret rotation ring. */
@@ -28,6 +28,7 @@ public class TurretConstants {
   public static final int turretCurrentLimitAmps = 40;
 
   /** Gear ratio: motor rotations per 1 turret rotation. */
+  // change later
   public static final double turretGearRatio = 100.0 / 1.0;
 
   public static final double turretEncoderPositionFactor =
@@ -68,6 +69,7 @@ public class TurretConstants {
   public static final int hoodCurrentLimitAmps = 20;
 
   /** Gear ratio: motor rotations per 1 hood degree. */
+  // change later
   public static final double hoodGearRatio = 50.0 / 1.0;
 
   public static final double hoodEncoderPositionFactor =

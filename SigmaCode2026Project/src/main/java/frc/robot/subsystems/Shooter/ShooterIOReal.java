@@ -1,6 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
-import static frc.robot.subsystems.Shooter.TurretConstants.*;
+import static frc.robot.subsystems.Shooter.ShooterConstants.*;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -25,9 +25,9 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 
 /**
- * Competition / full-robot implementation of {@link TurretIO}.
+ * Competition / full-robot implementation of {@link ShooterIO}.
  *
- * <p>Structure intentionally mirrors {@link TurretIOSim}: each axis tracks a closed-loop flag and a
+ * <p>Structure intentionally mirrors {@link ShooterIOSim}: each axis tracks a closed-loop flag and a
  * stored setpoint. The actual control output is delegated to onboard hardware controllers rather
  * than WPILib {@code PIDController}s, but the field layout and {@code updateInputs} shape are
  * identical so the two implementations are easy to compare side-by-side.
@@ -38,7 +38,7 @@ import edu.wpi.first.math.filter.Debouncer;
  *   <li>Hood – Neo 550 via {@link SparkMax}
  * </ul>
  */
-public class TurretIOReal implements TurretIO {
+public class ShooterIOReal implements ShooterIO {
 
   // ── Hardware ──────────────────────────────────────────────────────────────
   private final SparkFlex turretMotor;
@@ -69,7 +69,7 @@ public class TurretIOReal implements TurretIO {
   private double shooterSetpointRadPerSec = 0.0;
   private double hoodSetpointDeg = 0.0;
 
-  public TurretIOReal() {
+  public ShooterIOReal() {
 
     // ── Turret (SparkFlex / Vortex, absolute encoder) ─────────────────────
     turretMotor = new SparkFlex(turretRotationCanId, MotorType.kBrushless);

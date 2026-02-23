@@ -4,9 +4,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-public class Turret extends SubsystemBase {
+public class Shooter extends SubsystemBase {
 
-  private final TurretIO io;
+  private final ShooterIO io;
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
 
   // Velocity tolerance for "at speed" check (rad/s)
@@ -20,7 +20,7 @@ public class Turret extends SubsystemBase {
   private double desiredTurretAngleRad = 0.0;
   private double desiredHoodAngleDeg = 0.0;
 
-  public Turret(TurretIO io) {
+  public Shooter(ShooterIO io) {
     this.io = io;
   }
 
@@ -36,7 +36,7 @@ public class Turret extends SubsystemBase {
     Logger.recordOutput("Turret/ReadyToShoot", isReadyToShoot());
     Logger.recordOutput(
         "Turret/ShooterSurfaceMPS",
-        inputs.shooterLeftVelocityRadPerSec * TurretConstants.shooterWheelRadiusMeters);
+        inputs.shooterLeftVelocityRadPerSec * ShooterConstants.shooterWheelRadiusMeters);
   }
 
   // ── Turret Rotation API ───────────────────────────────────────────────────
@@ -75,7 +75,7 @@ public class Turret extends SubsystemBase {
    * @param metersPerSec desired surface speed (positive = outward)
    */
   public void setShooterSpeed(double metersPerSec) {
-    desiredShooterVelocityRadPerSec = metersPerSec / TurretConstants.shooterWheelRadiusMeters;
+    desiredShooterVelocityRadPerSec = metersPerSec / ShooterConstants.shooterWheelRadiusMeters;
     io.setShooterVelocity(desiredShooterVelocityRadPerSec);
   }
 
@@ -106,9 +106,9 @@ public class Turret extends SubsystemBase {
   // ── Hood API ──────────────────────────────────────────────────────────────
 
   /**
-   * Seeds the hood's internal encoder from the absolute encoder reading.
-   * Call once at the start of tele-op; the internal encoder is used for all subsequent
-   * closed-loop control to avoid absolute encoder latency and noise.
+   * Seeds the hood's internal encoder from the absolute encoder reading. Call once at the start of
+   * tele-op; the internal encoder is used for all subsequent closed-loop control to avoid absolute
+   * encoder latency and noise.
    */
   public void seedHoodEncoder() {
     io.seedHoodEncoderFromAbsolute();

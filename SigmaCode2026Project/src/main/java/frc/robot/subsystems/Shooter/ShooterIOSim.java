@@ -1,6 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
-import static frc.robot.subsystems.Shooter.TurretConstants.*;
+import static frc.robot.subsystems.Shooter.ShooterConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
  *   <li>Hood (Neo 550 sim)
  * </ul>
  */
-public class TurretIOSim implements TurretIO {
+public class ShooterIOSim implements ShooterIO {
 
   private static final double DT = 0.02; // 50 Hz loop period
 
@@ -48,7 +48,7 @@ public class TurretIOSim implements TurretIO {
   private double shooterSetpointRadPerSec = 0.0;
   private double hoodSetpointDeg = 0.0;
 
-  public TurretIOSim() {
+  public ShooterIOSim() {
     turretSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(turretMotorModel, turretMOI, turretGearRatio),

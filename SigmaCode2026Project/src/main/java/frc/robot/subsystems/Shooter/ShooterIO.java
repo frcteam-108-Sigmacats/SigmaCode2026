@@ -14,7 +14,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
  *   <li>Hood – 1× Neo 550 (SparkMax)
  * </ul>
  */
-public interface TurretIO {
+public interface ShooterIO {
   @AutoLog
   public static class TurretIOInputs {
 
@@ -80,8 +80,8 @@ public interface TurretIO {
   public default void setHoodPosition(double angleDeg) {}
 
   /**
-   * Seeds the hood's internal (relative) encoder position from the absolute encoder reading.
-   * Call this once at the start of tele-op so the closed-loop controller starts from a known angle.
+   * Seeds the hood's internal (relative) encoder position from the absolute encoder reading. Call
+   * this once at the start of tele-op so the closed-loop controller starts from a known angle.
    */
   public default void seedHoodEncoderFromAbsolute() {}
 }
