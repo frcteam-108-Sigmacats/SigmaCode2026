@@ -106,6 +106,15 @@ public class Turret extends SubsystemBase {
   // ── Hood API ──────────────────────────────────────────────────────────────
 
   /**
+   * Seeds the hood's internal encoder from the absolute encoder reading.
+   * Call once at the start of tele-op; the internal encoder is used for all subsequent
+   * closed-loop control to avoid absolute encoder latency and noise.
+   */
+  public void seedHoodEncoder() {
+    io.seedHoodEncoderFromAbsolute();
+  }
+
+  /**
    * Command the hood to a target elevation angle in degrees.
    *
    * @param angleDeg angle in [0°, 90°]

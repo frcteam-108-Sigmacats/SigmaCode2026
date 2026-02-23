@@ -52,6 +52,7 @@ public class TurretIOReal implements TurretIO {
 
   private final SparkClosedLoopController turretController;
   private final VelocityVoltage shooterVelocityReq = new VelocityVoltage(0);
+  private final AbsoluteEncoder hoodAbsEncoder;
   private final RelativeEncoder hoodEncoder;
   private final SparkClosedLoopController hoodController;
 
@@ -91,8 +92,7 @@ public class TurretIOReal implements TurretIO {
     turretCfg
         .closedLoop
         .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .positionWrappingEnabled(true)
-        .positionWrappingInputRange(-Math.PI, Math.PI)
+        .positionWrappingEnabled(false)
         .pid(turretKp, 0.0, turretKd);
     turretCfg
         .signals
@@ -129,6 +129,7 @@ public class TurretIOReal implements TurretIO {
 
     // ── Hood (SparkMax / Neo 550) ──────────────────────────────────────────
     hoodMotor = new SparkMax(hoodCanId, MotorType.kBrushless);
+    hoodAbsEncoder = hoodMotor.getAbsoluteEncoder();
     hoodEncoder = hoodMotor.getEncoder();
     hoodController = hoodMotor.getClosedLoopController();
 
@@ -142,6 +143,13 @@ public class TurretIOReal implements TurretIO {
         .encoder
         .positionConversionFactor(hoodEncoderPositionFactor)
         .velocityConversionFactor(hoodEncoderVelocityFactor);
+    // Absolute encoder on hood output shaft (through-bore), reports degrees directly
+    hoodCfg
+        .absoluteEncoder
+        .positionConversionFactor(360.0)
+        .velocityConversionFactor(360.0 / 60.0)
+        .inverted(false)
+        .averageDepth(2);
     hoodCfg.closedLoop.pid(hoodKp, 0.0, hoodKd);
     hoodCfg
         .softLimit
@@ -155,12 +163,15 @@ public class TurretIOReal implements TurretIO {
         .primaryEncoderPositionPeriodMs(20)
         .primaryEncoderVelocityAlwaysOn(true)
         .primaryEncoderVelocityPeriodMs(20)
+        .absoluteEncoderPositionAlwaysOn(true)
+        .absoluteEncoderPositionPeriodMs(20)
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
 
     hoodMotor.configure(hoodCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    hoodMotor.getEncoder().setPosition(0.0);
+    // NOTE: Internal encoder is seeded from the absolute encoder at the start of tele-op;
+    // see seedHoodEncoderFromAbsolute().
   }
 
   // ── updateInputs ──────────────────────────────────────────────────────────
@@ -189,6 +200,7 @@ public class TurretIOReal implements TurretIO {
     // Hood
     inputs.hoodConnected = hoodDebounce.calculate(hoodMotor.getLastError() == REVLibError.kOk);
     inputs.hoodPositionDeg = hoodEncoder.getPosition();
+    inputs.hoodAbsPositionDeg = hoodAbsEncoder.getPosition();
     inputs.hoodVelocityDegPerSec = hoodEncoder.getVelocity();
     inputs.hoodAppliedVolts = hoodMotor.getAppliedOutput() * hoodMotor.getBusVoltage();
     inputs.hoodCurrentAmps = hoodMotor.getOutputCurrent();
@@ -205,8 +217,12 @@ public class TurretIOReal implements TurretIO {
   @Override
   public void setTurretPosition(double angleRad) {
     turretClosedLoop = true;
-    turretSetpointRad = MathUtil.angleModulus(angleRad);
-    turretController.setReference(turretSetpointRad, ControlType.kPosition);
+    // Clamp to the physical ±180° range – never wrap the setpoint.
+    double clampedRad = MathUtil.clamp(angleRad, -Math.PI, Math.PI);
+    turretSetpointRad = clampedRad;
+    // Absolute encoder reports [0, 2π]. Convert the clamped [-π, π] angle to that space.
+    double encoderSetpoint = clampedRad < 0.0 ? clampedRad + 2.0 * Math.PI : clampedRad;
+    turretController.setReference(encoderSetpoint, ControlType.kPosition);
   }
 
   // ── Shooter wheels ────────────────────────────────────────────────────────
@@ -242,5 +258,13 @@ public class TurretIOReal implements TurretIO {
     hoodClosedLoop = true;
     hoodSetpointDeg = MathUtil.clamp(angleDeg, hoodMinDeg, hoodMaxDeg);
     hoodController.setReference(hoodSetpointDeg, ControlType.kPosition);
+  }
+
+  @Override
+  public void seedHoodEncoderFromAbsolute() {
+    // Read the current absolute position and seed the internal encoder to match.
+    // After this call the closed-loop controller uses the internal encoder exclusively.
+    double absPositionDeg = hoodAbsEncoder.getPosition();
+    hoodEncoder.setPosition(absPositionDeg);
   }
 }

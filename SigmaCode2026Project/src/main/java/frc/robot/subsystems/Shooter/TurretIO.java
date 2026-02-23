@@ -40,8 +40,11 @@ public interface TurretIO {
 
     // ── Hood ─────────────────────────────────────────────────────────────────
     public boolean hoodConnected = false;
-    /** Hood position in degrees (0 = lowest / flat). */
+    /** Hood position in degrees read from the internal (relative) encoder (0 = lowest / flat). */
     public double hoodPositionDeg = 0.0;
+
+    /** Hood position in degrees read directly from the absolute encoder. */
+    public double hoodAbsPositionDeg = 0.0;
 
     public double hoodVelocityDegPerSec = 0.0;
     public double hoodAppliedVolts = 0.0;
@@ -75,4 +78,10 @@ public interface TurretIO {
 
   /** Command the hood to a target angle (degrees) using closed-loop control. */
   public default void setHoodPosition(double angleDeg) {}
+
+  /**
+   * Seeds the hood's internal (relative) encoder position from the absolute encoder reading.
+   * Call this once at the start of tele-op so the closed-loop controller starts from a known angle.
+   */
+  public default void seedHoodEncoderFromAbsolute() {}
 }

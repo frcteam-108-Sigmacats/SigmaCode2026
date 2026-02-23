@@ -17,7 +17,6 @@ import java.util.function.DoubleSupplier;
  * <ul>
  *   <li>{@link #stopAll} – coast everything to zero immediately
  *   <li>{@link #manualTurret} – operator jogs the turret with a joystick axis
- *   <li>{@link #manualHood} – operator jogs the hood with a joystick axis
  *   <li>{@link #spinUpShooter} – run wheels to a target surface speed (m/s)
  *   <li>{@link #idleShooter} – coast wheels (does NOT hold speed)
  *   <li>{@link #setHoodAngle} – servo hood to a fixed angle and finish when there
@@ -27,13 +26,9 @@ import java.util.function.DoubleSupplier;
 public class TurretCommands {
 
   private static final double TURRET_DEADBAND = 0.08;
-  private static final double HOOD_DEADBAND = 0.08;
 
   /** Maximum turret jog voltage when an axis is fully deflected. */
   private static final double TURRET_MAX_VOLTS = 4.0;
-
-  /** Maximum hood jog voltage when an axis is fully deflected. */
-  private static final double HOOD_MAX_VOLTS = 3.0;
 
   private TurretCommands() {}
 
@@ -68,27 +63,6 @@ public class TurretCommands {
             turret)
         .finallyDo(turret::stopTurret)
         .withName("Turret.ManualTurret");
-  }
-
-  /**
-   * Jog the hood angle open-loop from a joystick axis.
-   *
-   * <p>Applies a deadband and squares the input. The SparkMax soft-limits on the hood prevent the
-   * motor from driving past the physical travel range.
-   *
-   * @param turret the turret subsystem
-   * @param axisSupplier raw joystick axis in [-1, +1] (positive = increase angle)
-   */
-  public static Command manualHood(Turret turret, DoubleSupplier axisSupplier) {
-    return Commands.run(
-            () -> {
-              double raw = MathUtil.applyDeadband(axisSupplier.getAsDouble(), HOOD_DEADBAND);
-              double volts = Math.copySign(raw * raw, raw) * HOOD_MAX_VOLTS;
-              turret.setHoodOpenLoop(volts);
-            },
-            turret)
-        .finallyDo(turret::stopHood)
-        .withName("Turret.ManualHood");
   }
 
   // ── Shooter wheels ────────────────────────────────────────────────────────

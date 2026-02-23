@@ -50,7 +50,7 @@ public class TurretConstants {
 
   // ── Shooter Wheels (Kraken / TalonFX) ────────────────────────────────────
   public static final double shooterWheelGearRatio = 1.0; // direct drive
-  public static final int shooterCurrentLimitAmps = 60;
+  public static final int shooterCurrentLimitAmps = 40; // change later if too low
   public static final boolean shooterRightInverted = true;
 
   // Velocity PID / FF (Slot 0 on TalonFX)
