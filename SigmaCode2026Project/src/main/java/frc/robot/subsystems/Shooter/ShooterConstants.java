@@ -28,8 +28,7 @@ public class ShooterConstants {
   public static final int turretCurrentLimitAmps = 40;
 
   /** Gear ratio: motor rotations per 1 turret rotation. */
-  // change later
-  public static final double turretGearRatio = 100.0 / 1.0;
+  public static final double turretGearRatio = 31.5;
 
   public static final double turretEncoderPositionFactor =
       (2.0 * Math.PI) / turretGearRatio; // rad per motor rotation
@@ -69,8 +68,7 @@ public class ShooterConstants {
   public static final int hoodCurrentLimitAmps = 20;
 
   /** Gear ratio: motor rotations per 1 hood degree. */
-  // change later
-  public static final double hoodGearRatio = 50.0 / 1.0;
+  public static final double hoodGearRatio = 66.67;
 
   public static final double hoodEncoderPositionFactor =
       360.0 / hoodGearRatio; // degrees per motor rotation
@@ -100,8 +98,11 @@ public class ShooterConstants {
   public static final double shooterWheelMOI = 0.025;
   public static final double hoodMOI = 0.01;
 
-  // Shooter wheel radius (m) – used for surface-speed calcs
+  /** Shooter flywheel radius (m) – 3 in contact wheel. */
   public static final double shooterWheelRadiusMeters = Units.inchesToMeters(3.0);
+
+  /** Shooter inertia wheel radius (m) – 4 in inertia wheels. */
+  public static final double shooterInertiaWheelRadiusMeters = Units.inchesToMeters(4.0);
 
   // ── Shooter lookup tables ─────────────────────────────────────────────────
   /**

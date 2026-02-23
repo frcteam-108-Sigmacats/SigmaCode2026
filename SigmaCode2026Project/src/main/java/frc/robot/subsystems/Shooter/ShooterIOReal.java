@@ -50,9 +50,11 @@ public class ShooterIOReal implements ShooterIO {
   /** Absolute encoder on the turret output shaft (through-bore). Radians after conversion. */
   private final AbsoluteEncoder turretAbsEncoder;
 
+  /** Internal relative encoder on the turret motor shaft. Seeded from absolute at startup. */
+  private final RelativeEncoder turretEncoder;
+
   private final SparkClosedLoopController turretController;
   private final VelocityVoltage shooterVelocityReq = new VelocityVoltage(0);
-  private final AbsoluteEncoder hoodAbsEncoder;
   private final RelativeEncoder hoodEncoder;
   private final SparkClosedLoopController hoodController;
 
@@ -74,6 +76,7 @@ public class ShooterIOReal implements ShooterIO {
     // ── Turret (SparkFlex / Vortex, absolute encoder) ─────────────────────
     turretMotor = new SparkFlex(turretRotationCanId, MotorType.kBrushless);
     turretAbsEncoder = turretMotor.getAbsoluteEncoder();
+    turretEncoder = turretMotor.getEncoder();
     turretController = turretMotor.getClosedLoopController();
 
     var turretCfg = new SparkFlexConfig();
@@ -82,6 +85,11 @@ public class ShooterIOReal implements ShooterIO {
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(turretCurrentLimitAmps)
         .voltageCompensation(12.0);
+    // Relative encoder: motor rotations -> radians at the turret output
+    turretCfg
+        .encoder
+        .positionConversionFactor(turretEncoderPositionFactor)
+        .velocityConversionFactor(turretEncoderVelocityFactor);
     // Absolute encoder: raw [0, 1] revolution -> [-pi, pi] radians
     turretCfg
         .absoluteEncoder
@@ -96,6 +104,10 @@ public class ShooterIOReal implements ShooterIO {
         .pid(turretKp, 0.0, turretKd);
     turretCfg
         .signals
+        .primaryEncoderPositionAlwaysOn(true)
+        .primaryEncoderPositionPeriodMs(20)
+        .primaryEncoderVelocityAlwaysOn(true)
+        .primaryEncoderVelocityPeriodMs(20)
         .absoluteEncoderPositionAlwaysOn(true)
         .absoluteEncoderPositionPeriodMs(20)
         .absoluteEncoderVelocityAlwaysOn(true)
@@ -129,7 +141,6 @@ public class ShooterIOReal implements ShooterIO {
 
     // ── Hood (SparkMax / Neo 550) ──────────────────────────────────────────
     hoodMotor = new SparkMax(hoodCanId, MotorType.kBrushless);
-    hoodAbsEncoder = hoodMotor.getAbsoluteEncoder();
     hoodEncoder = hoodMotor.getEncoder();
     hoodController = hoodMotor.getClosedLoopController();
 
@@ -143,13 +154,6 @@ public class ShooterIOReal implements ShooterIO {
         .encoder
         .positionConversionFactor(hoodEncoderPositionFactor)
         .velocityConversionFactor(hoodEncoderVelocityFactor);
-    // Absolute encoder on hood output shaft (through-bore), reports degrees directly
-    hoodCfg
-        .absoluteEncoder
-        .positionConversionFactor(360.0)
-        .velocityConversionFactor(360.0 / 60.0)
-        .inverted(false)
-        .averageDepth(2);
     hoodCfg.closedLoop.pid(hoodKp, 0.0, hoodKd);
     hoodCfg
         .softLimit
@@ -163,15 +167,24 @@ public class ShooterIOReal implements ShooterIO {
         .primaryEncoderPositionPeriodMs(20)
         .primaryEncoderVelocityAlwaysOn(true)
         .primaryEncoderVelocityPeriodMs(20)
-        .absoluteEncoderPositionAlwaysOn(true)
-        .absoluteEncoderPositionPeriodMs(20)
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
 
     hoodMotor.configure(hoodCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    // NOTE: Internal encoder is seeded from the absolute encoder at the start of tele-op;
-    // see seedHoodEncoderFromAbsolute().
+
+    // ── Seed encoders from known references ───────────────────────────────
+    // Seed the turret relative encoder from the absolute encoder reading.
+    // The absolute encoder reports [0, 2π]; if the position exceeds π (180°), subtract 2π
+    // so the relative encoder starts in the same [-π, π] convention used elsewhere.
+    double turretAbsPositionRad = turretAbsEncoder.getPosition();
+    if (turretAbsPositionRad > Math.PI) {
+      turretAbsPositionRad -= 2.0 * Math.PI;
+    }
+    turretEncoder.setPosition(turretAbsPositionRad);
+
+    // Seed the hood relative encoder to 0 (mechanism assumed to be at rest / home position).
+    hoodEncoder.setPosition(0.0);
   }
 
   // ── updateInputs ──────────────────────────────────────────────────────────
@@ -200,7 +213,6 @@ public class ShooterIOReal implements ShooterIO {
     // Hood
     inputs.hoodConnected = hoodDebounce.calculate(hoodMotor.getLastError() == REVLibError.kOk);
     inputs.hoodPositionDeg = hoodEncoder.getPosition();
-    inputs.hoodAbsPositionDeg = hoodAbsEncoder.getPosition();
     inputs.hoodVelocityDegPerSec = hoodEncoder.getVelocity();
     inputs.hoodAppliedVolts = hoodMotor.getAppliedOutput() * hoodMotor.getBusVoltage();
     inputs.hoodCurrentAmps = hoodMotor.getOutputCurrent();
@@ -262,9 +274,7 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void seedHoodEncoderFromAbsolute() {
-    // Read the current absolute position and seed the internal encoder to match.
-    // After this call the closed-loop controller uses the internal encoder exclusively.
-    double absPositionDeg = hoodAbsEncoder.getPosition();
-    hoodEncoder.setPosition(absPositionDeg);
+    // No absolute encoder on the hood; the relative encoder is seeded to 0 in the constructor.
+    // This method is intentionally a no-op for the real robot.
   }
 }

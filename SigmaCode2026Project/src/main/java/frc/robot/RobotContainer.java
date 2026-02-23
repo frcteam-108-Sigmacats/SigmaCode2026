@@ -11,8 +11,8 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.Shooter.Turret;
-import frc.robot.subsystems.Shooter.TurretIOReal;
+import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterIOReal;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -23,7 +23,7 @@ import frc.robot.subsystems.Shooter.TurretIOReal;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private final Turret m_turret = new Turret(new TurretIOReal());
+  private final Shooter m_turret = new Shooter(new ShooterIOReal());
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -65,7 +65,7 @@ public class RobotContainer {
   }
 
   /** Exposes the turret subsystem so {@link Robot} can seed its hood encoder on teleop init. */
-  public Turret getTurret() {
+  public Shooter getTurret() {
     return m_turret;
   }
 }

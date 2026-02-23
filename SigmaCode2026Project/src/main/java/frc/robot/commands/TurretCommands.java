@@ -3,7 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.Shooter.Turret;
+import frc.robot.subsystems.Shooter.Shooter;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -38,7 +38,7 @@ public class TurretCommands {
    * Immediately cut power to every motor on the turret subsystem and coast to a stop. This command
    * runs forever so it is suitable as a default command.
    */
-  public static Command stopAll(Turret turret) {
+  public static Command stopAll(Shooter turret) {
     return Commands.run(turret::stopAll, turret).withName("Turret.StopAll");
   }
 
@@ -53,7 +53,7 @@ public class TurretCommands {
    * @param turret the turret subsystem
    * @param axisSupplier raw joystick axis in [-1, +1]
    */
-  public static Command manualTurret(Turret turret, DoubleSupplier axisSupplier) {
+  public static Command manualTurret(Shooter turret, DoubleSupplier axisSupplier) {
     return Commands.run(
             () -> {
               double raw = MathUtil.applyDeadband(axisSupplier.getAsDouble(), TURRET_DEADBAND);
@@ -81,7 +81,7 @@ public class TurretCommands {
    * @param turret the turret subsystem
    * @param targetMPS desired surface speed in metres per second
    */
-  public static Command spinUpShooter(Turret turret, double targetMPS) {
+  public static Command spinUpShooter(Shooter turret, double targetMPS) {
     return Commands.run(() -> turret.setShooterSpeed(targetMPS), turret)
         .finallyDo(turret::stopShooter)
         .withName("Turret.SpinUpShooter(" + targetMPS + " mps)");
@@ -91,7 +91,7 @@ public class TurretCommands {
    * Coast the shooter wheels to a stop by cutting motor output. Finishes immediately (instant
    * command).
    */
-  public static Command idleShooter(Turret turret) {
+  public static Command idleShooter(Shooter turret) {
     return Commands.runOnce(turret::stopShooter, turret).withName("Turret.IdleShooter");
   }
 
@@ -104,7 +104,7 @@ public class TurretCommands {
    * @param turret the turret subsystem
    * @param angleDeg target elevation in degrees [0, 90]
    */
-  public static Command setHoodAngle(Turret turret, double angleDeg) {
+  public static Command setHoodAngle(Shooter turret, double angleDeg) {
     return Commands.run(() -> turret.setHoodAngle(angleDeg), turret)
         .until(turret::isHoodAtPosition)
         .withTimeout(2.0)
@@ -130,7 +130,7 @@ public class TurretCommands {
    * @param targetMPS shooter surface speed in metres per second
    * @param hoodDeg hood elevation in degrees
    */
-  public static Command prepareToShoot(Turret turret, double targetMPS, double hoodDeg) {
+  public static Command prepareToShoot(Shooter turret, double targetMPS, double hoodDeg) {
     return Commands.run(
             () -> {
               turret.setShooterSpeed(targetMPS);

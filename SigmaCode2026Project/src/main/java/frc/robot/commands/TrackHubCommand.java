@@ -2,8 +2,8 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Shooter.Turret;
-import frc.robot.subsystems.Shooter.TurretConstants;
+import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterConstants;
 import java.util.TreeMap;
 import org.littletonrobotics.junction.Logger;
 
@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.Logger;
  * Continuously aims the turret, spins the shooter wheels, and positions the hood based on a target
  * distance supplied externally (e.g. from a vision pipeline or a fixed pre-match setpoint).
  *
- * <p>This command is self-contained: it requires only the {@link Turret} subsystem and does
+ * <p>This command is self-contained: it requires only the {@link Shooter} subsystem and does
  * <em>not</em> depend on the drive subsystem. Robot-relative aiming is handled by passing in a
  * {@code targetAngleSupplier} and {@code distanceSupplier} from whichever source is available
  * (vision, LiDAR, driver override, etc.).
@@ -30,7 +30,7 @@ import org.littletonrobotics.junction.Logger;
  */
 public class TrackHubCommand extends Command {
 
-  private final Turret turret;
+  private final Shooter turret;
 
   /**
    * Supplies the desired turret angle in radians relative to the robot's forward axis. Positive =
@@ -40,12 +40,12 @@ public class TrackHubCommand extends Command {
 
   /**
    * Supplies the estimated distance to the target in metres. Used to interpolate shooter RPM and
-   * hood angle from {@link TurretConstants.ShooterStates}.
+   * hood angle from {@link ShooterConstants.ShooterStates}.
    */
   private final java.util.function.DoubleSupplier distanceMetersSupplier;
 
   /** Wheel diameter in metres used to convert RPM -> surface speed (m/s). */
-  private static final double WHEEL_DIAMETER_M = 2.0 * TurretConstants.shooterWheelRadiusMeters;
+  private static final double WHEEL_DIAMETER_M = 2.0 * ShooterConstants.shooterWheelRadiusMeters;
 
   /**
    * @param turret the turret subsystem
@@ -53,7 +53,7 @@ public class TrackHubCommand extends Command {
    * @param distanceMetersSupplier distance to the target in metres for lookup-table interpolation
    */
   public TrackHubCommand(
-      Turret turret,
+      Shooter turret,
       java.util.function.DoubleSupplier targetAngleRadSupplier,
       java.util.function.DoubleSupplier distanceMetersSupplier) {
     this.turret = turret;
@@ -72,8 +72,8 @@ public class TrackHubCommand extends Command {
     double angleRad = targetAngleRadSupplier.getAsDouble();
     double distMeters = distanceMetersSupplier.getAsDouble();
 
-    double rpm = interpolate(distMeters, TurretConstants.ShooterStates.shooterRPMMap);
-    double hoodDeg = interpolate(distMeters, TurretConstants.ShooterStates.shooterHoodAngleMap);
+    double rpm = interpolate(distMeters, ShooterConstants.ShooterStates.shooterRPMMap);
+    double hoodDeg = interpolate(distMeters, ShooterConstants.ShooterStates.shooterHoodAngleMap);
     double surfaceMps = (rpm / 60.0) * Math.PI * WHEEL_DIAMETER_M;
 
     turret.setTurretAngle(new Rotation2d(angleRad));
