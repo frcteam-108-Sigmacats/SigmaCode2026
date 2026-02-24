@@ -29,13 +29,11 @@ public class SpinDexerIOSim implements SpinDexerIO {
     spinDexer =
         new DCMotorSim(
             spinDexerPhysics,
-            DCMotor.getNEO(1).withReduction(1),
-            0.0); // Have to grab the Gear ratio later
+            DCMotor.getNEO(1).withReduction(1)); // Have to grab the Gear ratio later
     spinDexerKicker =
         new DCMotorSim(
             spinDexerKickerPhysics,
-            DCMotor.getNEO(1).withReduction(1),
-            0.0); // Have to grab the Gear ratio later
+            DCMotor.getNEO(1).withReduction(1)); // Have to grab the Gear ratio later
 
     // Setting the voltage of the motors to 0 at boot up
     spinDexerMotorVoltage = 0.0;
@@ -69,11 +67,23 @@ public class SpinDexerIOSim implements SpinDexerIO {
   }
 
   @Override
-  public void setSpinDexerKickerSpeed(double speed) {
+  public void setKickerSpeed(double speed) {
     spinDexerKickerMotorVoltage =
         12 * speed; // Converts the percentage of speed to the amount of volts the motor would
     // receive to accomplish speed
     spinDexerKicker.setInputVoltage(
         spinDexerKickerMotorVoltage); // Sets the voltage we want the motor to run at
+  }
+
+  @Override
+  public void setSpinDexerVoltage(double volt) {
+    spinDexerMotorVoltage = volt;
+    spinDexer.setInputVoltage(spinDexerMotorVoltage);
+  }
+
+  @Override
+  public void setKickerVoltage(double volt) {
+    spinDexerKickerMotorVoltage = volt;
+    spinDexerKicker.setInputVoltage(volt);
   }
 }

@@ -18,6 +18,9 @@ public interface SpinDexerIO {
 
   public default void setSpinDexerSpeed(double speed) {}
 
-  public default void setSpinDexerKickerSpeed(double speed) {}
+  public default void setKickerSpeed(double speed) {}
 
+  public default void setSpinDexerVoltage(double volt) {}
+
+  public default void setKickerVoltage(double volt) {}
 }

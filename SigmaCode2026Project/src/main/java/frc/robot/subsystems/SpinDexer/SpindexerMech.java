@@ -1,31 +1,41 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.SpinDexer;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.SpinDexer.SpinDexerIO;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
-public class SpindexerMech extends SubsystemBase {
-    private SpinDexerIO io;
-    private Alert kicker1Disconnected = new Alert("Kicker1 Motor is Disconnected", AlertType.kError);
-    private Alert kicker2Disconnected = new Alert("Kicker2 Motor is Disconnected", AlertType.kError);
-    public SpindexerMech(SpinDexerIO io) {
-      this.io = io;
-    }
+public class SpinDexerMech extends SubsystemBase {
+  private SpinDexerIO io;
+  private final SpinDexerIOInputsAutoLogged inputs = new SpinDexerIOInputsAutoLogged();
+  private Alert spinDexerDisconnected = new Alert("SpinDexer Motor Disconnected", AlertType.kError);
+  private Alert kicker1Disconnected = new Alert("Kicker1 Motor is Disconnected", AlertType.kError);
+  private Alert kicker2Disconnected = new Alert("Kicker2 Motor is Disconnected", AlertType.kError);
 
-    public void setSpindexerLeft(){
-      io.setSpinDexerKickerSpeed(0);
-    }
-    public void setSpindexerRight(){
-      io.setSpinDexerKickerSpeed(0);
-    }
-    public void setKickerForward(){
-      io.setKickerForward(0);
-    }
+  public SpinDexerMech(SpinDexerIO io) {
+    this.io = io;
+  }
 
+  public void setSpinDexerClockwise() {
+    io.setSpinDexerSpeed(SpinDexerConstants.SpinDexerClockWise);
+  }
 
+  public void setSpinDexerCounterClockwise() {
+    io.setSpinDexerSpeed(SpinDexerConstants.SpinDexerCounterClockWise);
+  }
+
+  public void setKickerForward() {
+    io.setKickerSpeed(SpinDexerConstants.KickerForward);
+  }
+
+  public void stopSpinDexer() {
+    io.setSpinDexerVoltage(0);
+  }
+
+  public void stopKickers() {
+    io.setKickerVoltage(0);
+  }
 
   /**
    * Example command factory method.
@@ -54,6 +64,8 @@ public class SpindexerMech extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    io.updateInputs(inputs);
+    Logger.processInputs("SpinDexerMech/", inputs);
   }
 
   @Override
@@ -61,4 +73,3 @@ public class SpindexerMech extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
   }
 }
-

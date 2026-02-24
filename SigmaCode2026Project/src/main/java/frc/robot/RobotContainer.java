@@ -9,8 +9,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.DefaultSpinDexerCommand;
+import frc.robot.commands.TransferFuelToShooter;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
+import frc.robot.subsystems.SpinDexer.SpinDexerIOSim;
+import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -21,15 +25,33 @@ import frc.robot.subsystems.ExampleSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final SpinDexerMech spinDexerMech;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
+  private Trigger bA;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    switch (Constants.currentMode) {
+      case REAL:
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
+        break;
+      case SIM:
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
+        break;
+      case REPLAY:
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
+        break;
+      default:
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
+    }
     // Configure the trigger bindings
     configureBindings();
+    spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
+    bA.whileTrue(new TransferFuelToShooter(spinDexerMech));
   }
 
   /**
@@ -43,8 +65,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    bA = m_driverController.a();
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
