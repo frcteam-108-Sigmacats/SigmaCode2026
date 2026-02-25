@@ -15,7 +15,7 @@ public class IntakeConstants {
   public static double actuaterPositionConversion = 16;
   public static boolean actucaterEncoderInverted = false;
   // Intake State Values
-  public static double intakeOutPosition = 0;
+  public static double intakeOutPosition = 70;
   public static double intakeInPosition = 0;
   public static double rollerSpeedPercentage = 0;
 }

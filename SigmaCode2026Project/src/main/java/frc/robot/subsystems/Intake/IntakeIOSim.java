@@ -27,9 +27,9 @@ public class IntakeIOSim implements IntakeIO {
 
   public IntakeIOSim() {
     intakeRotatorMotor =
-        new DCMotorSim(intakeRotatorMotorPhysics, DCMotor.getNEO(1).withReduction(1.02), 0.0);
+        new DCMotorSim(intakeRotatorMotorPhysics, DCMotor.getNEO(1).withReduction(1.02));
     intakeRollerMotor =
-        new DCMotorSim(intakeRollerMotorPhysics, DCMotor.getNeoVortex(1).withReduction(1.02), 0.0);
+        new DCMotorSim(intakeRollerMotorPhysics, DCMotor.getNeoVortex(1).withReduction(1.02));
 
     intakePID = new PIDController(0.3, 0.0, 0.0);
 
@@ -45,7 +45,7 @@ public class IntakeIOSim implements IntakeIO {
     inputs.intakeActuaterVoltage = intakeRotatorMotorVoltage;
     inputs.intakeRollerVoltage = intakeRollerMotorVoltage;
 
-    inputs.intakeActuaterAngle = new Rotation2d(intakeRotatorMotor.getAngularPosition());
+    inputs.intakeActuaterAngle = new Rotation2d(intakeRotatorMotor.getAngularPositionRad());
 
     inputs.intakeActuaterCurrent = intakeRotatorMotor.getCurrentDrawAmps();
     inputs.intakeRollerCurrent = intakeRollerMotor.getCurrentDrawAmps();
@@ -63,7 +63,7 @@ public class IntakeIOSim implements IntakeIO {
 
   @Override
   public void setIntakeActuaterPosition(double position) {
-    Rotation2d currentAngle = new Rotation2d(intakeRotatorMotor.getAngularPosition());
+    Rotation2d currentAngle = new Rotation2d(intakeRotatorMotor.getAngularPositionRad());
     intakeRotatorMotorVoltage = intakePID.calculate(currentAngle.getDegrees(), position);
     intakeRotatorMotor.setInputVoltage(intakeRotatorMotorVoltage);
     intakeRotatorMotor.setAngularVelocity(intakeRotatorMotorVoltage * (2 * Math.PI / 60));

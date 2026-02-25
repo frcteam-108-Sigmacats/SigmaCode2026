@@ -4,17 +4,16 @@
 // intake mech
 package frc.robot.subsystems.Intake;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class IntakeMech extends SubsystemBase {
   private IntakeIO io;
   private IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
-  //Creating the Alerts to notify if the speed controllers get disconnected from CANBUS
+  // Creating the Alerts to notify if the speed controllers get disconnected from CANBUS
   private Alert actuationDisconnected =
       new Alert("Actuater Motor Is Disconnected", AlertType.kError);
   private Alert rollerDisconnected = new Alert("Roller Motor Is Disconnected", AlertType.kError);
@@ -43,8 +42,9 @@ public class IntakeMech extends SubsystemBase {
     io.setRollerVoltage(0);
   }
 
-  public boolean isIntakeExtended(){
-    return Math.abs(IntakeConstants.intakeOutPosition - inputs.intakeActuaterAngle) <= 2;
+  public boolean isIntakeExtended() {
+    return Math.abs(IntakeConstants.intakeOutPosition - inputs.intakeActuaterAngle.getDegrees())
+        <= 2;
   }
 
   /**
