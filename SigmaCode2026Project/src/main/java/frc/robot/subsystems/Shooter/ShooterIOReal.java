@@ -27,8 +27,8 @@ import edu.wpi.first.math.filter.Debouncer;
 /**
  * Competition / full-robot implementation of {@link ShooterIO}.
  *
- * <p>Structure intentionally mirrors {@link ShooterIOSim}: each axis tracks a closed-loop flag and a
- * stored setpoint. The actual control output is delegated to onboard hardware controllers rather
+ * <p>Structure intentionally mirrors {@link ShooterIOSim}: each axis tracks a closed-loop flag and
+ * a stored setpoint. The actual control output is delegated to onboard hardware controllers rather
  * than WPILib {@code PIDController}s, but the field layout and {@code updateInputs} shape are
  * identical so the two implementations are easy to compare side-by-side.
  *
