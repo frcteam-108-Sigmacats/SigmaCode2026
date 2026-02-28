@@ -2,6 +2,7 @@ package frc.robot.subsystems.Shooter;
 
 import static frc.robot.subsystems.Shooter.ShooterConstants.*;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -120,8 +121,8 @@ public class ShooterIOReal implements ShooterIO {
         turretCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     // ── Shooter wheels (TalonFX / Kraken X60) ────────────────────────────
-    shooterLeft = new TalonFX(shooterWheelLeftCanId, canBusName);
-    shooterRight = new TalonFX(shooterWheelRightCanId, canBusName);
+    shooterLeft = new TalonFX(shooterWheelLeftCanId, new CANBus("PhoenixBus"));
+    shooterRight = new TalonFX(shooterWheelRightCanId, new CANBus("PhoenixBus"));
 
     var shooterCfg = new TalonFXConfiguration();
     shooterCfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -234,7 +235,7 @@ public class ShooterIOReal implements ShooterIO {
     turretSetpointRad = clampedRad;
     // Absolute encoder reports [0, 2π]. Convert the clamped [-π, π] angle to that space.
     double encoderSetpoint = clampedRad < 0.0 ? clampedRad + 2.0 * Math.PI : clampedRad;
-    turretController.setReference(encoderSetpoint, ControlType.kPosition);
+    turretController.setSetpoint(encoderSetpoint, ControlType.kPosition);
   }
 
   // ── Shooter wheels ────────────────────────────────────────────────────────
@@ -269,7 +270,7 @@ public class ShooterIOReal implements ShooterIO {
   public void setHoodPosition(double angleDeg) {
     hoodClosedLoop = true;
     hoodSetpointDeg = MathUtil.clamp(angleDeg, hoodMinDeg, hoodMaxDeg);
-    hoodController.setReference(hoodSetpointDeg, ControlType.kPosition);
+    hoodController.setSetpoint(hoodSetpointDeg, ControlType.kPosition);
   }
 
   @Override

@@ -8,16 +8,16 @@ public class ShooterConstants {
 
   // ── CAN IDs ──────────────────────────────────────────────────────────────
   /** SparkFlex (Vortex) driving the turret rotation ring. */
-  public static final int turretRotationCanId = 20;
+  public static final int turretRotationCanId = 17;
 
   /** TalonFX (Kraken X60) for the left shooter wheel. */
-  public static final int shooterWheelLeftCanId = 21;
+  public static final int shooterWheelLeftCanId = 15;
 
   /** TalonFX (Kraken X60) for the right shooter wheel. */
-  public static final int shooterWheelRightCanId = 22;
+  public static final int shooterWheelRightCanId = 16;
 
   /** SparkMax (Neo 550) for the shooter hood angle. */
-  public static final int hoodCanId = 23;
+  public static final int hoodCanId = 18;
 
   // ── CAN Bus ──────────────────────────────────────────────────────────────
   /** CAN bus name for TalonFX devices. Use "*" or "rio" as appropriate. */
@@ -41,7 +41,7 @@ public class ShooterConstants {
   public static final double turretMaxAngleRad = Math.PI;
 
   // Closed-loop gains (real hardware)
-  public static final double turretKp = 1.5;
+  public static final double turretKp = 0.0; // 1.5
   public static final double turretKd = 0.0;
 
   // Closed-loop gains (sim)
@@ -54,9 +54,9 @@ public class ShooterConstants {
   public static final boolean shooterRightInverted = true;
 
   // Velocity PID / FF (Slot 0 on TalonFX)
-  public static final double shooterKp = 0.05;
+  public static final double shooterKp = 0.01;
   public static final double shooterKd = 0.0;
-  public static final double shooterKs = 0.05; // V
+  public static final double shooterKs = 0.01; // V
   public static final double shooterKv = 0.12; // V*s/rad
 
   // Sim
@@ -81,7 +81,7 @@ public class ShooterConstants {
   public static final double hoodMaxDeg = 90.0;
 
   // Closed-loop gains (real hardware)
-  public static final double hoodKp = 0.1;
+  public static final double hoodKp = 0.0;
   public static final double hoodKd = 0.0;
 
   // Closed-loop gains (sim)

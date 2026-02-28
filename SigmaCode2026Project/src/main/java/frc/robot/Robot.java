@@ -127,7 +127,7 @@ public class Robot extends LoggedRobot {
 
     // Seed the hood's internal encoder from the absolute encoder so closed-loop
     // control starts from the correct physical position.
-    m_robotContainer.getTurret().seedHoodEncoder();
+    // m_robotContainer.getTurret().seedHoodEncoder();
   }
 
   /** This function is called periodically during operator control. */
