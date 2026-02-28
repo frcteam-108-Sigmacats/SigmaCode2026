@@ -8,6 +8,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.Autos;
+import frc.robot.commands.DefaultShooter;
+import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.Shoot;
+import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.commands.DefaultSpinDexerCommand;
 import frc.robot.commands.TransferFuelToShooter;
 import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
@@ -22,6 +29,10 @@ import frc.robot.subsystems.SpinDexer.SpinDexerMech;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final Shooter shooterMech;
+
+  private Trigger bA;
   private final SpinDexerMech spinDexerMech;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -34,6 +45,18 @@ public class RobotContainer {
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
+        shooterMech = new Shooter(new ShooterIOReal());
+        break;
+      default:
+        shooterMech = new Shooter(new ShooterIOReal());
+        break;
+    }
+    // Configure the trigger bindings
+    configureBindings();
+
+    shooterMech.setDefaultCommand(new DefaultShooter(shooterMech));
+
+    bA.whileTrue(new Shoot(shooterMech));
         spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
         break;
       case SIM:
@@ -66,6 +89,8 @@ public class RobotContainer {
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
+    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    bA = m_driverController.a();
   }
 
   /**
@@ -77,4 +102,9 @@ public class RobotContainer {
     // An example command will be run in autonomous
     return null;
   }
+
+  /** Exposes the turret subsystem so {@link Robot} can seed its hood encoder on teleop init. */
+  // public Shooter getTurret() {
+  //   return getTurret();
+  // }
 }
