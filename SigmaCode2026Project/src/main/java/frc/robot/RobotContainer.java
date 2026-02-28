@@ -15,6 +15,11 @@ import frc.robot.commands.Shoot;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.commands.DefaultSpinDexerCommand;
+import frc.robot.commands.TransferFuelToShooter;
+import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
+import frc.robot.subsystems.SpinDexer.SpinDexerIOSim;
+import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -28,10 +33,13 @@ public class RobotContainer {
   private final Shooter shooterMech;
 
   private Trigger bA;
+  private final SpinDexerMech spinDexerMech;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
+
+  private Trigger bA;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -49,6 +57,21 @@ public class RobotContainer {
     shooterMech.setDefaultCommand(new DefaultShooter(shooterMech));
 
     bA.whileTrue(new Shoot(shooterMech));
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
+        break;
+      case SIM:
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
+        break;
+      case REPLAY:
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
+        break;
+      default:
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
+    }
+    // Configure the trigger bindings
+    configureBindings();
+    spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
+    bA.whileTrue(new TransferFuelToShooter(spinDexerMech));
   }
 
   /**
@@ -62,8 +85,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    bA = m_driverController.a();
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
@@ -78,7 +100,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return null;
   }
 
   /** Exposes the turret subsystem so {@link Robot} can seed its hood encoder on teleop init. */
