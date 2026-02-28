@@ -85,7 +85,7 @@ public class Drive extends SubsystemBase {
     modules[3] = new Module(brModuleIO, 3);
 
     // this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
-    poseEstimator.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(0)));
+    // poseEstimator.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(0)));
 
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
@@ -173,13 +173,12 @@ public class Drive extends SubsystemBase {
       // Update gyro angle
       if (gyroInputs.connected) {
         // Use the real gyro angle
-        System.out.println("Gyro real angle");
+        rawGyroRotation = gyroIO.getYaw();
       } else {
         // Use the angle delta from the kinematics and module deltas
         // Twist2d twist = kinematics.toTwist2d(moduleDeltas);
         // rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
         rawGyroRotation = gyroIO.getYaw();
-        System.out.println("GYROOOOO");
       }
 
       // Apply update

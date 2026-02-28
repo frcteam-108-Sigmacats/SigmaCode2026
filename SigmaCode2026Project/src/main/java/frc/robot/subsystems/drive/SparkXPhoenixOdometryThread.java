@@ -40,7 +40,7 @@ public class SparkXPhoenixOdometryThread {
   private BaseStatusSignal[] phoenixSignals = new BaseStatusSignal[0];
   private final List<Queue<Double>> phoenixQueues = new ArrayList<>();
 
-  private final boolean isCANFD = new CANBus("*").isNetworkFD();
+  private final boolean isCANFD = new CANBus("PhoenixBus").isNetworkFD();
 
   private final double ODOMETRY_FREQUENCY = isCANFD ? 250 : 100;
 
@@ -144,6 +144,10 @@ public class SparkXPhoenixOdometryThread {
       // Get sample timestamp
       double timestamp = RobotController.getFPGATime() / 1e6;
 
+      for (int i = 0; i < phoenixSignals.length; i++) {
+        phoenixQueues.get(i).offer(phoenixSignals[i].getValueAsDouble());
+      }
+
       // Read Spark values, mark invalid in case of error
       double[] sparkValues = new double[sparkSignals.size()];
       boolean isValid = true;
@@ -169,6 +173,7 @@ public class SparkXPhoenixOdometryThread {
     } catch (InterruptedException e) {
       e.printStackTrace();
     } finally {
+      signalsLock.unlock();
       Drive.odometryLock.unlock();
     }
   }
