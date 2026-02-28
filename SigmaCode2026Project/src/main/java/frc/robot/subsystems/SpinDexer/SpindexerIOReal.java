@@ -56,4 +56,15 @@ public class SpinDexerIOReal implements SpinDexerIO {
     kicker1.set(speed);
     kicker2.set(speed);
   }
+
+  @Override
+  public void setSpinDexerVoltage(double volt) {
+    spinDexer.setVoltage(volt);
+  }
+
+  @Override
+  public void setKickerVoltage(double volt) {
+    kicker1.setVoltage(volt);
+    kicker2.setVoltage(volt);
+  }
 }

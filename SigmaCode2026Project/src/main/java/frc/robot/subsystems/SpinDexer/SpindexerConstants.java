@@ -7,6 +7,6 @@ public class SpinDexerConstants {
   public static int spinDexerCurrentLimit = 40;
 
   public static double SpinDexerClockWise = 0.5;
-  public static double SpinDexerCounterClockWise = 0;
+  public static double SpinDexerCounterClockWise = -0.5;
   public static double KickerForward = 0.3;
 }
