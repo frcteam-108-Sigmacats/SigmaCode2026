@@ -24,7 +24,7 @@ public class Shoot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooterMech.setShooterOpenLoop(5);
+    shooterMech.setShooterOpenLoop(6);
   }
 
   // Called once the command ends or is interrupted.

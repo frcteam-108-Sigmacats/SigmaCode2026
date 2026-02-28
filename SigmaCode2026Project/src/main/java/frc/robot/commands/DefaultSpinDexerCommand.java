@@ -13,7 +13,7 @@ public class DefaultSpinDexerCommand extends Command {
   /** Creates a new DefaultSpinDexerCommand. */
   public DefaultSpinDexerCommand(SpinDexerMech spinDexerMech) {
     this.spinDexerMech = spinDexerMech;
-    // Use addRequirements() here to declare subsystem dependencies.
+    //   // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(this.spinDexerMech);
   }
 

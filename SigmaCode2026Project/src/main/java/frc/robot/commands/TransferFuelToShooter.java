@@ -10,6 +10,7 @@ import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class TransferFuelToShooter extends Command {
   private SpinDexerMech spinDexerMech;
+  private int counter;
   /** Creates a new TransferFuelToShooter. */
   public TransferFuelToShooter(SpinDexerMech spinDexerMech) {
     this.spinDexerMech = spinDexerMech;
@@ -19,13 +20,18 @@ public class TransferFuelToShooter extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    counter = 100;
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    spinDexerMech.setSpinDexerCounterClockwise();
-    spinDexerMech.setKickerForward();
+    counter--;
+    if (counter <= 0) {
+      spinDexerMech.setSpinDexerCounterClockwise();
+      spinDexerMech.setKickerForward();
+    }
   }
 
   // Called once the command ends or is interrupted.

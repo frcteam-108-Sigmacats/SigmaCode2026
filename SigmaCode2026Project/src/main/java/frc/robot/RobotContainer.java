@@ -8,15 +8,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
 import frc.robot.commands.DefaultShooter;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.Shoot;
+import frc.robot.commands.DefaultSpinDexerCommand;
+import frc.robot.commands.ShootAndTransfer;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
-import frc.robot.commands.DefaultSpinDexerCommand;
-import frc.robot.commands.TransferFuelToShooter;
 import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
 import frc.robot.subsystems.SpinDexer.SpinDexerIOSim;
 import frc.robot.subsystems.SpinDexer.SpinDexerMech;
@@ -39,16 +36,18 @@ public class RobotContainer {
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
-  private Trigger bA;
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
         shooterMech = new Shooter(new ShooterIOReal());
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
+
         break;
       default:
         shooterMech = new Shooter(new ShooterIOReal());
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
+
         break;
     }
     // Configure the trigger bindings
@@ -56,22 +55,10 @@ public class RobotContainer {
 
     shooterMech.setDefaultCommand(new DefaultShooter(shooterMech));
 
-    bA.whileTrue(new Shoot(shooterMech));
-        spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
-        break;
-      case SIM:
-        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
-        break;
-      case REPLAY:
-        spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
-        break;
-      default:
-        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
-    }
     // Configure the trigger bindings
     configureBindings();
     spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
-    bA.whileTrue(new TransferFuelToShooter(spinDexerMech));
+    bA.whileTrue(new ShootAndTransfer(shooterMech, spinDexerMech));
   }
 
   /**
@@ -90,7 +77,6 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-    bA = m_driverController.a();
   }
 
   /**
