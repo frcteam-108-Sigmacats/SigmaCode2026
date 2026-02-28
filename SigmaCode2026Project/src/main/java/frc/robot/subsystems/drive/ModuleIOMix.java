@@ -3,6 +3,7 @@ package frc.robot.subsystems.drive;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 import static frc.robot.util.SparkUtil.*;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -62,7 +63,7 @@ public class ModuleIOMix implements ModuleIO {
               case 3 -> backRightDriveCanId;
               default -> 0;
             },
-            "*");
+            new CANBus("PhoenixBus"));
     turnMotor =
         new SparkMax(
             switch (module) {
