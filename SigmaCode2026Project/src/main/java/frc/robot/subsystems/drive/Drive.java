@@ -49,7 +49,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-  static final double ODOMETRY_FREQUENCY = new CANBus("*").isNetworkFD() ? 250.0 : 100.0;
+  static final double ODOMETRY_FREQUENCY = new CANBus("PhoenixBus").isNetworkFD() ? 250.0 : 100.0;
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -86,7 +86,7 @@ public class Drive extends SubsystemBase {
     modules[3] = new Module(brModuleIO, 3);
 
     // this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
-    poseEstimator.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(0)));
+    // poseEstimator.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(0)));
 
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
@@ -222,6 +222,7 @@ public class Drive extends SubsystemBase {
 
     // Log optimized setpoints (runSetpoint mutates each state)
     Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    Logger.recordOutput("SwerveGyroRotation", rawGyroRotation);
   }
 
   public ChassisSpeeds getDriveSpeeds() {
@@ -346,7 +347,7 @@ public class Drive extends SubsystemBase {
 
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
-    return getPose().getRotation();
+    return gyroIO.getYaw();
   }
 
   /** Resets the current odometry pose. */
