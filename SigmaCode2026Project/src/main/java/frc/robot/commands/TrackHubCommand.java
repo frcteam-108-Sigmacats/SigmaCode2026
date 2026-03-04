@@ -1,127 +1,157 @@
-package frc.robot.commands;
+// package frc.robot.commands;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Shooter.Shooter;
-import frc.robot.subsystems.Shooter.ShooterConstants;
-import java.util.TreeMap;
-import org.littletonrobotics.junction.Logger;
+// import edu.wpi.first.math.MathUtil;
+// import edu.wpi.first.math.controller.PIDController;
+// import edu.wpi.first.wpilibj.DriverStation;
+// import edu.wpi.first.wpilibj.DriverStation.Alliance;
+// import edu.wpi.first.wpilibj2.command.Command;
+// import frc.robot.subsystems.LimelightSubsystem;
+// import frc.robot.subsystems.SwerveSubsystem;
+// import java.util.Set;
+// import java.util.function.DoubleSupplier;
 
-/**
- * Continuously aims the turret, spins the shooter wheels, and positions the hood based on a target
- * distance supplied externally (e.g. from a vision pipeline or a fixed pre-match setpoint).
- *
- * <p>This command is self-contained: it requires only the {@link Shooter} subsystem and does
- * <em>not</em> depend on the drive subsystem. Robot-relative aiming is handled by passing in a
- * {@code targetAngleSupplier} and {@code distanceSupplier} from whichever source is available
- * (vision, LiDAR, driver override, etc.).
- *
- * <p>Typical usage with a fixed angle + distance (e.g. auto pre-aim):
- *
- * <pre>
- *   new TrackHubCommand(turret, () -> 0.0, () -> 3.0)
- * </pre>
- *
- * <p>Typical usage wired to a vision system:
- *
- * <pre>
- *   new TrackHubCommand(turret, vision::getTurretAngleRad, vision::getDistanceMeters)
- * </pre>
- */
-public class TrackHubCommand extends Command {
+// /**
+//  * Tracks the alliance's Reef hub using the Limelight and rotates the robot to face it while
+// still
+//  * allowing the driver to translate freely.
+//  *
+//  * <p>2026 Reefscape AprilTag layout used for hub identification:
+//  *
+//  * <ul>
+//  *   <li>Red hub face tags : 6, 7, 8, 9, 10, 11
+//  *   <li>Blue hub face tags : 17, 18, 19, 20, 21, 22
+//  * </ul>
+//  *
+//  * <p>The Limelight is told to prioritise the nearest alliance tag so the robot always locks on
+// to
+//  * the closest reef face regardless of which direction it started from. When no valid target is
+//  * visible the driver retains full control.
+//  */
+// public class TrackHubCommand extends Command {
 
-  private final Shooter turret;
+//   // ── hub AprilTag sets ───────────────────────────────────────────────────
+//   private static final Set<Integer> RED_HUB_TAGS = Set.of(6, 7, 8, 9, 10, 11);
+//   private static final Set<Integer> BLUE_HUB_TAGS = Set.of(17, 18, 19, 20, 21, 22);
 
-  /**
-   * Supplies the desired turret angle in radians relative to the robot's forward axis. Positive =
-   * counterclockwise when viewed from above. Return 0.0 to keep the turret facing forward.
-   */
-  private final java.util.function.DoubleSupplier targetAngleRadSupplier;
+//   // ── Speeds ───────────────────────────────────────────────────────────────
+//   private static final double MAX_SPEED_MPS = 4.5;
+//   private static final double MAX_ANGULAR_SPEED = Math.PI;
+//   private static final double DEADBAND = 0.1;
 
-  /**
-   * Supplies the estimated distance to the target in metres. Used to interpolate shooter RPM and
-   * hood angle from {@link ShooterConstants.ShooterStates}.
-   */
-  private final java.util.function.DoubleSupplier distanceMetersSupplier;
+//   // ── Rotation PID ─────────────────────────────────────────────────────────
+//   // kP chosen so that a 10° offset → ~0.5 rad/s correction; tune on robot.
+//   private static final double ROT_kP = 0.05;
+//   private static final double ROT_kI = 0.0;
+//   private static final double ROT_kD = 0.001;
+//   // Tolerance: consider "on target" when TX error < 1°
+//   private static final double ROT_TOLERANCE_DEG = 1.0;
 
-  /** Wheel diameter in metres used to convert RPM -> surface speed (m/s). */
-  private static final double WHEEL_DIAMETER_M = 2.0 * ShooterConstants.shooterWheelRadiusMeters;
+//   private final SwerveSubsystem swerve;
+//   private final LimelightSubsystem limelight;
+//   private final DoubleSupplier xSupplier; // driver forward/back translation
+//   private final DoubleSupplier ySupplier; // driver left/right strafe
+//   private final PIDController rotPID;
 
-  /**
-   * @param turret the turret subsystem
-   * @param targetAngleRadSupplier robot-relative turret angle in radians (0 = forward)
-   * @param distanceMetersSupplier distance to the target in metres for lookup-table interpolation
-   */
-  public TrackHubCommand(
-      Shooter turret,
-      java.util.function.DoubleSupplier targetAngleRadSupplier,
-      java.util.function.DoubleSupplier distanceMetersSupplier) {
-    this.turret = turret;
-    this.targetAngleRadSupplier = targetAngleRadSupplier;
-    this.distanceMetersSupplier = distanceMetersSupplier;
-    addRequirements(turret);
-  }
+//   /**
+//    * @param swerve the swerve subsystem
+//    * @param limelight the Limelight subsystem (already filtering for alliance tags)
+//    * @param xSupplier forward (+) / back (−) translation [−1, 1]
+//    * @param ySupplier left (+) / right (−) strafe [−1, 1]
+//    */
+//   public TrackHubCommand(
+//       SwerveSubsystem swerve,
+//       LimelightSubsystem limelight,
+//       DoubleSupplier xSupplier,
+//       DoubleSupplier ySupplier) {
 
-  @Override
-  public void initialize() {
-    // Nothing to initialise – command calculates fresh each cycle
-  }
+//     this.swerve = swerve;
+//     this.limelight = limelight;
+//     this.xSupplier = xSupplier;
+//     this.ySupplier = ySupplier;
 
-  @Override
-  public void execute() {
-    double angleRad = targetAngleRadSupplier.getAsDouble();
-    double distMeters = distanceMetersSupplier.getAsDouble();
+//     rotPID = new PIDController(ROT_kP, ROT_kI, ROT_kD);
+//     rotPID.setTolerance(ROT_TOLERANCE_DEG);
+//     // Setpoint is 0° – we want TX (horizontal offset) to be zero.
+//     rotPID.setSetpoint(0.0);
 
-    double rpm = interpolate(distMeters, ShooterConstants.ShooterStates.shooterRPMMap);
-    double hoodDeg = interpolate(distMeters, ShooterConstants.ShooterStates.shooterHoodAngleMap);
-    double surfaceMps = (rpm / 60.0) * Math.PI * WHEEL_DIAMETER_M;
+//     addRequirements(swerve);
+//   }
 
-    turret.setTurretAngle(new Rotation2d(angleRad));
-    turret.setShooterSpeed(surfaceMps);
-    turret.setHoodAngle(hoodDeg);
+//   // ── Alliance helpers ─────────────────────────────────────────────────────
 
-    Logger.recordOutput("TrackHub/TargetAngleDeg", Math.toDegrees(angleRad));
-    Logger.recordOutput("TrackHub/DistanceMeters", distMeters);
-    Logger.recordOutput("TrackHub/ShooterRPM", rpm);
-    Logger.recordOutput("TrackHub/HoodAngleDeg", hoodDeg);
-    Logger.recordOutput("TrackHub/ShooterSurfaceSpeedMPS", surfaceMps);
-    Logger.recordOutput("TrackHub/ReadyToShoot", turret.isReadyToShoot());
-  }
+//   /**
+//    * Returns the set of Reef AprilTag IDs that belong to the robot's current alliance. Falls back
+// to
+//    * Red tags if alliance is not yet determined.
+//    */
+//   private Set<Integer> getAllianceHubTags() {
+//     var alliance = DriverStation.getAlliance();
+//     if (alliance.isPresent() && alliance.get() == Alliance.Blue) {
+//       return BLUE_HUB_TAGS;
+//     }
+//     return RED_HUB_TAGS; // default / Red
+//   }
 
-  @Override
-  public void end(boolean interrupted) {
-    turret.stopAll();
-  }
+//   /**
+//    * Returns the direction the robot should shoot toward (i.e. the opposing alliance's hub
+//    * direction). Used for dashboard telemetry or a future shooter subsystem.
+//    */
+//   public Set<Integer> getShootTargetTags() {
+//     var alliance = DriverStation.getAlliance();
+//     if (alliance.isPresent() && alliance.get() == Alliance.Blue) {
+//       return RED_HUB_TAGS; // Blue alliance shoots toward Red hub
+//     }
+//     return BLUE_HUB_TAGS; // Red alliance shoots toward Blue hub
+//   }
 
-  /** This command never finishes on its own; interrupt it to stop tracking. */
-  @Override
-  public boolean isFinished() {
-    return false;
-  }
+//   // ── Command lifecycle ────────────────────────────────────────────────────
 
-  /**
-   * Linear interpolation over a {@link TreeMap} of (distance -> value) pairs.
-   *
-   * <p>If {@code key} is below the lowest key the first value is returned; above the highest key
-   * the last value is returned.
-   *
-   * @param key lookup distance in metres
-   * @param dataMap ordered map of distance -> setpoint (RPM or degrees)
-   * @return interpolated setpoint value
-   */
-  private static double interpolate(double key, TreeMap<Double, Double> dataMap) {
-    if (dataMap.isEmpty()) return 0.0;
+//   @Override
+//   public void initialize() {
+//     rotPID.reset();
+//     // Tell the Limelight which tags to prioritise for this command
+//     limelight.setTargetTags(getAllianceHubTags());
+//   }
 
-    Double lo = dataMap.floorKey(key);
-    Double hi = dataMap.ceilingKey(key);
+//   @Override
+//   public void execute() {
+//     double xSpeed = applyDeadband(xSupplier.getAsDouble()) * MAX_SPEED_MPS;
+//     double ySpeed = applyDeadband(ySupplier.getAsDouble()) * MAX_SPEED_MPS;
 
-    if (lo == null) return dataMap.get(hi);
-    if (hi == null) return dataMap.get(lo);
-    if (lo.equals(hi)) return dataMap.get(lo);
+//     double rotSpeed;
+//     if (limelight.hasTarget() && isAllianceTag(limelight.getTargetId())) {
+//       // TX is positive when target is to the right; we rotate CCW (positive)
+//       // to bring it back to centre, so we negate.
+//       double tx = limelight.getTX();
+//       rotSpeed = MathUtil.clamp(-rotPID.calculate(tx), -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED);
+//     } else {
+//       // No valid alliance tag visible – hold heading, let driver translate.
+//       rotSpeed = 0.0;
+//     }
 
-    double y1 = dataMap.get(lo);
-    double y2 = dataMap.get(hi);
-    double fraction = (key - lo) / (hi - lo);
-    return y1 + (y2 - y1) * fraction;
-  }
-}
+//     // Always field-relative while tracking so the driver's stick directions are intuitive.
+//     swerve.drive(xSpeed, ySpeed, rotSpeed, true);
+//   }
+
+//   @Override
+//   public void end(boolean interrupted) {
+//     // Restore default tag filtering so normal vision-based odometry resumes.
+//     limelight.clearTargetTagFilter();
+//     swerve.stopModules();
+//   }
+
+//   @Override
+//   public boolean isFinished() {
+//     return false; // Runs until the button is released (whileTrue binding).
+//   }
+
+//   // ── Helpers ──────────────────────────────────────────────────────────────
+
+//   private boolean isAllianceTag(int tagId) {
+//     return getAllianceHubTags().contains(tagId);
+//   }
+
+//   private double applyDeadband(double value) {
+//     return MathUtil.applyDeadband(value, DEADBAND);
+//   }
+// }
