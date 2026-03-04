@@ -136,4 +136,15 @@ public class DriveConstants {
                   Meters.of(wheelRadiusMeters),
                   KilogramSquareMeters.of(0.02),
                   wheelCOF));
+
+  // Limelights
+  // public static final String kLimelightFrontName = "limelight-front"; // not on robot yet
+  public static final String kLimelightBackLeftName = "limelight-bl";
+  public static final String kLimelightBackRightName = "limelight-br";
+
+  public static double xyStdDevCoefficient = 0.005;
+  public static double thetaStdDevCoefficient = 0.01;
+  public static double stdDevFactor = 0.5;
+  public static boolean useVisionRotation = true;
+  public static double autoStdDevScale = 0;
 }

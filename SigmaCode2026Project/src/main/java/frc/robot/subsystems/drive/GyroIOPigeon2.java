@@ -51,4 +51,19 @@ public class GyroIOPigeon2 implements GyroIO {
   public Rotation2d getYaw() {
     return Rotation2d.fromDegrees(pigeon.getYaw().getValueAsDouble());
   }
+
+  @Override
+  public Rotation2d getPitch() {
+    return Rotation2d.fromDegrees(pigeon.getPitch().getValueAsDouble());
+  }
+
+  @Override
+  public Rotation2d getRoll() {
+    return Rotation2d.fromDegrees(pigeon.getPitch().getValueAsDouble());
+  }
+
+  @Override
+  public double getRate() {
+    return pigeon.getAngularVelocityZDevice().getValueAsDouble();
+  }
 }

@@ -20,4 +20,18 @@ public interface GyroIO {
   public default Rotation2d getYaw() {
     return new Rotation2d();
   }
+
+  @AutoLogOutput
+  public default Rotation2d getPitch() {
+    return new Rotation2d();
+  }
+
+  @AutoLogOutput
+  public default Rotation2d getRoll() {
+    return new Rotation2d();
+  }
+
+  public default double getRate() {
+    return 0;
+  }
 }

@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -54,6 +54,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if (hasAnyTarget) {}
     // Choose the correct pose estimator origin depending on alliance colour.
     // wpiBlue uses the WPILib field coordinate convention (blue origin at bottom-left).
     boolean isBlueAlliance =

@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
+// this is for use while shooting so if being gararded heavly we can not worry about accury//
 
 /**
  * Puts the robot in X-stance (defense mode) to resist pushing. All wheels are oriented at 45-degree

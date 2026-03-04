@@ -25,6 +25,7 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -42,6 +43,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -186,9 +189,58 @@ public class Drive extends SubsystemBase {
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
     if (Constants.currentMode == Mode.REAL) {
-      // addVisionMeasurement(vision.getLeftLLBotPose(), vision.getLeftLLBotPoseTimeStamp());
-      // addVisionMeasurement(vision.getRightLLBotPose(), vision.getRightLLBotPoseTimeStamp());
+      LimelightHelpers.SetRobotOrientation(
+          DriveConstants.kLimelightBackLeftName,
+          gyroIO.getYaw().getDegrees(),
+          0,
+          gyroIO.getPitch().getDegrees(),
+          0,
+          gyroIO.getRoll().getDegrees(),
+          0);
+
+      LimelightHelpers.SetRobotOrientation(
+          DriveConstants.kLimelightBackRightName,
+          gyroIO.getYaw().getDegrees(),
+          0,
+          gyroIO.getPitch().getDegrees(),
+          0,
+          gyroIO.getRoll().getDegrees(),
+          0);
+
+      PoseEstimate bLMT2 =
+          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
+      PoseEstimate bRMT2 =
+          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName);
+
+      if (checkPose(bLMT2)) {
+        updatePoseWithStdDev(bLMT2);
+      }
+      if (checkPose(bRMT2)) {
+        updatePoseWithStdDev(bRMT2);
+      }
     }
+  }
+
+  private void updatePoseWithStdDev(PoseEstimate estimate) {
+    double avgDistance = estimate.avgTagDist;
+    double xyStdDev =
+        DriveConstants.xyStdDevCoefficient
+            * Math.pow(avgDistance, 2.0)
+            / estimate.tagCount
+            * DriveConstants.stdDevFactor
+            * (DriverStation.isAutonomous() ? DriveConstants.autoStdDevScale : 1.0);
+
+    double thetaStdDev =
+        useVisionRotation
+            ? thetaStdDevCoefficient
+                * Math.pow(avgDistance, 2.0)
+                / estimate.tagCount
+                * stdDevFactor
+                * (DriverStation.isAutonomous() ? DriveConstants.autoStdDevScale : 1.0)
+            : Double.POSITIVE_INFINITY;
+
+    poseEstimator.addVisionMeasurement(
+        estimate.pose, estimate.timestampSeconds, VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev));
   }
 
   public void setSlowSpeedBool(boolean enable) {
@@ -368,5 +420,37 @@ public class Drive extends SubsystemBase {
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
     return maxSpeedMetersPerSec / driveBaseRadius;
+  }
+
+  private boolean checkPose(PoseEstimate estimate) {
+    if (estimate == null) {
+      return false;
+    }
+
+    if (isEstimateZero(estimate)) {
+      return false;
+    }
+
+    if (estimate.pose.getX() <= 0 || estimate.pose.getX() > 16.53) {
+      return false;
+    }
+
+    if (estimate.pose.getY() <= 0 || estimate.pose.getY() > 8) {
+      return false;
+    }
+
+    if (estimate.tagCount <= 0) {
+      return false;
+    }
+
+    if (Math.abs(gyroIO.getRate()) > 720) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private boolean isEstimateZero(PoseEstimate estimate) {
+    return estimate.pose.equals(new Pose2d());
   }
 }
