@@ -7,17 +7,20 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.ModuleIOMix;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.Autos;
+import frc.robot.commands.DefaultShooter;
+import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.Shoot;
+import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.commands.DefaultSpinDexerCommand;
+import frc.robot.commands.TransferFuelToShooter;
+import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
+import frc.robot.subsystems.SpinDexer.SpinDexerIOSim;
+import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -26,68 +29,49 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // Subsystems
-  private final Drive drive;
+  // The robot's subsystems and commands are defined here...
+  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final Shooter shooterMech;
 
-  private SwerveDriveSimulation driveSimulation;
-
-  // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private Trigger bA;
+  private final SpinDexerMech spinDexerMech;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private Trigger bA;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
-
-        // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2() {},
-                new ModuleIOMix(0),
-                new ModuleIOMix(1),
-                new ModuleIOMix(2),
-                new ModuleIOMix(3));
-        ;
+        shooterMech = new Shooter(new ShooterIOReal());
         break;
-
-      case SIM:
-        this.driveSimulation =
-            new SwerveDriveSimulation(
-                DriveConstants.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
-        // add the simulated drivetrain to the simulation field
-        SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
-        // Sim robot, instantiate physics sim IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim());
-        ;
-        break;
-
       default:
-        // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim());
-        ;
+        shooterMech = new Shooter(new ShooterIOReal());
         break;
     }
+    // Configure the trigger bindings
+    configureBindings();
 
-    // Set up auto routines
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    shooterMech.setDefaultCommand(new DefaultShooter(shooterMech));
 
-    // Configure the button bindings
-    configureButtonBindings();
+    bA.whileTrue(new Shoot(shooterMech));
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
+        break;
+      case SIM:
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
+        break;
+      case REPLAY:
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
+        break;
+      default:
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
+    }
+    // Configure the trigger bindings
+    configureBindings();
+    spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
+    bA.whileTrue(new TransferFuelToShooter(spinDexerMech));
   }
 
   /**
@@ -96,25 +80,14 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {
-    // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+  private void configureBindings() {
+    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
+    bA = m_driverController.a();
 
-    // Reset gyro to 0° when B button is pressed
-    // controller
-    //     .b()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //                 () ->
-    //                     drive.setPose(
-    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-    //                 drive)
-    //             .ignoringDisable(true));
+    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    bA = m_driverController.a();
   }
 
   public void updateSimulation() {
@@ -129,4 +102,9 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
+
+  /** Exposes the turret subsystem so {@link Robot} can seed its hood encoder on teleop init. */
+  // public Shooter getTurret() {
+  //   return getTurret();
+  // }
 }
