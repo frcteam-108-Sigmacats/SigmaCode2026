@@ -151,13 +151,13 @@ public class ShooterConstants {
     static {
 
       // Distance (m) -> hood angle (deg)
-      shooterHoodAngleMap.put((double) 0, 2500.0);
-      shooterHoodAngleMap.put((double) 1.117, 2700.0);
-      shooterHoodAngleMap.put((double) 2.488, 2700.0);
-      shooterHoodAngleMap.put((double) 3.135, 2900.0);
-      shooterHoodAngleMap.put((double) 3.9, 3300.0);
-      shooterHoodAngleMap.put((double) 4.4, 3300.0);
-      shooterHoodAngleMap.put((double) 5, 2300.0);
+      shooterHoodAngleMap.put((double) 0, 0.0);
+      shooterHoodAngleMap.put((double) 1.117, 12.0);
+      shooterHoodAngleMap.put((double) 2.488, 18.0);
+      shooterHoodAngleMap.put((double) 3.135, 21.0);
+      shooterHoodAngleMap.put((double) 3.9, 22.0);
+      shooterHoodAngleMap.put((double) 4.4, 24.0);
+      shooterHoodAngleMap.put((double) 5, 25.0);
     }
   }
 }

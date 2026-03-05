@@ -109,7 +109,7 @@ public class ShooterIOReal implements ShooterIO {
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .positionWrappingEnabled(false)
-        .pid(turretKp, 0.0, turretKd);
+        .pid(turretKp, 0.0, turretKd); // WARNING i DO NOT USE
     turretCfg
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -186,9 +186,9 @@ public class ShooterIOReal implements ShooterIO {
     // The absolute encoder reports [0, 2π]; if the position exceeds π (180°), subtract 2π
     // so the relative encoder starts in the same [-π, π] convention used elsewhere.
     double turretAbsPositionRad = turretAbsEncoder.getPosition() - 4.554;
-    // if (turretAbsPositionRad > Math.PI) {
-    //   turretAbsPositionRad -= 2.0 * Math.PI;
-    // }
+    if (turretAbsPositionRad > Math.PI) {
+      turretAbsPositionRad -= 2.0 * Math.PI;
+    }
     turretEncoder.setPosition(turretAbsPositionRad);
 
     // Seed the hood relative encoder to 0 (mechanism assumed to be at rest / home position).
@@ -274,6 +274,7 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setHoodPosition(double angleDeg) {
+
     hoodClosedLoop = true;
     hoodSetpointDeg = MathUtil.clamp(angleDeg, hoodMinDeg, hoodMaxDeg);
     hoodController.setSetpoint(angleDeg, ControlType.kPosition);
