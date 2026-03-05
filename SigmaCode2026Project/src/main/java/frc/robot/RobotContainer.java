@@ -1,86 +1,117 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.DefaultIntakeCommand;
-import frc.robot.commands.RunIntakeCommand;
-import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.Intake.IntakeIOReal;
-import frc.robot.subsystems.Intake.IntakeIOSim;
-import frc.robot.subsystems.Intake.IntakeMech;
+import frc.robot.commands.DefaultShooter;
+import frc.robot.commands.DefaultSpinDexerCommand;
+import frc.robot.commands.DriveCommands;
+import frc.robot.commands.TransferFuelToShooter;
+import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
+import frc.robot.subsystems.SpinDexer.SpinDexerIOSim;
+import frc.robot.subsystems.SpinDexer.SpinDexerMech;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.ModuleIOMix;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
+ * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final Shooter shooterMech;
+  private final Drive swerveDrive;
 
-  private final IntakeMech intakeMech;
+  private CommandXboxController driver = new CommandXboxController(0);
+  private Trigger bA;
+  private final SpinDexerMech spinDexerMech;
 
-  private Trigger bRT;
-
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  // Dashboard inputs
+  private final LoggedDashboardChooser<Command> autoChooser =
+      new LoggedDashboardChooser<>("AutoChooser");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
-        intakeMech = new IntakeMech(new IntakeIOReal());
-        break;
-      case SIM:
-        intakeMech = new IntakeMech(new IntakeIOSim());
-        break;
-      case REPLAY:
-        intakeMech = new IntakeMech(new IntakeIOReal());
+        shooterMech = new Shooter(new ShooterIOReal());
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
+        swerveDrive =
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOMix(0),
+                new ModuleIOMix(1),
+                new ModuleIOMix(2),
+                new ModuleIOMix(3));
+
         break;
       default:
-        intakeMech = new IntakeMech(new IntakeIOSim());
+        shooterMech = new Shooter(new ShooterIOReal());
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
+        swerveDrive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIOSim(),
+                new ModuleIOSim(),
+                new ModuleIOSim(),
+                new ModuleIOSim());
+
+        break;
     }
     // Configure the trigger bindings
     configureBindings();
-    intakeMech.setDefaultCommand(new DefaultIntakeCommand(intakeMech));
 
-    bRT.whileTrue(new RunIntakeCommand(intakeMech));
+    shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive));
+    spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
+    swerveDrive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            swerveDrive,
+            () -> -driver.getLeftY(),
+            () -> -driver.getLeftX(),
+            () -> -driver.getRightX()));
+
+    // Configure the trigger bindings
+    configureBindings();
+    bA.whileTrue(new TransferFuelToShooter(spinDexerMech));
   }
 
   /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
+   * Use this method to define your button->command mappings. Buttons can be created by
+   * instantiating a {@link GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     bRT = m_driverController.rightTrigger();
+    bA = driver.a();
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
   }
 
+  public void updateSimulation() {}
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return autoChooser.get();
   }
+
+  /** Exposes the turret subsystem so {@link Robot} can seed its hood encoder on teleop init. */
+  // public Shooter getTurret() {
+  //   return getTurret();
+  // }
 }
