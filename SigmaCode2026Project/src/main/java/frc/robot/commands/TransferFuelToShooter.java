@@ -27,11 +27,8 @@ public class TransferFuelToShooter extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    counter--;
-    if (counter <= 0) {
-      spinDexerMech.setSpinDexerCounterClockwise();
-      spinDexerMech.setKickerForward();
-    }
+    spinDexerMech.setSpinDexerCounterClockwise();
+    spinDexerMech.setKickerForward();
   }
 
   // Called once the command ends or is interrupted.

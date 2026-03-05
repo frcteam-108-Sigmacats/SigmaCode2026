@@ -1,5 +1,7 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import java.util.TreeMap;
@@ -24,7 +26,7 @@ public class ShooterConstants {
   public static final String canBusName = "*";
 
   // ── Turret Rotation (Vortex / SparkFlex) ─────────────────────────────────
-  public static final boolean turretInverted = false;
+  public static final boolean turretInverted = true;
   public static final int turretCurrentLimitAmps = 40;
 
   /** Gear ratio: motor rotations per 1 turret rotation. */
@@ -40,8 +42,11 @@ public class ShooterConstants {
 
   public static final double turretMaxAngleRad = Math.PI;
 
+  public static final double turretForwardLimit = 1.919; // was 2.8;
+  public static final double turretReverseLimit = -4.7;
+
   // Closed-loop gains (real hardware)
-  public static final double turretKp = 0.0; // 1.5
+  public static final double turretKp = 0.6; // 1.5
   public static final double turretKd = 0.0;
 
   // Closed-loop gains (sim)
@@ -78,10 +83,10 @@ public class ShooterConstants {
   /** Hood travel limits in degrees. */
   public static final double hoodMinDeg = 0.0;
 
-  public static final double hoodMaxDeg = 90.0;
+  public static final double hoodMaxDeg = 25.0;
 
   // Closed-loop gains (real hardware)
-  public static final double hoodKp = 0.0;
+  public static final double hoodKp = 0.05;
   public static final double hoodKd = 0.0;
 
   // Closed-loop gains (sim)
@@ -99,10 +104,12 @@ public class ShooterConstants {
   public static final double hoodMOI = 0.01;
 
   /** Shooter flywheel radius (m) – 3 in contact wheel. */
-  public static final double shooterWheelRadiusMeters = Units.inchesToMeters(3.0);
+  public static final double shooterWheelRadiusMeters = Units.inchesToMeters(1.5);
 
   /** Shooter inertia wheel radius (m) – 4 in inertia wheels. */
   public static final double shooterInertiaWheelRadiusMeters = Units.inchesToMeters(4.0);
+
+  public static final Pose2d blueHubPose = new Pose2d(4.62, 4.03, new Rotation2d());
 
   // ── Shooter lookup tables ─────────────────────────────────────────────────
   /**
@@ -124,6 +131,17 @@ public class ShooterConstants {
      */
     public static final TreeMap<Double, Double> shooterRPMMap = new TreeMap<>();
 
+    static {
+      // Distance (m) -> RPM
+      shooterRPMMap.put((double) 0, 2500.0);
+      shooterRPMMap.put((double) 1.117, 2700.0);
+      shooterRPMMap.put((double) 2.488, 2700.0);
+      shooterRPMMap.put((double) 3.135, 2900.0);
+      shooterRPMMap.put((double) 3.9, 3200.0);
+      shooterRPMMap.put((double) 4.4, 3300.0);
+      shooterRPMMap.put((double) 5, 3500.0);
+    }
+
     /**
      * Hood elevation in degrees as a function of distance (metres). Interpolated linearly between
      * known points.
@@ -131,21 +149,15 @@ public class ShooterConstants {
     public static final TreeMap<Double, Double> shooterHoodAngleMap = new TreeMap<>();
 
     static {
-      // Distance (m) -> RPM
-      shooterRPMMap.put(1.5, 2800.0);
-      shooterRPMMap.put(2.0, 3000.0);
-      shooterRPMMap.put(3.0, 3400.0);
-      shooterRPMMap.put(4.0, 3900.0);
-      shooterRPMMap.put(5.0, 4500.0);
-      shooterRPMMap.put(6.0, 5200.0);
 
       // Distance (m) -> hood angle (deg)
-      shooterHoodAngleMap.put(1.5, 60.0);
-      shooterHoodAngleMap.put(2.0, 55.0);
-      shooterHoodAngleMap.put(3.0, 48.0);
-      shooterHoodAngleMap.put(4.0, 42.0);
-      shooterHoodAngleMap.put(5.0, 36.0);
-      shooterHoodAngleMap.put(6.0, 30.0);
+      shooterHoodAngleMap.put((double) 0, 2500.0);
+      shooterHoodAngleMap.put((double) 1.117, 2700.0);
+      shooterHoodAngleMap.put((double) 2.488, 2700.0);
+      shooterHoodAngleMap.put((double) 3.135, 2900.0);
+      shooterHoodAngleMap.put((double) 3.9, 3300.0);
+      shooterHoodAngleMap.put((double) 4.4, 3300.0);
+      shooterHoodAngleMap.put((double) 5, 2300.0);
     }
   }
 }

@@ -1,13 +1,18 @@
 package frc.robot.subsystems.Shooter;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.TreeMap;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
 
   private final ShooterIO io;
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
+
+  double shooterRPM = 0;
+  double hoodAngle = 0;
 
   // Velocity tolerance for "at speed" check (rad/s)
   private static final double SHOOTER_VELOCITY_TOLERANCE_RAD_PER_SEC = 10.0;
@@ -22,6 +27,8 @@ public class Shooter extends SubsystemBase {
 
   public Shooter(ShooterIO io) {
     this.io = io;
+    SmartDashboard.putNumber("ShooterRPM", shooterRPM);
+    SmartDashboard.putNumber("HoodAngle", hoodAngle);
   }
 
   @Override
@@ -37,6 +44,11 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput(
         "Turret/ShooterSurfaceMPS",
         inputs.shooterLeftVelocityRadPerSec * ShooterConstants.shooterWheelRadiusMeters);
+    Logger.recordOutput("/Tuning/ShooterRPMSet", shooterRPM);
+    Logger.recordOutput("/Tuning/HoodAngleSet", hoodAngle);
+
+    hoodAngle = SmartDashboard.getNumber("HoodAngle", 0);
+    shooterRPM = SmartDashboard.getNumber("ShooterRPM", 0);
   }
 
   // ── Turret Rotation API ───────────────────────────────────────────────────
@@ -74,9 +86,11 @@ public class Shooter extends SubsystemBase {
    *
    * @param metersPerSec desired surface speed (positive = outward)
    */
-  public void setShooterSpeed(double metersPerSec) {
-    desiredShooterVelocityRadPerSec = metersPerSec / ShooterConstants.shooterWheelRadiusMeters;
-    io.setShooterVelocity(desiredShooterVelocityRadPerSec);
+  public void setShooterSpeed(double distance) {
+    double rpm =
+        getInterpolated(Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
+    // desiredShooterVelocityRadPerSec = metersPerSec / ShooterConstants.shooterWheelRadiusMeters;
+    io.setShooterVelocity(rpm);
   }
 
   /** Run shooter wheels open-loop (volts). */
@@ -87,6 +101,32 @@ public class Shooter extends SubsystemBase {
   /** Coast both wheels to a stop. */
   public void stopShooter() {
     io.setShooterOpenLoop(0.0);
+  }
+
+  public Double getInterpolated(Double key, TreeMap<Double, Double> dataMap) {
+    if (dataMap.isEmpty()) {
+      return null;
+    }
+    Double floorKey = dataMap.floorKey(key);
+    Double ceilingKey = dataMap.ceilingKey(key);
+
+    if (floorKey == null) {
+      return dataMap.get(ceilingKey);
+    }
+    if (ceilingKey == null) {
+      return dataMap.get(floorKey);
+    }
+
+    if (floorKey.equals(ceilingKey)) {
+      return dataMap.get(key);
+    }
+
+    Double y1 = dataMap.get(floorKey);
+    Double y2 = dataMap.get(ceilingKey);
+
+    double fraction = (key - floorKey) / (ceilingKey - floorKey);
+
+    return y1 + (y2 - y1) * fraction;
   }
 
   /** Average shooter wheel velocity in rad/s. */
@@ -119,9 +159,12 @@ public class Shooter extends SubsystemBase {
    *
    * @param angleDeg angle in [0°, 90°]
    */
-  public void setHoodAngle(double angleDeg) {
-    desiredHoodAngleDeg = angleDeg;
-    io.setHoodPosition(angleDeg);
+  public void setHoodAngle(double distance) {
+    double angle =
+        getInterpolated(
+            Double.valueOf(distance), ShooterConstants.ShooterStates.shooterHoodAngleMap);
+    // desiredHoodAngleDeg = angleDeg;
+    io.setHoodPosition(angle);
   }
 
   /** Run hood motor open-loop (volts). */

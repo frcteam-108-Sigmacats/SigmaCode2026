@@ -24,6 +24,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * Competition / full-robot implementation of {@link ShooterIO}.
@@ -85,7 +86,12 @@ public class ShooterIOReal implements ShooterIO {
         .inverted(turretInverted)
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(turretCurrentLimitAmps)
-        .voltageCompensation(12.0);
+        .voltageCompensation(12.0)
+        .softLimit
+        .forwardSoftLimitEnabled(true)
+        .forwardSoftLimit(ShooterConstants.turretForwardLimit)
+        .reverseSoftLimitEnabled(true)
+        .reverseSoftLimit(ShooterConstants.turretReverseLimit);
     // Relative encoder: motor rotations -> radians at the turret output
     turretCfg
         .encoder
@@ -96,11 +102,12 @@ public class ShooterIOReal implements ShooterIO {
         .absoluteEncoder
         .positionConversionFactor(2.0 * Math.PI)
         .velocityConversionFactor((2.0 * Math.PI) / 60.0)
-        .inverted(false)
+        .zeroCentered(false)
+        .inverted(true)
         .averageDepth(2);
     turretCfg
         .closedLoop
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .positionWrappingEnabled(false)
         .pid(turretKp, 0.0, turretKd);
     turretCfg
@@ -178,10 +185,10 @@ public class ShooterIOReal implements ShooterIO {
     // Seed the turret relative encoder from the absolute encoder reading.
     // The absolute encoder reports [0, 2π]; if the position exceeds π (180°), subtract 2π
     // so the relative encoder starts in the same [-π, π] convention used elsewhere.
-    double turretAbsPositionRad = turretAbsEncoder.getPosition();
-    if (turretAbsPositionRad > Math.PI) {
-      turretAbsPositionRad -= 2.0 * Math.PI;
-    }
+    double turretAbsPositionRad = turretAbsEncoder.getPosition() - 4.554;
+    // if (turretAbsPositionRad > Math.PI) {
+    //   turretAbsPositionRad -= 2.0 * Math.PI;
+    // }
     turretEncoder.setPosition(turretAbsPositionRad);
 
     // Seed the hood relative encoder to 0 (mechanism assumed to be at rest / home position).
@@ -196,16 +203,16 @@ public class ShooterIOReal implements ShooterIO {
     // Turret – absolute encoder reports [0, 2pi]; wrap to [-pi, pi]
     inputs.turretConnected =
         turretDebounce.calculate(turretMotor.getLastError() == REVLibError.kOk);
-    inputs.turretPositionRad = MathUtil.angleModulus(turretAbsEncoder.getPosition());
+    inputs.turretPositionRad = Rotation2d.fromRadians(turretEncoder.getPosition()).getDegrees();
     inputs.turretVelocityRadPerSec = turretAbsEncoder.getVelocity();
-    inputs.turretAppliedVolts = turretMotor.getAppliedOutput() * turretMotor.getBusVoltage();
+    inputs.turretAppliedVolts = turretMotor.getAppliedOutput();
     inputs.turretCurrentAmps = turretMotor.getOutputCurrent();
 
     // Shooter wheels
     inputs.shooterLeftConnected = shooterLeft.isConnected();
     inputs.shooterRightConnected = shooterRight.isConnected();
-    inputs.shooterLeftVelocityRadPerSec = shooterLeft.getVelocity().getValueAsDouble();
-    inputs.shooterRightVelocityRadPerSec = shooterRight.getVelocity().getValueAsDouble();
+    inputs.shooterLeftVelocityRadPerSec = shooterLeft.getVelocity().getValueAsDouble() * 60;
+    inputs.shooterRightVelocityRadPerSec = shooterRight.getVelocity().getValueAsDouble() * 60;
     inputs.shooterLeftAppliedVolts = shooterLeft.getMotorVoltage().getValueAsDouble();
     inputs.shooterRightAppliedVolts = shooterRight.getMotorVoltage().getValueAsDouble();
     inputs.shooterLeftCurrentAmps = shooterLeft.getStatorCurrent().getValueAsDouble();
@@ -235,7 +242,7 @@ public class ShooterIOReal implements ShooterIO {
     turretSetpointRad = clampedRad;
     // Absolute encoder reports [0, 2π]. Convert the clamped [-π, π] angle to that space.
     double encoderSetpoint = clampedRad < 0.0 ? clampedRad + 2.0 * Math.PI : clampedRad;
-    turretController.setSetpoint(encoderSetpoint, ControlType.kPosition);
+    turretController.setSetpoint(angleRad, ControlType.kPosition);
   }
 
   // ── Shooter wheels ────────────────────────────────────────────────────────
@@ -248,14 +255,13 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setShooterVelocity(double velocityRadPerSec) {
+  public void setShooterVelocity(double velocityRotPerSec) {
     shooterClosedLoop = true;
-    shooterSetpointRadPerSec = velocityRadPerSec;
+    double shooterSetpointRPM = velocityRotPerSec * 60;
+    double velocityRadPerSec = velocityRotPerSec * 2 * Math.PI;
     double ff = shooterKs * Math.signum(velocityRadPerSec) + shooterKv * velocityRadPerSec;
-    shooterLeft.setControl(
-        shooterVelocityReq.withSlot(0).withVelocity(velocityRadPerSec).withFeedForward(ff));
-    shooterRight.setControl(
-        shooterVelocityReq.withSlot(0).withVelocity(velocityRadPerSec).withFeedForward(ff));
+    shooterLeft.setControl(shooterVelocityReq.withSlot(0).withVelocity(velocityRotPerSec / 60));
+    shooterRight.setControl(shooterVelocityReq.withSlot(0).withVelocity(velocityRotPerSec / 60));
   }
 
   // ── Hood ──────────────────────────────────────────────────────────────────
@@ -270,7 +276,7 @@ public class ShooterIOReal implements ShooterIO {
   public void setHoodPosition(double angleDeg) {
     hoodClosedLoop = true;
     hoodSetpointDeg = MathUtil.clamp(angleDeg, hoodMinDeg, hoodMaxDeg);
-    hoodController.setSetpoint(hoodSetpointDeg, ControlType.kPosition);
+    hoodController.setSetpoint(angleDeg, ControlType.kPosition);
   }
 
   @Override
