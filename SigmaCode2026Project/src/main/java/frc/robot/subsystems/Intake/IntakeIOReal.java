@@ -46,7 +46,7 @@ public class IntakeIOReal implements IntakeIO {
 
     // Configuring the Actuator Encoder's Position and deciding if it should be inverted or not
     actuaterConfig.encoder.positionConversionFactor(IntakeConstants.actuaterPositionConversion);
-    actuaterConfig.encoder.inverted(IntakeConstants.actucaterEncoderInverted);
+    // actuaterConfig.encoder.inverted(IntakeConstants.actucaterEncoderInverted);
 
     // Configuring the Intake Roller Motor's Current Limit and Idle Mode
     rollerConfig.smartCurrentLimit(IntakeConstants.rollerCurrentLimit);

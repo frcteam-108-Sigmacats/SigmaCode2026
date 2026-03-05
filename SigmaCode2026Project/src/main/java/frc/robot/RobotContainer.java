@@ -28,7 +28,7 @@ public class RobotContainer {
 
   private final IntakeMech intakeMech;
 
-  private Trigger bB;
+  private Trigger bRT;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -53,7 +53,7 @@ public class RobotContainer {
     configureBindings();
     intakeMech.setDefaultCommand(new DefaultIntakeCommand(intakeMech));
 
-    bB.whileTrue(new RunIntakeCommand(intakeMech));
+    bRT.whileTrue(new RunIntakeCommand(intakeMech));
   }
 
   /**
@@ -67,7 +67,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    bB = m_driverController.b();
+    bRT = m_driverController.rightTrigger();
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
