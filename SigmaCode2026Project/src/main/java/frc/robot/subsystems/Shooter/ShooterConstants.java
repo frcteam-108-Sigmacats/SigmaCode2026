@@ -46,8 +46,8 @@ public class ShooterConstants {
   public static final double turretReverseLimit = -4.7;
 
   // Closed-loop gains (real hardware)
-  public static final double turretKp = 0.6; // 1.5
-  public static final double turretKd = 0.0;
+  public static final double turretKp = 0.9; // 1.5
+  public static final double turretKd = 0.01;
 
   // Closed-loop gains (sim)
   public static final double turretSimKp = 8.0;
