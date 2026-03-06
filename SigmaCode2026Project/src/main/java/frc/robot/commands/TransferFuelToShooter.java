@@ -6,14 +6,17 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SpinDexer.SpinDexerMech;
+import frc.robot.subsystems.drive.Drive;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class TransferFuelToShooter extends Command {
   private SpinDexerMech spinDexerMech;
+  private Drive swerveDrive;
   private int counter;
   /** Creates a new TransferFuelToShooter. */
-  public TransferFuelToShooter(SpinDexerMech spinDexerMech) {
+  public TransferFuelToShooter(SpinDexerMech spinDexerMech, Drive swerveDrive) {
     this.spinDexerMech = spinDexerMech;
+    this.swerveDrive = swerveDrive;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(this.spinDexerMech);
   }
@@ -21,6 +24,7 @@ public class TransferFuelToShooter extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    swerveDrive.setDriveState("Shoot");
     counter = 100;
   }
 
@@ -33,7 +37,11 @@ public class TransferFuelToShooter extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    if (swerveDrive.getDriveState().equals("Shoot")) {
+      swerveDrive.setDriveState("Drive");
+    }
+  }
 
   // Returns true when the command should end.
   @Override

@@ -5,10 +5,15 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.DefaultIntakeCommand;
 import frc.robot.commands.DefaultShooter;
 import frc.robot.commands.DefaultSpinDexerCommand;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.RunIntakeCommand;
 import frc.robot.commands.TransferFuelToShooter;
+import frc.robot.subsystems.Intake.IntakeIOReal;
+import frc.robot.subsystems.Intake.IntakeIOSim;
+import frc.robot.subsystems.Intake.IntakeMech;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
@@ -31,9 +36,10 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Shooter shooterMech;
   private final Drive swerveDrive;
+  private final IntakeMech intakeMech;
 
   private CommandXboxController driver = new CommandXboxController(0);
-  private Trigger bA;
+  private Trigger bA, bRT;
   private final SpinDexerMech spinDexerMech;
 
   // Dashboard inputs
@@ -46,6 +52,7 @@ public class RobotContainer {
       case REAL:
         shooterMech = new Shooter(new ShooterIOReal());
         spinDexerMech = new SpinDexerMech(new SpinDexerIOReal());
+        intakeMech = new IntakeMech(new IntakeIOReal());
         swerveDrive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -58,6 +65,7 @@ public class RobotContainer {
       default:
         shooterMech = new Shooter(new ShooterIOReal());
         spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
+        intakeMech = new IntakeMech(new IntakeIOSim());
         swerveDrive =
             new Drive(
                 new GyroIO() {},
@@ -73,6 +81,7 @@ public class RobotContainer {
 
     shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive));
     spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
+    intakeMech.setDefaultCommand(new DefaultIntakeCommand(intakeMech));
     swerveDrive.setDefaultCommand(
         DriveCommands.joystickDrive(
             swerveDrive,
@@ -82,7 +91,8 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
-    bA.whileTrue(new TransferFuelToShooter(spinDexerMech));
+    bA.whileTrue(new TransferFuelToShooter(spinDexerMech, swerveDrive));
+    bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
   }
 
   /**
@@ -93,7 +103,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    bRT = m_driverController.rightTrigger();
+    bRT = driver.rightTrigger();
     bA = driver.a();
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,

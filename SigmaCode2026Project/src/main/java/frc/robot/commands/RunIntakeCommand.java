@@ -6,34 +6,42 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake.IntakeMech;
+import frc.robot.subsystems.drive.Drive;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class RunIntakeCommand extends Command {
   private IntakeMech intakeMech;
-  private boolean fullyExtended;
+  private Drive swerveDrive;
   /** Creates a new IntakeCommand. */
-  public RunIntakeCommand(IntakeMech intakeMech) {
+  public RunIntakeCommand(IntakeMech intakeMech, Drive swerveDrive) {
     this.intakeMech = intakeMech;
+    this.swerveDrive = swerveDrive;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(this.intakeMech);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    fullyExtended = false;
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
 
     intakeMech.setIntakeRoller();
+
+    if (!swerveDrive.getDriveState().equals("Shoot")) {
+      swerveDrive.setDriveState("Intake");
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    if (swerveDrive.getDriveState().equals("Intake")) {
+      swerveDrive.setDriveState("Drive");
+    }
+  }
 
   // Returns true when the command should end.
   @Override

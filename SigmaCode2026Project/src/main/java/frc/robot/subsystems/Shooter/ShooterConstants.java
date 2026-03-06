@@ -93,6 +93,10 @@ public class ShooterConstants {
   public static final double hoodSimKp = 5.0;
   public static final double hoodSimKd = 0.0;
 
+  public static final double hoodStartAngle = 12;
+
+  public static final double ballExitVelocityConversion = 0.002626;
+
   // ── DCMotor models used for simulation ───────────────────────────────────
   public static final DCMotor turretMotorModel = DCMotor.getNeoVortex(1);
   public static final DCMotor shooterMotorModel = DCMotor.getKrakenX60(2);

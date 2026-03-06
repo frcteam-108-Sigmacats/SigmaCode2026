@@ -33,6 +33,24 @@ public class DefaultShooter extends Command {
   public void execute() {
     Translation2d diff =
         ShooterConstants.blueHubPose.getTranslation().minus(swerveDrive.getPose().getTranslation());
+    // double distance = diff.getNorm();
+    // double RPM =
+    //     shooterMech.getInterpolated(
+    //         Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
+    // double hoodAngle =
+    //     shooterMech.getInterpolated(
+    //         Double.valueOf(distance), ShooterConstants.ShooterStates.shooterHoodAngleMap);
+    // double exitBallVelX =
+    //     (RPM * ShooterConstants.ballExitVelocityConversion)
+    //         * Math.cos(Math.toRadians(ShooterConstants.hoodStartAngle + hoodAngle));
+    // double flightOfTime = distance / exitBallVelX;
+    // Translation2d aimPoint =
+    //     new Translation2d(
+    //         ShooterConstants.blueHubPose.getX()
+    //             - swerveDrive.getDriveSpeeds().vxMetersPerSecond / flightOfTime,
+    //         ShooterConstants.blueHubPose.getY()
+    //             - swerveDrive.getDriveSpeeds().vyMetersPerSecond / flightOfTime);
+    // diff = aimPoint.minus(swerveDrive.getPose().getTranslation());
     Rotation2d desiredAngle = Rotation2d.fromRadians(Math.atan2(diff.getY(), diff.getX()));
     desiredAngle =
         desiredAngle.minus(swerveDrive.getPose().getRotation().minus(Rotation2d.k180deg));
