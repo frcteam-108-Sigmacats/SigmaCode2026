@@ -39,7 +39,7 @@ public class RobotContainer {
   private final IntakeMech intakeMech;
 
   private CommandXboxController driver = new CommandXboxController(0);
-  private Trigger bA, bRT;
+  private Trigger bLT, bRT;
   private final SpinDexerMech spinDexerMech;
 
   // Dashboard inputs
@@ -91,7 +91,7 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
-    bA.whileTrue(new TransferFuelToShooter(spinDexerMech, swerveDrive));
+    bLT.whileTrue(new TransferFuelToShooter(spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
   }
 
@@ -104,7 +104,7 @@ public class RobotContainer {
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     bRT = driver.rightTrigger();
-    bA = driver.a();
+    bLT = driver.leftTrigger();
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.

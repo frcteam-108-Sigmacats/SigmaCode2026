@@ -262,9 +262,9 @@ public class Drive extends SubsystemBase {
     if (driveMode.equals("Shoot")) {
       speeds =
           new ChassisSpeeds(
-              speeds.vxMetersPerSecond * 0.4,
-              speeds.vyMetersPerSecond * 0.4,
-              speeds.omegaRadiansPerSecond * 0.4);
+              speeds.vxMetersPerSecond * 0.2,
+              speeds.vyMetersPerSecond * 0.2,
+              speeds.omegaRadiansPerSecond * 0.2);
       System.out.println("Drive is 40% speed");
     } else if (driveMode.equals("Intake")) {
       speeds =
@@ -299,6 +299,12 @@ public class Drive extends SubsystemBase {
 
   public ChassisSpeeds getDriveSpeeds() {
     return robotChassisSpeeds;
+  }
+
+  public ChassisSpeeds getDriveSpeedsFieldRelative() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(
+        kinematics.toChassisSpeeds(getModuleStates()),
+        poseEstimator.getEstimatedPosition().getRotation());
   }
 
   public void runVelocityFieldRelative(ChassisSpeeds speeds) {
@@ -439,7 +445,7 @@ public class Drive extends SubsystemBase {
 
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
-    return maxSpeedMetersPerSec / driveBaseRadius;
+    return 2 * Math.PI;
   }
 
   private boolean checkPose(PoseEstimate estimate) {

@@ -29,7 +29,7 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 2.2;
+  public static final double maxSpeedMetersPerSec = 4; // Max 5.07 m/s
   public static final double slowSpeedMetersPerSec = 1.0;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(21.5);

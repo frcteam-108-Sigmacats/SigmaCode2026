@@ -1,8 +1,11 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.drive.Drive;
 import java.util.TreeMap;
 import org.littletonrobotics.junction.Logger;
 
@@ -185,6 +188,39 @@ public class Shooter extends SubsystemBase {
   /** Whether the hood is within {@value HOOD_TOLERANCE_DEG}° of its target. */
   public boolean isHoodAtPosition() {
     return Math.abs(inputs.hoodPositionDeg - desiredHoodAngleDeg) < HOOD_TOLERANCE_DEG;
+  }
+
+  public Pose2d getTargetPose(Drive swerveDrive) {
+    if (swerveDrive.getPose().getX() > ShooterConstants.blueHubPose.getX()) {
+      if (swerveDrive.getPose().getY() > ShooterConstants.blueHubPose.getY()) {
+        return ShooterConstants.blueDepotPose;
+      } else {
+        return null;
+      }
+    } else {
+      return ShooterConstants.blueHubPose;
+    }
+  }
+
+  public Translation2d getAimPoint(Pose2d targetPose, Drive swerveDrive) {
+    Translation2d diff = targetPose.getTranslation().minus(swerveDrive.getPose().getTranslation());
+    double distance = diff.getNorm();
+    double RPM =
+        getInterpolated(Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
+    double hoodAngle =
+        getInterpolated(
+            Double.valueOf(distance), ShooterConstants.ShooterStates.shooterHoodAngleMap);
+    double exitBallVelX =
+        (RPM * ShooterConstants.ballExitVelocityConversion)
+            * Math.cos(Math.toRadians(ShooterConstants.hoodStartAngle + hoodAngle));
+    double flightOfTime = distance / exitBallVelX;
+    Translation2d aimPoint =
+        new Translation2d(
+            targetPose.getX()
+                - swerveDrive.getDriveSpeedsFieldRelative().vxMetersPerSecond / flightOfTime,
+            targetPose.getY()
+                - swerveDrive.getDriveSpeedsFieldRelative().vyMetersPerSecond / flightOfTime);
+    return aimPoint;
   }
 
   // ── Composite ─────────────────────────────────────────────────────────────

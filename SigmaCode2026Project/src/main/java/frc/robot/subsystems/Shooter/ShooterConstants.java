@@ -46,8 +46,8 @@ public class ShooterConstants {
   public static final double turretReverseLimit = -4.7;
 
   // Closed-loop gains (real hardware)
-  public static final double turretKp = 0.9; // 1.5
-  public static final double turretKd = 0.01;
+  public static final double turretKp = 1.5; // 1.5
+  public static final double turretKd = 0.08;
 
   // Closed-loop gains (sim)
   public static final double turretSimKp = 8.0;
@@ -114,6 +114,7 @@ public class ShooterConstants {
   public static final double shooterInertiaWheelRadiusMeters = Units.inchesToMeters(4.0);
 
   public static final Pose2d blueHubPose = new Pose2d(4.62, 4.03, new Rotation2d());
+  public static final Pose2d blueDepotPose = new Pose2d(2.5, 7, new Rotation2d());
 
   // ── Shooter lookup tables ─────────────────────────────────────────────────
   /**

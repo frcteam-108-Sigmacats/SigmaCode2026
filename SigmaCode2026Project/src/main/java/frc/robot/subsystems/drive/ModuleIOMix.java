@@ -198,7 +198,10 @@ public class ModuleIOMix implements ModuleIO {
     double ffVolts = driveKs * Math.signum(velocityRadPerSec) + driveKv * velocityRadPerSec;
 
     driveMotor.setControl(
-        velocity.withSlot(0).withFeedForward(ffVolts).withVelocity(velocityRadPerSec));
+        velocity
+            .withSlot(0)
+            .withFeedForward(ffVolts)
+            .withVelocity(velocityRadPerSec / (2 * Math.PI)));
   }
 
   @Override

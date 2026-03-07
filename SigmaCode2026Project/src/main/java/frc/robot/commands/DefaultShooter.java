@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,26 +32,9 @@ public class DefaultShooter extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Translation2d diff =
-        ShooterConstants.blueHubPose.getTranslation().minus(swerveDrive.getPose().getTranslation());
-    // double distance = diff.getNorm();
-    // double RPM =
-    //     shooterMech.getInterpolated(
-    //         Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
-    // double hoodAngle =
-    //     shooterMech.getInterpolated(
-    //         Double.valueOf(distance), ShooterConstants.ShooterStates.shooterHoodAngleMap);
-    // double exitBallVelX =
-    //     (RPM * ShooterConstants.ballExitVelocityConversion)
-    //         * Math.cos(Math.toRadians(ShooterConstants.hoodStartAngle + hoodAngle));
-    // double flightOfTime = distance / exitBallVelX;
-    // Translation2d aimPoint =
-    //     new Translation2d(
-    //         ShooterConstants.blueHubPose.getX()
-    //             - swerveDrive.getDriveSpeeds().vxMetersPerSecond / flightOfTime,
-    //         ShooterConstants.blueHubPose.getY()
-    //             - swerveDrive.getDriveSpeeds().vyMetersPerSecond / flightOfTime);
-    // diff = aimPoint.minus(swerveDrive.getPose().getTranslation());
+    Translation2d aimPoint =
+        shooterMech.getAimPoint(shooterMech.getTargetPose(swerveDrive), swerveDrive);
+    Translation2d diff = aimPoint.minus(swerveDrive.getPose().getTranslation());
     Rotation2d desiredAngle = Rotation2d.fromRadians(Math.atan2(diff.getY(), diff.getX()));
     desiredAngle =
         desiredAngle.minus(swerveDrive.getPose().getRotation().minus(Rotation2d.k180deg));
@@ -62,6 +46,7 @@ public class DefaultShooter extends Command {
     }
     Logger.recordOutput("DESIRED TURRET ANGLE", desiredAngle.getDegrees());
     Logger.recordOutput("ROBOT DISTANCE FROM HUB", diff.getNorm());
+    Logger.recordOutput("Aim Point", new Pose2d(aimPoint, new Rotation2d()));
     shooterMech.setTurretAngle(desiredAngle);
     shooterMech.setShooterSpeed(diff.getNorm());
     shooterMech.setHoodAngle(diff.getNorm());
