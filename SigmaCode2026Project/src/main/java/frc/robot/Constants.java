@@ -261,4 +261,9 @@ public final class Constants {
     // Simulation physics constants
     public static final double kSimLoopPeriod = 0.02; // 20ms
   }
+
+  public static class LEDsConstants {
+    public static final int k_PWMId = 9;
+    public static final int k_totalLength = 36;
+  }
 }

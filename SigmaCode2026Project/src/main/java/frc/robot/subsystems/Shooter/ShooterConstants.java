@@ -142,9 +142,11 @@ public class ShooterConstants {
       shooterRPMMap.put((double) 1.117, 2700.0);
       shooterRPMMap.put((double) 2.488, 2700.0);
       shooterRPMMap.put((double) 3.135, 2900.0);
-      shooterRPMMap.put((double) 3.9, 3200.0);
-      shooterRPMMap.put((double) 4.4, 3300.0);
-      shooterRPMMap.put((double) 5, 3500.0);
+      shooterRPMMap.put((double) 3.9, 3130.0);
+      shooterRPMMap.put((double) 4.4, 3230.0);
+      shooterRPMMap.put((double) 5, 3430.0);
+      shooterRPMMap.put((double) 6.149, 3600.0);
+      shooterRPMMap.put((double) 7.63, 3800.0);
     }
 
     /**

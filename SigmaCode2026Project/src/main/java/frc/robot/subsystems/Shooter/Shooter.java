@@ -93,7 +93,8 @@ public class Shooter extends SubsystemBase {
     double rpm =
         getInterpolated(Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
     // desiredShooterVelocityRadPerSec = metersPerSec / ShooterConstants.shooterWheelRadiusMeters;
-    io.setShooterVelocity(rpm);
+    // io.setShooterVelocity(shooterRPM); // Advantage Scope control
+    io.setShooterVelocity(rpm); // Automatic Control
   }
 
   /** Run shooter wheels open-loop (volts). */
@@ -167,7 +168,8 @@ public class Shooter extends SubsystemBase {
         getInterpolated(
             Double.valueOf(distance), ShooterConstants.ShooterStates.shooterHoodAngleMap);
     // desiredHoodAngleDeg = angleDeg;
-    io.setHoodPosition(angle);
+    // io.setHoodPosition(hoodAngle); // advancge scope
+    io.setHoodPosition(angle); // auto
   }
 
   /** Run hood motor open-loop (volts). */
