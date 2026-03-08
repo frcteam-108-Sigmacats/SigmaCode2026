@@ -127,7 +127,6 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    m_leds.breathe();
 
     // Seed the hood's internal encoder from the absolute encoder so closed-loop
     // control starts from the correct physical position.
@@ -136,7 +135,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    m_leds.breathe();
+  }
 
   @Override
   public void testInit() {
