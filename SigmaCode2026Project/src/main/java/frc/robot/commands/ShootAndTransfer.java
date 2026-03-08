@@ -7,15 +7,16 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.SpinDexer.SpinDexerMech;
+import frc.robot.subsystems.drive.Drive;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ShootAndTransfer extends ParallelCommandGroup {
   /** Creates a new ShootAndTransfer. */
-  public ShootAndTransfer(Shooter shooterMech, SpinDexerMech spinDexerMech) {
+  public ShootAndTransfer(Shooter shooterMech, SpinDexerMech spinDexerMech, Drive swerveDrive) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new Shoot(shooterMech), new TransferFuelToShooter(spinDexerMech));
+    addCommands(new Shoot(shooterMech), new TransferFuelToShooter(spinDexerMech, swerveDrive));
   }
 }

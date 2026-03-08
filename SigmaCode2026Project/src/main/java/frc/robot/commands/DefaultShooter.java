@@ -4,11 +4,11 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter.Shooter;
-import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.drive.Drive;
 import org.littletonrobotics.junction.Logger;
 
@@ -31,8 +31,9 @@ public class DefaultShooter extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Translation2d diff =
-        ShooterConstants.blueHubPose.getTranslation().minus(swerveDrive.getPose().getTranslation());
+    Translation2d aimPoint =
+        shooterMech.getAimPoint(shooterMech.getTargetPose(swerveDrive), swerveDrive);
+    Translation2d diff = aimPoint.minus(swerveDrive.getPose().getTranslation());
     Rotation2d desiredAngle = Rotation2d.fromRadians(Math.atan2(diff.getY(), diff.getX()));
     desiredAngle =
         desiredAngle.minus(swerveDrive.getPose().getRotation().minus(Rotation2d.k180deg));
@@ -44,6 +45,7 @@ public class DefaultShooter extends Command {
     }
     Logger.recordOutput("DESIRED TURRET ANGLE", desiredAngle.getDegrees());
     Logger.recordOutput("ROBOT DISTANCE FROM HUB", diff.getNorm());
+    Logger.recordOutput("Aim Point", new Pose2d(aimPoint, new Rotation2d()));
     shooterMech.setTurretAngle(desiredAngle);
     shooterMech.setShooterSpeed(diff.getNorm());
     shooterMech.setHoodAngle(diff.getNorm());

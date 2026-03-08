@@ -46,8 +46,8 @@ public class ShooterConstants {
   public static final double turretReverseLimit = -4.7;
 
   // Closed-loop gains (real hardware)
-  public static final double turretKp = 0.6; // 1.5
-  public static final double turretKd = 0.0;
+  public static final double turretKp = 1.5; // 1.5
+  public static final double turretKd = 0.08;
 
   // Closed-loop gains (sim)
   public static final double turretSimKp = 8.0;
@@ -93,6 +93,10 @@ public class ShooterConstants {
   public static final double hoodSimKp = 5.0;
   public static final double hoodSimKd = 0.0;
 
+  public static final double hoodStartAngle = 12;
+
+  public static final double ballExitVelocityConversion = 0.002626;
+
   // ── DCMotor models used for simulation ───────────────────────────────────
   public static final DCMotor turretMotorModel = DCMotor.getNeoVortex(1);
   public static final DCMotor shooterMotorModel = DCMotor.getKrakenX60(2);
@@ -110,6 +114,7 @@ public class ShooterConstants {
   public static final double shooterInertiaWheelRadiusMeters = Units.inchesToMeters(4.0);
 
   public static final Pose2d blueHubPose = new Pose2d(4.62, 4.03, new Rotation2d());
+  public static final Pose2d blueDepotPose = new Pose2d(2.5, 7, new Rotation2d());
 
   // ── Shooter lookup tables ─────────────────────────────────────────────────
   /**
@@ -137,9 +142,11 @@ public class ShooterConstants {
       shooterRPMMap.put((double) 1.117, 2700.0);
       shooterRPMMap.put((double) 2.488, 2700.0);
       shooterRPMMap.put((double) 3.135, 2900.0);
-      shooterRPMMap.put((double) 3.9, 3200.0);
-      shooterRPMMap.put((double) 4.4, 3300.0);
-      shooterRPMMap.put((double) 5, 3500.0);
+      shooterRPMMap.put((double) 3.9, 3130.0);
+      shooterRPMMap.put((double) 4.4, 3230.0);
+      shooterRPMMap.put((double) 5, 3430.0);
+      shooterRPMMap.put((double) 6.149, 3600.0);
+      shooterRPMMap.put((double) 7.63, 3800.0);
     }
 
     /**

@@ -64,6 +64,8 @@ public class Drive extends SubsystemBase {
 
   private ChassisSpeeds robotChassisSpeeds = new ChassisSpeeds();
 
+  private String driveMode = "Drive";
+
   private static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private static Rotation2d rawGyroRotation = new Rotation2d();
   private static SwerveModulePosition[] lastModulePositions = // For delta tracking
@@ -257,6 +259,24 @@ public class Drive extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
+    if (driveMode.equals("Shoot")) {
+      speeds =
+          new ChassisSpeeds(
+              speeds.vxMetersPerSecond * 0.2,
+              speeds.vyMetersPerSecond * 0.2,
+              speeds.omegaRadiansPerSecond * 0.2);
+      System.out.println("Drive is 40% speed");
+    } else if (driveMode.equals("Intake")) {
+      speeds =
+          new ChassisSpeeds(
+              speeds.vxMetersPerSecond * 0.5,
+              speeds.vyMetersPerSecond * 0.5,
+              speeds.omegaRadiansPerSecond * 0.5);
+      System.out.println("Drive speed is 70%");
+    } else {
+      speeds.times(1);
+    }
+
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
@@ -279,6 +299,12 @@ public class Drive extends SubsystemBase {
 
   public ChassisSpeeds getDriveSpeeds() {
     return robotChassisSpeeds;
+  }
+
+  public ChassisSpeeds getDriveSpeedsFieldRelative() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(
+        kinematics.toChassisSpeeds(getModuleStates()),
+        poseEstimator.getEstimatedPosition().getRotation());
   }
 
   public void runVelocityFieldRelative(ChassisSpeeds speeds) {
@@ -419,7 +445,7 @@ public class Drive extends SubsystemBase {
 
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
-    return maxSpeedMetersPerSec / driveBaseRadius;
+    return 2 * Math.PI;
   }
 
   private boolean checkPose(PoseEstimate estimate) {
@@ -448,6 +474,14 @@ public class Drive extends SubsystemBase {
     }
 
     return true;
+  }
+
+  public void setDriveState(String mode) {
+    driveMode = mode;
+  }
+
+  public String getDriveState() {
+    return driveMode;
   }
 
   private boolean isEstimateZero(PoseEstimate estimate) {
