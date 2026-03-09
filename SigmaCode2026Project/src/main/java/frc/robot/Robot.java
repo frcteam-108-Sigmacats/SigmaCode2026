@@ -98,7 +98,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    m_leds.setOff();
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -136,7 +138,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    m_leds.breathe();
+    m_leds.setRedBlueSwitch();
   }
 
   @Override
