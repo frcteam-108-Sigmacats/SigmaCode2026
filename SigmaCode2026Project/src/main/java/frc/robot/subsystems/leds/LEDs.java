@@ -69,7 +69,10 @@ public class LEDs extends SubsystemBase {
 
   // ── Mode setters ───────────────────────────────────────────────────────────
 
-/** Full strip switches between red and blue every ~0.4 s (matches the robot video)[i dont know how to access the fms to do this]. */
+  /**
+   * Full strip switches between red and blue every ~0.4 s (matches the robot video)[i dont know how
+   * to access the fms to do this].
+   */
   public void setRedBlueSwitch() {
     m_mode = Mode.RED_BLUE_SWITCH;
   }
@@ -102,7 +105,6 @@ public class LEDs extends SubsystemBase {
   public void setOff() {
     m_mode = Mode.OFF;
   }
-
 
   public void setMode(Mode mode) {
     m_mode = mode;

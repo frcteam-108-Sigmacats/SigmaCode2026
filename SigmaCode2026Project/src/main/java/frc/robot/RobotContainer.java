@@ -39,7 +39,7 @@ public class RobotContainer {
   private final IntakeMech intakeMech;
 
   private CommandXboxController driver = new CommandXboxController(0);
-  private Trigger bLT, bRT;
+  private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFT, dRIGHT, dDOWN;
   private final SpinDexerMech spinDexerMech;
 
   // Dashboard inputs

@@ -264,6 +264,6 @@ public final class Constants {
 
   public static class LEDsConstants {
     public static final int k_PWMId = 9;
-    public static final int k_totalLength = 36;
+    public static final int k_totalLength = 37;
   }
 }
