@@ -9,8 +9,8 @@ import frc.robot.commands.DefaultIntakeCommand;
 import frc.robot.commands.DefaultShooter;
 import frc.robot.commands.DefaultSpinDexerCommand;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.RunAll;
 import frc.robot.commands.RunIntakeCommand;
-import frc.robot.commands.TransferFuelToShooter;
 import frc.robot.subsystems.Intake.IntakeIOReal;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeMech;
@@ -79,7 +79,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
 
-    shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive));
+    shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive, false));
     spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
     intakeMech.setDefaultCommand(new DefaultIntakeCommand(intakeMech));
     swerveDrive.setDefaultCommand(
@@ -91,7 +91,7 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
-    bLT.whileTrue(new TransferFuelToShooter(spinDexerMech, swerveDrive));
+    bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
   }
 

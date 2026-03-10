@@ -89,12 +89,16 @@ public class Shooter extends SubsystemBase {
    *
    * @param metersPerSec desired surface speed (positive = outward)
    */
-  public void setShooterSpeed(double distance) {
+  public void setShooterSpeed(double distance, boolean fullSpeed) {
     double rpm =
         getInterpolated(Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
     // desiredShooterVelocityRadPerSec = metersPerSec / ShooterConstants.shooterWheelRadiusMeters;
     // io.setShooterVelocity(shooterRPM); // Advantage Scope control
-    io.setShooterVelocity(rpm); // Automatic Control
+    if (fullSpeed) {
+      io.setShooterVelocity(rpm); // Automatic Control
+    } else {
+      io.setShooterVelocity(2500);
+    }
   }
 
   /** Run shooter wheels open-loop (volts). */
@@ -219,9 +223,9 @@ public class Shooter extends SubsystemBase {
     Translation2d aimPoint =
         new Translation2d(
             targetPose.getX()
-                - swerveDrive.getDriveSpeedsFieldRelative().vxMetersPerSecond / flightOfTime,
+                - swerveDrive.getDriveSpeedsFieldRelative().vxMetersPerSecond * flightOfTime,
             targetPose.getY()
-                - swerveDrive.getDriveSpeedsFieldRelative().vyMetersPerSecond / flightOfTime);
+                - swerveDrive.getDriveSpeedsFieldRelative().vyMetersPerSecond * flightOfTime);
     return aimPoint;
   }
 

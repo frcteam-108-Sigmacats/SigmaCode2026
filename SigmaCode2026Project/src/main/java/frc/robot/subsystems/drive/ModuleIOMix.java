@@ -42,10 +42,7 @@ public class ModuleIOMix implements ModuleIO {
   private final Queue<Double> drivePositionQueue;
   private final Queue<Double> turnPositionQueue;
 
-  @SuppressWarnings("unused")
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
-
-  @SuppressWarnings("unused")
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
   public ModuleIOMix(int module) {

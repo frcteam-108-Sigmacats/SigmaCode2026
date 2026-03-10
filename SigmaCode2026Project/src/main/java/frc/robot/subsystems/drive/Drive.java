@@ -172,6 +172,8 @@ public class Drive extends SubsystemBase {
                     - lastModulePositions[moduleIndex].distanceMeters,
                 modulePositions[moduleIndex].angle);
         lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+
+        modulePositions[moduleIndex] = modules[moduleIndex].getPosition();
       }
 
       // Update gyro angle
@@ -185,7 +187,8 @@ public class Drive extends SubsystemBase {
       }
 
       // Apply update
-      poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      // poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      poseEstimator.update(rawGyroRotation, modulePositions);
     }
 
     // Update gyro alert
@@ -195,18 +198,18 @@ public class Drive extends SubsystemBase {
           DriveConstants.kLimelightBackLeftName,
           gyroIO.getYaw().getDegrees(),
           0,
-          gyroIO.getPitch().getDegrees(),
-          0,
           gyroIO.getRoll().getDegrees(),
+          0,
+          gyroIO.getPitch().getDegrees(),
           0);
 
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackRightName,
           gyroIO.getYaw().getDegrees(),
           0,
-          gyroIO.getPitch().getDegrees(),
-          0,
           gyroIO.getRoll().getDegrees(),
+          0,
+          gyroIO.getPitch().getDegrees(),
           0);
 
       PoseEstimate bLMT2 =

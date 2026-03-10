@@ -69,7 +69,7 @@ public interface ShooterIO {
   public default void setShooterOpenLoop(double outputVolts) {}
 
   /** Command both shooter wheels to a target surface velocity (rad/s) using closed-loop control. */
-  public default void setShooterVelocity(double velocityRadPerSec) {}
+  public default void setShooterVelocity(double velocityRotPerMin) {}
 
   // ── Hood Commands ────────────────────────────────────────────────────────
 

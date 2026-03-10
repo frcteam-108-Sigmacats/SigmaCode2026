@@ -16,10 +16,12 @@ import org.littletonrobotics.junction.Logger;
 public class DefaultShooter extends Command {
   private Shooter shooterMech;
   private Drive swerveDrive;
+  private boolean fullSpeed;
   /** Creates a new DefaultShooter. */
-  public DefaultShooter(Shooter shooterMech, Drive swerveDrive) {
+  public DefaultShooter(Shooter shooterMech, Drive swerveDrive, boolean fullSpeed) {
     this.shooterMech = shooterMech;
     this.swerveDrive = swerveDrive;
+    this.fullSpeed = fullSpeed;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(this.shooterMech);
   }
@@ -47,7 +49,7 @@ public class DefaultShooter extends Command {
     Logger.recordOutput("ROBOT DISTANCE FROM HUB", diff.getNorm());
     Logger.recordOutput("Aim Point", new Pose2d(aimPoint, new Rotation2d()));
     shooterMech.setTurretAngle(desiredAngle);
-    shooterMech.setShooterSpeed(diff.getNorm());
+    shooterMech.setShooterSpeed(diff.getNorm(), fullSpeed);
     shooterMech.setHoodAngle(diff.getNorm());
   }
 

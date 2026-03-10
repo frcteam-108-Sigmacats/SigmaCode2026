@@ -255,13 +255,13 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setShooterVelocity(double velocityRotPerSec) {
+  public void setShooterVelocity(double velocityRotPerMin) {
     shooterClosedLoop = true;
-    double shooterSetpointRPM = velocityRotPerSec * 60;
-    double velocityRadPerSec = velocityRotPerSec * 2 * Math.PI;
+    double shooterSetpointRPM = velocityRotPerMin * 60;
+    double velocityRadPerSec = velocityRotPerMin * 2 * Math.PI;
     double ff = shooterKs * Math.signum(velocityRadPerSec) + shooterKv * velocityRadPerSec;
-    shooterLeft.setControl(shooterVelocityReq.withSlot(0).withVelocity(velocityRotPerSec / 60));
-    shooterRight.setControl(shooterVelocityReq.withSlot(0).withVelocity(velocityRotPerSec / 60));
+    shooterLeft.setControl(shooterVelocityReq.withSlot(0).withVelocity(velocityRotPerMin / 60));
+    shooterRight.setControl(shooterVelocityReq.withSlot(0).withVelocity(velocityRotPerMin / 60));
   }
 
   // ── Hood ──────────────────────────────────────────────────────────────────
