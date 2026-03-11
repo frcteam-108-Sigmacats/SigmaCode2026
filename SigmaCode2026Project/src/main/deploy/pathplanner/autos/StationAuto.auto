@@ -11,15 +11,34 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": " StationPath2"
+            "name": "Intake"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "StationPath3"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "StationPath4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunAll"
+                }
+              }
+            ]
           }
         }
       ]
