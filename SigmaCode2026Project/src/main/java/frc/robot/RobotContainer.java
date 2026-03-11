@@ -26,6 +26,9 @@ import frc.robot.subsystems.drive.ModuleIOMix;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -43,8 +46,7 @@ public class RobotContainer {
   private final SpinDexerMech spinDexerMech;
 
   // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser =
-      new LoggedDashboardChooser<>("AutoChooser");
+  private LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -91,6 +93,7 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
+    createAutoChooser();
     bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
   }
@@ -118,6 +121,13 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public void createAutoChooser(){
+    NamedCommands.registerCommand("Intake", new RunIntakeCommand(intakeMech, swerveDrive));
+    NamedCommands.registerCommand("RunAll", new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
+
+    autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
   }
 
   /** Exposes the turret subsystem so {@link Robot} can seed its hood encoder on teleop init. */

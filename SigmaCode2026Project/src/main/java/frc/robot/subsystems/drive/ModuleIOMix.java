@@ -80,7 +80,7 @@ public class ModuleIOMix implements ModuleIO {
     var driveConfig = new TalonFXConfiguration();
     driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     driveConfig.CurrentLimits.StatorCurrentLimit = DriveConstants.driveMotorCurrentLimit;
-    driveConfig.Feedback.SensorToMechanismRatio = driveEncoderPositionFactor;
+    driveConfig.Feedback.SensorToMechanismRatio = driveEncoderPositionFactor;//Swap encoder position to just be 1/4.71
     driveConfig.Slot0.kP = driveKp;
     driveConfig.Slot0.kI = 0;
     driveConfig.Slot0.kD = driveKd;
@@ -135,8 +135,8 @@ public class ModuleIOMix implements ModuleIO {
   public void updateInputs(ModuleIOInputs inputs) {
 
     sparkStickyFault = false;
-    inputs.drivePositionRad = driveMotor.getPosition().getValueAsDouble();
-    inputs.driveVelocityRadPerSec = driveMotor.getVelocity().getValueAsDouble();
+    inputs.drivePositionRad = driveMotor.getPosition().getValueAsDouble();//Multiply by 2*PI
+    inputs.driveVelocityRadPerSec = driveMotor.getVelocity().getValueAsDouble();// Multiply by (2*PI)/60
     inputs.driveAppliedVolts = driveMotor.getMotorVoltage().getValueAsDouble();
     inputs.driveCurrentAmps = driveMotor.getStatorCurrent().getValueAsDouble();
     inputs.driveConnected = driveMotor.isConnected();
