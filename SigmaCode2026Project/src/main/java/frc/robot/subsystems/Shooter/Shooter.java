@@ -9,6 +9,12 @@ import frc.robot.subsystems.drive.Drive;
 import java.util.TreeMap;
 import org.littletonrobotics.junction.Logger;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.FlippingUtil;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.*;
+
 public class Shooter extends SubsystemBase {
 
   private final ShooterIO io;
@@ -197,15 +203,31 @@ public class Shooter extends SubsystemBase {
   }
 
   public Pose2d getTargetPose(Drive swerveDrive) {
-    if (swerveDrive.getPose().getX() > ShooterConstants.blueHubPose.getX()) {
+    if(DriverStation.getAlliance().get() == Alliance.Blue){
+      if (swerveDrive.getPose().getX() > ShooterConstants.blueHubPose.getX()) {
       if (swerveDrive.getPose().getY() > ShooterConstants.blueHubPose.getY()) {
         return ShooterConstants.blueDepotPose;
       } else {
-        return null;
+        return ShooterConstants.blueStationPose;
       }
     } else {
       return ShooterConstants.blueHubPose;
     }
+    }
+    else{
+      if(swerveDrive.getPose().getX() < FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose).getX()){
+        if(swerveDrive.getPose().getY() > FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose).getY()){
+          return FlippingUtil.flipFieldPose(ShooterConstants.blueStationPose);
+        }
+        else{
+          return FlippingUtil.flipFieldPose(ShooterConstants.blueDepotPose);
+        }
+      }
+      else{
+        return FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose);
+      }
+    }
+    
   }
 
   public Translation2d getAimPoint(Pose2d targetPose, Drive swerveDrive) {

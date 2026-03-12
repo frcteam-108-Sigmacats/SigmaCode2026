@@ -16,6 +16,7 @@ import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeMech;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.subsystems.Shooter.ShooterIOSim;
 import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
 import frc.robot.subsystems.SpinDexer.SpinDexerIOSim;
 import frc.robot.subsystems.SpinDexer.SpinDexerMech;
@@ -26,6 +27,9 @@ import frc.robot.subsystems.drive.ModuleIOMix;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -34,17 +38,17 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final Shooter shooterMech;
-  private final Drive swerveDrive;
-  private final IntakeMech intakeMech;
+  private Shooter shooterMech;
+  private Drive swerveDrive;
+  private IntakeMech intakeMech;
+  private SpinDexerMech spinDexerMech;
 
   private CommandXboxController driver = new CommandXboxController(0);
   private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFT, dRIGHT, dDOWN;
-  private final SpinDexerMech spinDexerMech;
+  
 
   // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser =
-      new LoggedDashboardChooser<>("AutoChooser");
+  private LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -62,6 +66,13 @@ public class RobotContainer {
                 new ModuleIOMix(3));
 
         break;
+      case SIM:
+        shooterMech = new Shooter(new ShooterIOSim());
+        spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
+        intakeMech = new IntakeMech(new IntakeIOSim());
+        swerveDrive = new Drive(new GyroIO() {
+          
+        }, new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim());
       default:
         shooterMech = new Shooter(new ShooterIOReal());
         spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
@@ -91,6 +102,7 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
+    createAutoChooser();
     bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
   }
@@ -118,6 +130,13 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public void createAutoChooser(){
+    NamedCommands.registerCommand("Intake", new RunIntakeCommand(intakeMech, swerveDrive));
+    NamedCommands.registerCommand("RunAll", new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
+
+    autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
   }
 
   /** Exposes the turret subsystem so {@link Robot} can seed its hood encoder on teleop init. */
