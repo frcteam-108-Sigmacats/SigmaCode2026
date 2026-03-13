@@ -30,18 +30,11 @@ public class RunIntakeCommand extends Command {
 
     intakeMech.setIntakeRoller();
 
-    if (!swerveDrive.getDriveState().equals("Shoot")) {
-      swerveDrive.setDriveState("Intake");
-    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    if (swerveDrive.getDriveState().equals("Intake")) {
-      swerveDrive.setDriveState("Drive");
-    }
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override

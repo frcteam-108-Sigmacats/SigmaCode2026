@@ -17,5 +17,5 @@ public class IntakeConstants {
   // Intake State Values
   public static double intakeOutPosition = 70;
   public static double intakeInPosition = 0;
-  public static double rollerSpeedPercentage = -0.8;
+  public static double rollerSpeedPercentage = -1.0;
 }

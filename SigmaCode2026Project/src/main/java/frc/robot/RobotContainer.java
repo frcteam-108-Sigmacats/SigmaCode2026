@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DefaultIntakeCommand;
@@ -44,7 +45,8 @@ public class RobotContainer {
   private SpinDexerMech spinDexerMech;
 
   private CommandXboxController driver = new CommandXboxController(0);
-  private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFT, dRIGHT, dDOWN;
+  private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFT, dRIGHT, dDOWN ,dSTART;
+  private boolean slowMoActive = false;
   
 
   // Dashboard inputs
@@ -98,7 +100,8 @@ public class RobotContainer {
             swerveDrive,
             () -> -driver.getLeftY(),
             () -> -driver.getLeftX(),
-            () -> -driver.getRightX()));
+            () -> -driver.getRightX(),
+            () -> slowMoActive));
 
     // Configure the trigger bindings
     configureBindings();
@@ -118,8 +121,8 @@ public class RobotContainer {
     bRT = driver.rightTrigger();
     bLT = driver.leftTrigger();
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
+    // Start button toggles slow-mo mode (30% speed reduction)
+    driver.start().onTrue(Commands.runOnce(() -> slowMoActive = !slowMoActive));
   }
 
   public void updateSimulation() {}
