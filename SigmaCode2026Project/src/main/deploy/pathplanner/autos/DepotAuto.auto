@@ -11,15 +11,34 @@
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "DepotPath2"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "DepotPath2"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": " DepotPath3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RunAll"
           }
         }
       ]

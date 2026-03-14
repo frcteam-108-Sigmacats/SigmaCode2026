@@ -1,4 +1,4 @@
-package frc.robot.subsystems.leds;
+/*package frc.robot.subsystems.leds;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
@@ -27,7 +27,7 @@ public class LEDs extends SubsystemBase {
 
   // ── Mode ───────────────────────────────────────────────────────────────────
 
-  /** All available LED modes. */
+  /** All available LED modes.
   public enum Mode {
     RED_BLUE_SWITCH, // full-strip alternates red ↔ blue  (matches the robot video)
     RED_BLUE_SPLIT, // half red / half blue, sides swap
@@ -72,12 +72,12 @@ public class LEDs extends SubsystemBase {
   /**
    * Full strip switches between red and blue every ~0.4 s (matches the robot video)[i dont know how
    * to access the fms to do this].
-   */
+
   public void setRedBlueSwitch() {
     m_mode = Mode.RED_BLUE_SWITCH;
   }
 
-  /** Strip is split half red / half blue; the two sides swap on the same timer. */
+  /** Strip is split half red / half blue; the two sides swap on the same timer.
   public void setRedBlueSplit() {
     m_mode = Mode.RED_BLUE_SPLIT;
   }
@@ -114,3 +114,4 @@ public class LEDs extends SubsystemBase {
     return m_mode;
   }
 }
+*/

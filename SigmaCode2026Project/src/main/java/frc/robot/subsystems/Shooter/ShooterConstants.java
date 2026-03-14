@@ -143,10 +143,11 @@ public class ShooterConstants {
       shooterRPMMap.put((double) 0, 2500.0);
       shooterRPMMap.put((double) 1.117, 2700.0);
       shooterRPMMap.put((double) 2.488, 2700.0);
-      shooterRPMMap.put((double) 3.135, 2900.0);
+      shooterRPMMap.put((double) 3.135, 2850.0);
       shooterRPMMap.put((double) 3.9, 3130.0);
       shooterRPMMap.put((double) 4.4, 3230.0);
-      shooterRPMMap.put((double) 5, 3430.0);
+      shooterRPMMap.put((double) 5, 3380.0);
+      shooterRPMMap.put((double) 5.2, 3450.0);
       shooterRPMMap.put((double) 6.149, 3600.0);
       shooterRPMMap.put((double) 7.63, 3800.0);
     }
@@ -163,7 +164,7 @@ public class ShooterConstants {
       shooterHoodAngleMap.put((double) 0, 0.0);
       shooterHoodAngleMap.put((double) 1.117, 12.0);
       shooterHoodAngleMap.put((double) 2.488, 18.0);
-      shooterHoodAngleMap.put((double) 3.135, 21.0);
+      shooterHoodAngleMap.put((double) 3.135, 20.0);
       shooterHoodAngleMap.put((double) 3.9, 22.0);
       shooterHoodAngleMap.put((double) 4.4, 24.0);
       shooterHoodAngleMap.put((double) 5, 25.0);

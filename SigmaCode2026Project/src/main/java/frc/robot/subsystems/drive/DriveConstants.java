@@ -29,7 +29,7 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4; // Max 5.07 m/s
+  public static final double maxSpeedMetersPerSec = 4.6; // Max 5.07 m/s
   public static final double slowSpeedMetersPerSec = 1.0;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(21.5);
@@ -105,16 +105,16 @@ public class DriveConstants {
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
 
   // PathPlanner configuration
-  public static final double robotMassKg = 45.3592; // 110lbs
-  public static final double robotMOI = 4.083;
+  public static final double robotMassKg = 66.86; // 110lbs
+  public static final double robotMOI = 5.318;
   public static final double wheelCOF = 1.6;
   public static final RobotConfig ppConfig =
       new RobotConfig(
           robotMassKg,
           robotMOI,
           new ModuleConfig(
-              wheelRadiusMeters,
-              maxSpeedMetersPerSec,
+              0.038,
+              5.07,
               wheelCOF,
               driveGearbox.withReduction(driveMotorReduction),
               driveMotorCurrentLimit,
@@ -148,3 +148,10 @@ public class DriveConstants {
   public static boolean useVisionRotation = true;
   public static double autoStdDevScale = 0;
 }
+// old
+ /*wheelRadiusMeters,
+ maxSpeedMetersPerSec,
+ wheelCOF,
+ driveGearbox.withReduction(driveMotorReduction),
+ driveMotorCurrentLimit,
+ 1*/

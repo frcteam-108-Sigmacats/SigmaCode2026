@@ -55,7 +55,7 @@ public class DriveCommands {
   /**
    * Field relative drive command using two joysticks (controlling linear and angular velocities).
    */
-  private static final double SLOW_MO_MULTIPLIER = 0.5;
+  //  private static final double SLOW_MO_MULTIPLIER = 1.0;
 
   public static Command joystickDrive(
       Drive drive,
@@ -84,14 +84,19 @@ public class DriveCommands {
           omega = Math.copySign(omega * omega, omega);
 
           // Apply slow mode multiplier (30% speed reduction) when toggled
-          double speedMultiplier = slowModeSupplier.getAsBoolean() ? SLOW_MO_MULTIPLIER : 1.0;
+          //    double speedMultiplier = slowModeSupplier.getAsBoolean() ? SLOW_MO_MULTIPLIER : 0.2;
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds =
               new ChassisSpeeds(
-                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * speedMultiplier,
-                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * speedMultiplier,
-                  (omega * drive.getMaxAngularSpeedRadPerSec()) * 0.9 * speedMultiplier);
+                  linearVelocity.getX()
+                      * drive.getMaxLinearSpeedMetersPerSec()
+                      * linearVelocity.getY()
+                      * drive.getMaxLinearSpeedMetersPerSec()
+                      * (omega * drive.getMaxAngularSpeedRadPerSec())
+                      * 5.07,
+                  omega,
+                  omega); // was 0.9
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;

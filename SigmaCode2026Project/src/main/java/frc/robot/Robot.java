@@ -7,7 +7,7 @@ package frc.robot;
 import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.leds.LEDs;
+// import frc.robot.subsystems.leds.LEDs;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -25,7 +25,7 @@ public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
-  public final LEDs m_leds = LEDs.getInstance();
+  // public final LEDs m_leds = LEDs.getInstance();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -99,7 +99,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
-    m_leds.setOff();
+    // m_leds.setOff();
   }
 
   @Override
@@ -138,7 +138,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    m_leds.setRedBlueSwitch();
+    //  m_leds.setRedBlueSwitch();
   }
 
   @Override
