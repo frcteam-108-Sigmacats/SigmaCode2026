@@ -36,6 +36,12 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "DepotPath4"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "RunAll"

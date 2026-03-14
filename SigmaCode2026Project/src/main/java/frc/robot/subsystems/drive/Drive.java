@@ -494,4 +494,9 @@ public class Drive extends SubsystemBase {
   private boolean isEstimateZero(PoseEstimate estimate) {
     return estimate.pose.equals(new Pose2d());
   }
+
+  public static boolean leftStick(boolean b) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'leftStick'");
+  }
 }

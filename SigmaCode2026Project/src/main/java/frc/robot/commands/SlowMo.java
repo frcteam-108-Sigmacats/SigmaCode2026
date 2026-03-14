@@ -6,13 +6,19 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drive.Drive;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class SlowMo extends Command {
+  private CommandXboxController driver = new CommandXboxController(0);
+  private Trigger leftStick;
   /** Creates a new SlowMo. */
   public SlowMo(Drive swerveDrive) {
-    new InstantCommand(() -> swerveDrive.setDriveState("Intake"));
+    if (driver.leftStick() != null) {
+      new InstantCommand(() -> swerveDrive.setDriveState("Intake"));
+    }
   }
   // Use addRequirements() here to declare subsystem dependencies.
 

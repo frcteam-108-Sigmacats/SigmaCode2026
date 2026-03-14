@@ -5,7 +5,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DefaultIntakeCommand;
@@ -14,6 +13,7 @@ import frc.robot.commands.DefaultSpinDexerCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.RunAll;
 import frc.robot.commands.RunIntakeCommand;
+import frc.robot.commands.SlowMo;
 import frc.robot.subsystems.Intake.IntakeIOReal;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeMech;
@@ -42,6 +42,7 @@ public class RobotContainer {
   private Drive swerveDrive;
   private IntakeMech intakeMech;
   private SpinDexerMech spinDexerMech;
+  private SlowMo slowMo;
 
   private CommandXboxController driver = new CommandXboxController(0);
   private Trigger bLT,
@@ -134,8 +135,7 @@ public class RobotContainer {
     bLT = driver.leftTrigger();
 
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
-    driver.leftStick().onTrue(Commands.runOnce(() -> slowMoActive = true));
-    driver.leftStick().onFalse(Commands.runOnce(() -> slowMoActive = false));
+
   }
 
   public void updateSimulation() {}
