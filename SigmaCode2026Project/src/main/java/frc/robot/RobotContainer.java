@@ -45,7 +45,7 @@ public class RobotContainer {
   private SpinDexerMech spinDexerMech;
 
   private CommandXboxController driver = new CommandXboxController(0);
-  private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFT, dRIGHT, dDOWN ,dSTART;
+  private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFT, dRIGHT, dDOWN ,dSTART;// dStart is equal to back trigger
   private boolean slowMoActive = false;
   
 
@@ -121,8 +121,9 @@ public class RobotContainer {
     bRT = driver.rightTrigger();
     bLT = driver.leftTrigger();
 
-    // Start button toggles slow-mo mode (30% speed reduction)
-    driver.start().onTrue(Commands.runOnce(() -> slowMoActive = !slowMoActive));
+    // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
+    driver.start().onTrue(Commands.runOnce(() -> slowMoActive = true));
+driver.start().onFalse(Commands.runOnce(() -> slowMoActive = false));
   }
 
   public void updateSimulation() {}
