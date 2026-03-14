@@ -55,7 +55,7 @@ public class DriveCommands {
   /**
    * Field relative drive command using two joysticks (controlling linear and angular velocities).
    */
-  private static final double SLOW_MO_MULTIPLIER = 0.7;
+  private static final double SLOW_MO_MULTIPLIER = 0.5;
 
   public static Command joystickDrive(
       Drive drive,
@@ -91,16 +91,13 @@ public class DriveCommands {
               new ChassisSpeeds(
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * speedMultiplier,
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * speedMultiplier,
-                  (omega * drive.getMaxAngularSpeedRadPerSec()) * 0.5 * speedMultiplier);
+                  (omega * drive.getMaxAngularSpeedRadPerSec()) * 0.9 * speedMultiplier);
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
           drive.runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
-                  speeds,
-                  isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()));
+                  speeds, isFlipped ? drive.getRotation() : drive.getRotation()));
         },
         drive);
   }
@@ -136,7 +133,6 @@ public class DriveCommands {
                   angleController.calculate(
                       drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
 
-        
               ChassisSpeeds speeds =
                   new ChassisSpeeds(
                       linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),

@@ -29,7 +29,6 @@ public class RunIntakeCommand extends Command {
   public void execute() {
 
     intakeMech.setIntakeRoller();
-
   }
 
   // Called once the command ends or is interrupted.

@@ -196,7 +196,9 @@ public class Drive extends SubsystemBase {
     if (Constants.currentMode == Mode.REAL) {
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackLeftName,
-          gyroIO.getYaw().getDegrees(),
+          DriverStation.getAlliance().get() == Alliance.Red
+              ? gyroIO.getYaw().getDegrees() + 180
+              : gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -205,7 +207,9 @@ public class Drive extends SubsystemBase {
 
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackRightName,
-          gyroIO.getYaw().getDegrees(),
+          DriverStation.getAlliance().get() == Alliance.Red
+              ? gyroIO.getYaw().getDegrees() + 180
+              : gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -265,16 +269,16 @@ public class Drive extends SubsystemBase {
     if (driveMode.equals("Shoot")) {
       speeds =
           new ChassisSpeeds(
-              speeds.vxMetersPerSecond * 0.2,
-              speeds.vyMetersPerSecond * 0.2,
-              speeds.omegaRadiansPerSecond * 0.2);
+              speeds.vxMetersPerSecond * 0.3,
+              speeds.vyMetersPerSecond * 0.3,
+              speeds.omegaRadiansPerSecond * 0.6);
       System.out.println("Drive is 40% speed");
     } else if (driveMode.equals("Intake")) {
       speeds =
           new ChassisSpeeds(
               speeds.vxMetersPerSecond * 0.5,
               speeds.vyMetersPerSecond * 0.5,
-              speeds.omegaRadiansPerSecond * 0.5);
+              speeds.omegaRadiansPerSecond * 0.75);
       System.out.println("Drive speed is 70%");
     } else {
       speeds.times(1);

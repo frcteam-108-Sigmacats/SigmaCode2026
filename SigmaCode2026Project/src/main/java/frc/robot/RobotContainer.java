@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,9 +30,6 @@ import frc.robot.subsystems.drive.ModuleIOMix;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -45,9 +44,18 @@ public class RobotContainer {
   private SpinDexerMech spinDexerMech;
 
   private CommandXboxController driver = new CommandXboxController(0);
-  private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFT, dRIGHT, dDOWN ,dSTART;// dStart is equal to back trigger
+  private Trigger bLT,
+      bRT,
+      bA,
+      bB,
+      bX,
+      bY,
+      dUP,
+      dLEFTSTICK,
+      dRIGHT,
+      dDOWN,
+      dSTART; // dStart is equal to back trigger
   private boolean slowMoActive = false;
-  
 
   // Dashboard inputs
   private LoggedDashboardChooser<Command> autoChooser;
@@ -72,9 +80,13 @@ public class RobotContainer {
         shooterMech = new Shooter(new ShooterIOSim());
         spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
         intakeMech = new IntakeMech(new IntakeIOSim());
-        swerveDrive = new Drive(new GyroIO() {
-          
-        }, new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim());
+        swerveDrive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIOSim(),
+                new ModuleIOSim(),
+                new ModuleIOSim(),
+                new ModuleIOSim());
       default:
         shooterMech = new Shooter(new ShooterIOReal());
         spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
@@ -122,8 +134,8 @@ public class RobotContainer {
     bLT = driver.leftTrigger();
 
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
-    driver.start().onTrue(Commands.runOnce(() -> slowMoActive = true));
-driver.start().onFalse(Commands.runOnce(() -> slowMoActive = false));
+    driver.leftStick().onTrue(Commands.runOnce(() -> slowMoActive = true));
+    driver.leftStick().onFalse(Commands.runOnce(() -> slowMoActive = false));
   }
 
   public void updateSimulation() {}
@@ -136,9 +148,10 @@ driver.start().onFalse(Commands.runOnce(() -> slowMoActive = false));
     return autoChooser.get();
   }
 
-  public void createAutoChooser(){
+  public void createAutoChooser() {
     NamedCommands.registerCommand("Intake", new RunIntakeCommand(intakeMech, swerveDrive));
-    NamedCommands.registerCommand("RunAll", new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
+    NamedCommands.registerCommand(
+        "RunAll", new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
 
     autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
   }

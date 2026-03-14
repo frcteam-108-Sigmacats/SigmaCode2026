@@ -1,19 +1,16 @@
 package frc.robot.subsystems.Shooter;
 
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.Drive;
 import java.util.TreeMap;
 import org.littletonrobotics.junction.Logger;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.FlippingUtil;
-
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.*;
 
 public class Shooter extends SubsystemBase {
 
@@ -203,31 +200,29 @@ public class Shooter extends SubsystemBase {
   }
 
   public Pose2d getTargetPose(Drive swerveDrive) {
-    if(DriverStation.getAlliance().get() == Alliance.Blue){
+    if (DriverStation.getAlliance().get() == Alliance.Blue) {
       if (swerveDrive.getPose().getX() > ShooterConstants.blueHubPose.getX()) {
-      if (swerveDrive.getPose().getY() > ShooterConstants.blueHubPose.getY()) {
-        return ShooterConstants.blueDepotPose;
+        if (swerveDrive.getPose().getY() > ShooterConstants.blueHubPose.getY()) {
+          return ShooterConstants.blueDepotPose;
+        } else {
+          return ShooterConstants.blueStationPose;
+        }
       } else {
-        return ShooterConstants.blueStationPose;
+        return ShooterConstants.blueHubPose;
       }
     } else {
-      return ShooterConstants.blueHubPose;
-    }
-    }
-    else{
-      if(swerveDrive.getPose().getX() < FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose).getX()){
-        if(swerveDrive.getPose().getY() > FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose).getY()){
+      if (swerveDrive.getPose().getX()
+          < FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose).getX()) {
+        if (swerveDrive.getPose().getY()
+            > FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose).getY()) {
           return FlippingUtil.flipFieldPose(ShooterConstants.blueStationPose);
-        }
-        else{
+        } else {
           return FlippingUtil.flipFieldPose(ShooterConstants.blueDepotPose);
         }
-      }
-      else{
+      } else {
         return FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose);
       }
     }
-    
   }
 
   public Translation2d getAimPoint(Pose2d targetPose, Drive swerveDrive) {
