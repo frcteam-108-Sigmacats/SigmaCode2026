@@ -172,8 +172,6 @@ public class Drive extends SubsystemBase {
                     - lastModulePositions[moduleIndex].distanceMeters,
                 modulePositions[moduleIndex].angle);
         lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-
-        modulePositions[moduleIndex] = modules[moduleIndex].getPosition();
       }
 
       // Update gyro angle
@@ -187,8 +185,8 @@ public class Drive extends SubsystemBase {
       }
 
       // Apply update
-      // poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-      poseEstimator.update(rawGyroRotation, modulePositions);
+      poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      // poseEstimator.update(rawGyroRotation, modulePositions);
     }
 
     // Update gyro alert
@@ -495,8 +493,4 @@ public class Drive extends SubsystemBase {
     return estimate.pose.equals(new Pose2d());
   }
 
-  public static boolean leftStick(boolean b) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'leftStick'");
-  }
 }
