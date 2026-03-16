@@ -4,6 +4,7 @@ import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -212,37 +213,42 @@ public class Shooter extends SubsystemBase {
       }
     } else {
       if (swerveDrive.getPose().getX()
-          < FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose).getX()) {
+          < ShooterConstants.redHubPose.getX()) {
         if (swerveDrive.getPose().getY()
-            > FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose).getY()) {
-          return FlippingUtil.flipFieldPose(ShooterConstants.blueStationPose);
+            > ShooterConstants.redHubPose.getY()) {
+          return ShooterConstants.redStationPose;
         } else {
-          return FlippingUtil.flipFieldPose(ShooterConstants.blueDepotPose);
+          return ShooterConstants.redDepotPose;
         }
       } else {
-        return FlippingUtil.flipFieldPose(ShooterConstants.blueHubPose);
+        return ShooterConstants.redHubPose;
       }
     }
   }
 
   public Translation2d getAimPoint(Pose2d targetPose, Drive swerveDrive) {
-    Translation2d diff = targetPose.getTranslation().minus(swerveDrive.getPose().getTranslation());
-    double distance = diff.getNorm();
-    double RPM =
-        getInterpolated(Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
-    double hoodAngle =
-        getInterpolated(
-            Double.valueOf(distance), ShooterConstants.ShooterStates.shooterHoodAngleMap);
-    double exitBallVelX =
-        (RPM * ShooterConstants.ballExitVelocityConversion)
-            * Math.cos(Math.toRadians(ShooterConstants.hoodStartAngle + hoodAngle));
-    double flightOfTime = distance / exitBallVelX;
-    Translation2d aimPoint =
-        new Translation2d(
-            targetPose.getX()
-                - swerveDrive.getDriveSpeedsFieldRelative().vxMetersPerSecond * flightOfTime,
-            targetPose.getY()
-                - swerveDrive.getDriveSpeedsFieldRelative().vyMetersPerSecond * flightOfTime);
+    Translation2d robotPos = swerveDrive.getPose().getTranslation();
+    ChassisSpeeds fieldSpeeds = swerveDrive.getDriveSpeedsFieldRelative();
+
+    Translation2d aimPoint = targetPose.getTranslation();
+    for(int i = 0; i < 3; i++){
+      double distance = targetPose.getTranslation().minus(robotPos).getNorm();
+      double RPM =
+          getInterpolated(Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
+      double hoodAngle =
+          getInterpolated(
+              Double.valueOf(distance), ShooterConstants.ShooterStates.shooterHoodAngleMap);
+      double exitBallVelX =
+          (RPM * ShooterConstants.ballExitVelocityConversion)
+              * Math.cos(Math.toRadians(ShooterConstants.hoodStartAngle + hoodAngle));
+      double flightOfTime = distance / exitBallVelX;
+      aimPoint =
+          new Translation2d(
+              targetPose.getX()
+                  - fieldSpeeds.vxMetersPerSecond * flightOfTime,
+              targetPose.getY()
+                  - fieldSpeeds.vyMetersPerSecond * flightOfTime);
+    }
     return aimPoint;
   }
 
