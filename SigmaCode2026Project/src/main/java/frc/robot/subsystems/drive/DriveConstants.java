@@ -20,9 +20,14 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
@@ -147,11 +152,10 @@ public class DriveConstants {
   public static double stdDevFactor = 0.5;
   public static boolean useVisionRotation = true;
   public static double autoStdDevScale = 0;
+
+  //Constants for AUTO
+  public static PIDController xyLinearPIDController = new PIDController(0, 0, 0);
+  public static ProfiledPIDController thetaPIDController = new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
 }
-// old
- /*wheelRadiusMeters,
- maxSpeedMetersPerSec,
- wheelCOF,
- driveGearbox.withReduction(driveMotorReduction),
- driveMotorCurrentLimit,
- 1*/
+
+
