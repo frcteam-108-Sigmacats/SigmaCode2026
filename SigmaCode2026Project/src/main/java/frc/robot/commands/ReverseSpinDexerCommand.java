@@ -25,7 +25,7 @@ public class ReverseSpinDexerCommand extends Command {
     // Shooter feed uses CounterClockwise + KickerForward,
     // so reverse uses Clockwise + KickerReverse
     spinDexerMech.setSpinDexerClockwise();
-    spinDexerMech.setKickerReverse();
+    spinDexerMech.setSpinDexerCounterClockwise();
   }
 
   @Override

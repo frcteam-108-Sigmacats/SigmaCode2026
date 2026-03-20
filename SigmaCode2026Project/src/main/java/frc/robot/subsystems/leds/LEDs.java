@@ -1,10 +1,14 @@
-/*package frc.robot.subsystems.leds;
+package frc.robot.subsystems.leds;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.subsystems.leds.LEDConstants.LEDSetting;
+import java.util.Optional;
 
 public class LEDs extends SubsystemBase {
 
@@ -20,33 +24,36 @@ public class LEDs extends SubsystemBase {
   }
 
   // ── Hardware ───────────────────────────────────────────────────────────────
-
   private final AddressableLED m_led;
   private final AddressableLEDBuffer m_buffer;
-  private final int m_length = Constants.LEDsConstants.k_totalLength;
 
-  // ── Mode ───────────────────────────────────────────────────────────────────
+  // ── Patterns ───────────────────────────────────────────────────────────────
 
-  /** All available LED modes.
-  public enum Mode {
-    RED_BLUE_SWITCH, // full-strip alternates red ↔ blue  (matches the robot video)
-    RED_BLUE_SPLIT, // half red / half blue, sides swap
-    BREATHE_RED,
-    BREATHE_BLUE,
-    SOLID_RED,
-    SOLID_BLUE,
-    RAINBOW,
-    OFF
-  }
+  private final LEDPattern blue = LEDPattern.solid(Color.kBlue);
+ 
+  private final LEDPattern red = LEDPattern.solid(Color.kRed);
+  // Shift warning → solid yellow  (transition coming in ≤5 seconds)
+  private final LEDPattern yellow = LEDPattern.solid(Color.kYellow);
 
-  private Mode m_mode = Mode.OFF;
+  // ── State ──────────────────────────────────────────────────────────────────
+  private boolean change = false;
+  private LEDSetting ledMode;
+
+ 
+  private LEDSetting lastHubSetting = null;
+
+
+  private static final double[] SHIFT_BOUNDARIES = {130.0, 105.0, 80.0, 55.0, 30.0};
+
+
+  private static final double WARNING_WINDOW = 5.0;
 
   // ── Constructor ────────────────────────────────────────────────────────────
 
-  private LEDs() {
-    m_led = new AddressableLED(Constants.LEDsConstants.k_PWMId);
-    m_buffer = new AddressableLEDBuffer(m_length);
-    m_led.setLength(m_length);
+  public LEDs() {
+    m_led = new AddressableLED(9);
+    m_buffer = new AddressableLEDBuffer(LEDConstants.k_stripLength);
+    m_led.setLength(LEDConstants.k_stripLength);
     m_led.start();
   }
 
@@ -54,64 +61,121 @@ public class LEDs extends SubsystemBase {
 
   @Override
   public void periodic() {
-    switch (m_mode) {
-      case RED_BLUE_SWITCH -> LEDModes.redBlueSwitch(m_buffer, 0, m_length);
-      case RED_BLUE_SPLIT -> LEDModes.redBlueSplit(m_buffer, 0, m_length);
-      case BREATHE_RED -> LEDModes.breathe(m_buffer, 0, m_length, Color.kRed);
-      case BREATHE_BLUE -> LEDModes.breathe(m_buffer, 0, m_length, Color.kBlue);
-      case SOLID_RED -> LEDModes.solid(m_buffer, 0, m_length, Color.kRed);
-      case SOLID_BLUE -> LEDModes.solid(m_buffer, 0, m_length, Color.kBlue);
-      case RAINBOW -> LEDModes.rainbow(m_buffer, 0, m_length);
-      case OFF -> LEDModes.off(m_buffer, 0, m_length);
+   
+    updateHubLEDFromGameData();
+
+    if (change) {
+      switch (ledMode) {
+        case BLUE:
+          blue.applyTo(m_buffer);
+          break;
+        case HUB_ACTIVE:
+          blue.applyTo(m_buffer);
+          break;
+        case HUB_WARNING:
+          yellow.applyTo(m_buffer);
+          break;
+        case HUB_INACTIVE:
+          red.applyTo(m_buffer);
+          break;
+      }
+      m_led.setData(m_buffer);
+      change = false;
     }
-    m_led.setData(m_buffer);
   }
 
-  // ── Mode setters ───────────────────────────────────────────────────────────
-
-  /**
-   * Full strip switches between red and blue every ~0.4 s (matches the robot video)[i dont know how
-   * to access the fms to do this].
-
-  public void setRedBlueSwitch() {
-    m_mode = Mode.RED_BLUE_SWITCH;
+  private void updateHubLEDFromGameData() {
+    LEDSetting computed = computeHubLEDSetting();
+    if (computed != null && computed != lastHubSetting) {
+      lastHubSetting = computed;
+      ledMode = computed;
+      change = true;
+    }
   }
 
-  /** Strip is split half red / half blue; the two sides swap on the same timer.
-  public void setRedBlueSplit() {
-    m_mode = Mode.RED_BLUE_SPLIT;
+  private LEDSetting computeHubLEDSetting() {
+    
+    if (DriverStation.isAutonomousEnabled()) {
+      return LEDSetting.HUB_ACTIVE;
+    }
+
+  
+    if (!DriverStation.isTeleopEnabled()) {
+      return null;
+    }
+
+    double matchTime = DriverStation.getMatchTime();
+
+
+    if (matchTime < 0) {
+      return LEDSetting.HUB_ACTIVE;
+    }
+
+    if (matchTime > SHIFT_BOUNDARIES[0] || matchTime <= SHIFT_BOUNDARIES[4]) {
+   
+      if (isWithinWarningWindow(matchTime)) {
+        return LEDSetting.HUB_WARNING;
+      }
+      return LEDSetting.HUB_ACTIVE;
+    }
+
+    
+    if (isWithinWarningWindow(matchTime)) {
+      return LEDSetting.HUB_WARNING;
+    }
+
+   
+    String gameData = DriverStation.getGameSpecificMessage();
+    if (gameData == null || gameData.isEmpty()) {
+      
+      return LEDSetting.HUB_ACTIVE;
+    }
+
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    if (alliance.isEmpty()) {
+      return LEDSetting.HUB_ACTIVE;
+    }
+
+  
+    boolean redInactiveFirst = gameData.charAt(0) == 'R';
+
+    
+    boolean shift1Active =
+        switch (alliance.get()) {
+          case Red -> !redInactiveFirst;
+          case Blue -> redInactiveFirst;
+        };
+
+    boolean hubActive = isHubActiveInCurrentShift(matchTime, shift1Active);
+    return hubActive ? LEDSetting.HUB_ACTIVE : LEDSetting.HUB_INACTIVE;
   }
 
-  public void setBreatheRed() {
-    m_mode = Mode.BREATHE_RED;
+  private boolean isWithinWarningWindow(double matchTime) {
+    for (double boundary : SHIFT_BOUNDARIES) {
+      if (matchTime > boundary && matchTime <= boundary + WARNING_WINDOW) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  public void setBreatheBlue() {
-    m_mode = Mode.BREATHE_BLUE;
+ 
+  private boolean isHubActiveInCurrentShift(double matchTime, boolean shift1Active) {
+    if (matchTime > SHIFT_BOUNDARIES[1]) return shift1Active; // Shift 1: > 105
+    if (matchTime > SHIFT_BOUNDARIES[2]) return !shift1Active; // Shift 2: > 80
+    if (matchTime > SHIFT_BOUNDARIES[3]) return shift1Active; // Shift 3: > 55
+    if (matchTime > SHIFT_BOUNDARIES[4]) return !shift1Active; // Shift 4: > 30
+    return true; // End game: ≤ 30
   }
 
-  public void setSolidRed() {
-    m_mode = Mode.SOLID_RED;
+
+  public void changeLEDMode(LEDSetting mode) {
+    ledMode = mode;
+    change = true;
   }
 
-  public void setSolidBlue() {
-    m_mode = Mode.SOLID_BLUE;
-  }
-
-  public void setRainbow() {
-    m_mode = Mode.RAINBOW;
-  }
-
-  public void setOff() {
-    m_mode = Mode.OFF;
-  }
-
-  public void setMode(Mode mode) {
-    m_mode = mode;
-  }
-
-  public Mode getMode() {
-    return m_mode;
+  // Returns the currently active LED setting. 
+  public LEDSetting grabLEDMode() {
+    return ledMode;
   }
 }
-*/

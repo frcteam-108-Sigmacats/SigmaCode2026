@@ -53,11 +53,10 @@ public class RobotContainer {
       bX,
       bY,
       dUP,
-      dLEFTSTICK,
+      leftStick,
       dRIGHT,
       dDOWN,
-      dSTART, // dStart is equal to back trigger
-      leftStick;
+      dSTART; // dStart is equal to back trigger
   private boolean slowMoActive = false;
 
   // Dashboard inputs

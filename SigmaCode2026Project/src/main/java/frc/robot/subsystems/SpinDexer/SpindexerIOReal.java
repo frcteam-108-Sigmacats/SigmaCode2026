@@ -24,7 +24,7 @@ public class SpinDexerIOReal implements SpinDexerIO {
     kicker1 = new SparkFlex(SpinDexerConstants.kicker1ID, MotorType.kBrushless);
     kicker2 = new SparkFlex(SpinDexerConstants.kicker2ID, MotorType.kBrushless);
     configSpinDexer.smartCurrentLimit(SpinDexerConstants.spinDexerCurrentLimit);
-    configSpinDexer.idleMode(IdleMode.kBrake);
+    configSpinDexer.idleMode(IdleMode.kCoast);
     configSparkFlex.smartCurrentLimit(40);
     configSparkFlex.idleMode(IdleMode.kBrake);
 
