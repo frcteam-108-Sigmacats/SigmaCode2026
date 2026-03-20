@@ -30,7 +30,7 @@ public class LEDs extends SubsystemBase {
   // ── Patterns ───────────────────────────────────────────────────────────────
 
   private final LEDPattern blue = LEDPattern.solid(Color.kBlue);
- 
+
   private final LEDPattern red = LEDPattern.solid(Color.kRed);
   // Shift warning → solid yellow  (transition coming in ≤5 seconds)
   private final LEDPattern yellow = LEDPattern.solid(Color.kYellow);
@@ -39,12 +39,9 @@ public class LEDs extends SubsystemBase {
   private boolean change = false;
   private LEDSetting ledMode;
 
- 
   private LEDSetting lastHubSetting = null;
 
-
   private static final double[] SHIFT_BOUNDARIES = {130.0, 105.0, 80.0, 55.0, 30.0};
-
 
   private static final double WARNING_WINDOW = 5.0;
 
@@ -61,7 +58,7 @@ public class LEDs extends SubsystemBase {
 
   @Override
   public void periodic() {
-   
+
     updateHubLEDFromGameData();
 
     if (change) {
@@ -94,40 +91,36 @@ public class LEDs extends SubsystemBase {
   }
 
   private LEDSetting computeHubLEDSetting() {
-    
+
     if (DriverStation.isAutonomousEnabled()) {
       return LEDSetting.HUB_ACTIVE;
     }
 
-  
     if (!DriverStation.isTeleopEnabled()) {
       return null;
     }
 
     double matchTime = DriverStation.getMatchTime();
 
-
     if (matchTime < 0) {
       return LEDSetting.HUB_ACTIVE;
     }
 
     if (matchTime > SHIFT_BOUNDARIES[0] || matchTime <= SHIFT_BOUNDARIES[4]) {
-   
+
       if (isWithinWarningWindow(matchTime)) {
         return LEDSetting.HUB_WARNING;
       }
       return LEDSetting.HUB_ACTIVE;
     }
 
-    
     if (isWithinWarningWindow(matchTime)) {
       return LEDSetting.HUB_WARNING;
     }
 
-   
     String gameData = DriverStation.getGameSpecificMessage();
     if (gameData == null || gameData.isEmpty()) {
-      
+
       return LEDSetting.HUB_ACTIVE;
     }
 
@@ -136,10 +129,8 @@ public class LEDs extends SubsystemBase {
       return LEDSetting.HUB_ACTIVE;
     }
 
-  
     boolean redInactiveFirst = gameData.charAt(0) == 'R';
 
-    
     boolean shift1Active =
         switch (alliance.get()) {
           case Red -> !redInactiveFirst;
@@ -159,7 +150,6 @@ public class LEDs extends SubsystemBase {
     return false;
   }
 
- 
   private boolean isHubActiveInCurrentShift(double matchTime, boolean shift1Active) {
     if (matchTime > SHIFT_BOUNDARIES[1]) return shift1Active; // Shift 1: > 105
     if (matchTime > SHIFT_BOUNDARIES[2]) return !shift1Active; // Shift 2: > 80
@@ -168,13 +158,12 @@ public class LEDs extends SubsystemBase {
     return true; // End game: ≤ 30
   }
 
-
   public void changeLEDMode(LEDSetting mode) {
     ledMode = mode;
     change = true;
   }
 
-  // Returns the currently active LED setting. 
+  // Returns the currently active LED setting.
   public LEDSetting grabLEDMode() {
     return ledMode;
   }
