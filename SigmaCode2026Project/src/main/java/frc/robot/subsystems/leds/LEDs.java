@@ -1,5 +1,7 @@
 package frc.robot.subsystems.leds;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -12,38 +14,36 @@ import java.util.Optional;
 
 public class LEDs extends SubsystemBase {
 
-  // ── Singleton ──────────────────────────────────────────────────────────────
-
-  private static LEDs m_instance;
-
-  public static LEDs getInstance() {
-    if (m_instance == null) {
-      m_instance = new LEDs();
-    }
-    return m_instance;
-  }
-
   // ── Hardware ───────────────────────────────────────────────────────────────
   private final AddressableLED m_led;
   private final AddressableLEDBuffer m_buffer;
 
-  // ── Patterns ───────────────────────────────────────────────────────────────
-
+  // ── Base solid patterns ────────────────────────────────────────────────────
   private final LEDPattern blue = LEDPattern.solid(Color.kBlue);
-
   private final LEDPattern red = LEDPattern.solid(Color.kRed);
-  // Shift warning → solid yellow  (transition coming in ≤5 seconds)
   private final LEDPattern yellow = LEDPattern.solid(Color.kYellow);
+
+  // ── Animated patterns ──────────────────────────────────────────────────────
+
+  private final LEDPattern bluePulse = blue.breathe(Seconds.of(1.0));
+
+  private final LEDPattern redPulse = red.breathe(Seconds.of(1.0));
+
+  private final LEDPattern yellowBlink = yellow.blink(Seconds.of(0.2));
 
   // ── State ──────────────────────────────────────────────────────────────────
   private boolean change = false;
-  private LEDSetting ledMode;
+  private LEDSetting ledMode = LEDSetting.BLUE;
+
+  private LEDPattern currentPattern;
 
   private LEDSetting lastHubSetting = null;
 
+  // ── Shift timing (match time counts DOWN from 135 s) ──────────────────────
+
   private static final double[] SHIFT_BOUNDARIES = {130.0, 105.0, 80.0, 55.0, 30.0};
 
-  private static final double WARNING_WINDOW = 5.0;
+  private static final double ACTIVE_WARNING_WINDOW = 2.5;
 
   // ── Constructor ────────────────────────────────────────────────────────────
 
@@ -52,6 +52,7 @@ public class LEDs extends SubsystemBase {
     m_buffer = new AddressableLEDBuffer(LEDConstants.k_stripLength);
     m_led.setLength(LEDConstants.k_stripLength);
     m_led.start();
+    currentPattern = blue;
   }
 
   // ── Periodic ───────────────────────────────────────────────────────────────
@@ -61,37 +62,37 @@ public class LEDs extends SubsystemBase {
 
     updateHubLEDFromGameData();
 
-    if (change) {
-      switch (ledMode) {
-        case BLUE:
-          blue.applyTo(m_buffer);
-          break;
-        case HUB_ACTIVE:
-          blue.applyTo(m_buffer);
-          break;
-        case HUB_WARNING:
-          yellow.applyTo(m_buffer);
-          break;
-        case HUB_INACTIVE:
-          red.applyTo(m_buffer);
-          break;
-      }
-      m_led.setData(m_buffer);
-      change = false;
-    }
+    currentPattern.applyTo(m_buffer);
+    m_led.setData(m_buffer);
   }
+
+  // ── Hub state detection ────────────────────────────────────────────────────
 
   private void updateHubLEDFromGameData() {
     LEDSetting computed = computeHubLEDSetting();
     if (computed != null && computed != lastHubSetting) {
       lastHubSetting = computed;
       ledMode = computed;
+      currentPattern = patternFor(computed);
       change = true;
     }
   }
 
-  private LEDSetting computeHubLEDSetting() {
+  private LEDPattern patternFor(LEDSetting setting) {
+    switch (setting) {
+      case HUB_ACTIVE:
+        return bluePulse;
+      case HUB_WARNING:
+        return yellowBlink;
+      case HUB_INACTIVE:
+        return redPulse;
+      case BLUE:
+      default:
+        return blue;
+    }
+  }
 
+  private LEDSetting computeHubLEDSetting() {
     if (DriverStation.isAutonomousEnabled()) {
       return LEDSetting.HUB_ACTIVE;
     }
@@ -101,26 +102,12 @@ public class LEDs extends SubsystemBase {
     }
 
     double matchTime = DriverStation.getMatchTime();
-
     if (matchTime < 0) {
       return LEDSetting.HUB_ACTIVE;
     }
 
-    if (matchTime > SHIFT_BOUNDARIES[0] || matchTime <= SHIFT_BOUNDARIES[4]) {
-
-      if (isWithinWarningWindow(matchTime)) {
-        return LEDSetting.HUB_WARNING;
-      }
-      return LEDSetting.HUB_ACTIVE;
-    }
-
-    if (isWithinWarningWindow(matchTime)) {
-      return LEDSetting.HUB_WARNING;
-    }
-
     String gameData = DriverStation.getGameSpecificMessage();
     if (gameData == null || gameData.isEmpty()) {
-
       return LEDSetting.HUB_ACTIVE;
     }
 
@@ -130,21 +117,32 @@ public class LEDs extends SubsystemBase {
     }
 
     boolean redInactiveFirst = gameData.charAt(0) == 'R';
-
     boolean shift1Active =
         switch (alliance.get()) {
           case Red -> !redInactiveFirst;
           case Blue -> redInactiveFirst;
         };
 
-    boolean hubActive = isHubActiveInCurrentShift(matchTime, shift1Active);
-    return hubActive ? LEDSetting.HUB_ACTIVE : LEDSetting.HUB_INACTIVE;
+    if (matchTime > SHIFT_BOUNDARIES[0] || matchTime <= SHIFT_BOUNDARIES[4]) {
+      return LEDSetting.HUB_ACTIVE;
+    }
+
+    boolean currentlyActive = isHubActiveInCurrentShift(matchTime, shift1Active);
+
+    if (!currentlyActive && isWithinActiveWarningWindow(matchTime, shift1Active)) {
+      return LEDSetting.HUB_WARNING;
+    }
+
+    return currentlyActive ? LEDSetting.HUB_ACTIVE : LEDSetting.HUB_INACTIVE;
   }
 
-  private boolean isWithinWarningWindow(double matchTime) {
+  private boolean isWithinActiveWarningWindow(double matchTime, boolean shift1Active) {
     for (double boundary : SHIFT_BOUNDARIES) {
-      if (matchTime > boundary && matchTime <= boundary + WARNING_WINDOW) {
-        return true;
+      boolean nextShiftActive = isHubActiveInCurrentShift(boundary - 0.01, shift1Active);
+      if (nextShiftActive) {
+        if (matchTime > boundary && matchTime <= boundary + ACTIVE_WARNING_WINDOW) {
+          return true;
+        }
       }
     }
     return false;
@@ -160,10 +158,10 @@ public class LEDs extends SubsystemBase {
 
   public void changeLEDMode(LEDSetting mode) {
     ledMode = mode;
+    currentPattern = patternFor(mode);
     change = true;
   }
 
-  // Returns the currently active LED setting.
   public LEDSetting grabLEDMode() {
     return ledMode;
   }
