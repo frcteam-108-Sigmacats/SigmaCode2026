@@ -5,6 +5,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DefaultIntakeCommand;
@@ -55,7 +56,8 @@ public class RobotContainer {
       dLEFTSTICK,
       dRIGHT,
       dDOWN,
-      dSTART; // dStart is equal to back trigger
+      dSTART, // dStart is equal to back trigger
+      leftStick;
   private boolean slowMoActive = false;
 
   // Dashboard inputs
@@ -121,6 +123,16 @@ public class RobotContainer {
     createAutoChooser();
     bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
+    leftStick.onTrue(new InstantCommand(() -> {
+      if (!swerveDrive.getDriveState().equals("Shoot")) {
+        swerveDrive.setDriveState("Intake");
+      }
+    }));
+    leftStick.onFalse(new InstantCommand(() -> {
+      if (swerveDrive.getDriveState().equals("Intake")) {
+        swerveDrive.setDriveState("Drive");
+      }
+    }));
   }
 
   /**
@@ -133,6 +145,7 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     bRT = driver.rightTrigger();
     bLT = driver.leftTrigger();
+    leftStick = driver.leftStick();
 
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
 
