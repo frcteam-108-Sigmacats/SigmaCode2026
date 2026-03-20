@@ -123,16 +123,20 @@ public class RobotContainer {
     createAutoChooser();
     bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
-    leftStick.onTrue(new InstantCommand(() -> {
-      if (!swerveDrive.getDriveState().equals("Shoot")) {
-        swerveDrive.setDriveState("Intake");
-      }
-    }));
-    leftStick.onFalse(new InstantCommand(() -> {
-      if (swerveDrive.getDriveState().equals("Intake")) {
-        swerveDrive.setDriveState("Drive");
-      }
-    }));
+    leftStick.onTrue(
+        new InstantCommand(
+            () -> {
+              if (!swerveDrive.getDriveState().equals("Shoot")) {
+                swerveDrive.setDriveState("Intake");
+              }
+            }));
+    leftStick.onFalse(
+        new InstantCommand(
+            () -> {
+              if (swerveDrive.getDriveState().equals("Intake")) {
+                swerveDrive.setDriveState("Drive");
+              }
+            }));
   }
 
   /**
