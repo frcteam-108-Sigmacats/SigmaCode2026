@@ -117,6 +117,12 @@ public class ShooterConstants {
   public static final Pose2d blueDepotPose = new Pose2d(2.5, 7, new Rotation2d());
   public static final Pose2d blueStationPose =
       new Pose2d(2.5, 1.06, new Rotation2d()); // Put Station Pose
+    
+  public static enum ShooterStatus{
+    SHOOT,
+    PASSING,
+    INTAKE
+  }
 
   // ── Shooter lookup tables ─────────────────────────────────────────────────
   /**

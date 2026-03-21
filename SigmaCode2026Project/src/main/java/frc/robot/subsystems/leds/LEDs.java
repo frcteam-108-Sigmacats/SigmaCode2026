@@ -9,14 +9,11 @@ import frc.robot.subsystems.leds.LEDConstants.LEDSetting;
 
 public class LEDs extends SubsystemBase {
 
-
   private final AddressableLED m_led;
   private final AddressableLEDBuffer m_buffer;
 
-
   private final LEDPattern blue = LEDPattern.solid(Color.kBlue);
 
-  
   private boolean change = false;
   private LEDSetting ledMode;
 

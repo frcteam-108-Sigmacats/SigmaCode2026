@@ -1,5 +1,8 @@
 package frc.robot.subsystems.SpinDexer;
 
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.hardware.CANrange;
 import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
 import com.revrobotics.ResetMode;
@@ -19,10 +22,20 @@ public class SpinDexerIOReal implements SpinDexerIO {
   private SparkMaxConfig configSpinDexer = new SparkMaxConfig();
   private SparkFlexConfig configSparkFlex = new SparkFlexConfig();
 
+  private CANrange countingSensor;
+
+  private CANrangeConfiguration canRangeConfiguration = new CANrangeConfiguration();
+
   public SpinDexerIOReal() {
     spinDexer = new SparkMax(SpinDexerConstants.spinDexerID, MotorType.kBrushless);
     kicker1 = new SparkFlex(SpinDexerConstants.kicker1ID, MotorType.kBrushless);
     kicker2 = new SparkFlex(SpinDexerConstants.kicker2ID, MotorType.kBrushless);
+
+    countingSensor = new CANrange(SpinDexerConstants.canRangeID, new CANBus("PhoenixBus"));
+
+    // canRangeConfiguration.ProximityParams.ProximityThreshold = 0.0;
+
+    countingSensor.getConfigurator().apply(canRangeConfiguration);
     configSpinDexer.smartCurrentLimit(SpinDexerConstants.spinDexerCurrentLimit);
     configSpinDexer.idleMode(IdleMode.kCoast);
     configSparkFlex.smartCurrentLimit(40);
@@ -44,6 +57,8 @@ public class SpinDexerIOReal implements SpinDexerIO {
     inputs.spinDexerKickerDisconnected = kicker1.getLastError() == REVLibError.kCANDisconnected;
     inputs.spinDexerKickerMotorVoltage = kicker1.getAppliedOutput();
     inputs.spinDexerMotorCurrent = kicker1.getOutputCurrent();
+
+    inputs.detectBall = countingSensor.getIsDetected().getValue();
   }
 
   @Override
