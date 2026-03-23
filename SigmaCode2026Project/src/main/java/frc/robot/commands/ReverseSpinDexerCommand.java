@@ -10,6 +10,7 @@ import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 public class ReverseSpinDexerCommand extends Command {
 
   private SpinDexerMech spinDexerMech;
+  private int counter;
 
   public ReverseSpinDexerCommand(SpinDexerMech spinDexerMech) {
     this.spinDexerMech = spinDexerMech;
@@ -17,15 +18,20 @@ public class ReverseSpinDexerCommand extends Command {
   }
 
   @Override
-  public void initialize() {}
+  public void initialize() {
+    counter = 40;
+  }
 
   @Override
   public void execute() {
     // Opposite of TransferFuelToShooter:
     // Shooter feed uses CounterClockwise + KickerForward,
     // so reverse uses Clockwise + KickerReverse
-    spinDexerMech.setSpinDexerClockwise();
-    spinDexerMech.setSpinDexerCounterClockwise();
+    counter--;
+    if (counter < 40) {
+      spinDexerMech.setSpinDexerClockwise();
+      spinDexerMech.setKickerReverse();
+    }
   }
 
   @Override

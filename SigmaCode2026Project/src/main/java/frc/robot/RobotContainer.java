@@ -133,6 +133,9 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     bRT = driver.rightTrigger();
     bLT = driver.leftTrigger();
+    dSTART = driver.start();
+    dDOWN = driver.povDown(); // climer down
+    dUP = driver.povUp(); // climer up
 
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
 
