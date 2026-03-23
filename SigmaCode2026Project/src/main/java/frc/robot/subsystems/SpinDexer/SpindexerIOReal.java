@@ -26,7 +26,7 @@ public class SpinDexerIOReal implements SpinDexerIO {
     configSpinDexer.smartCurrentLimit(SpinDexerConstants.spinDexerCurrentLimit);
     configSpinDexer.idleMode(IdleMode.kCoast);
     configSparkFlex.smartCurrentLimit(40);
-    configSparkFlex.idleMode(IdleMode.kBrake);
+    configSparkFlex.idleMode(IdleMode.kCoast);
 
     spinDexer.configure(
         configSpinDexer, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
