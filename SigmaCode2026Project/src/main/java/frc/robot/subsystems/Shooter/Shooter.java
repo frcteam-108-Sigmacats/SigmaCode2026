@@ -1,6 +1,5 @@
 package frc.robot.subsystems.Shooter;
 
-import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -212,10 +211,8 @@ public class Shooter extends SubsystemBase {
         return ShooterConstants.blueHubPose;
       }
     } else {
-      if (swerveDrive.getPose().getX()
-          < ShooterConstants.redHubPose.getX()) {
-        if (swerveDrive.getPose().getY()
-            > ShooterConstants.redHubPose.getY()) {
+      if (swerveDrive.getPose().getX() < ShooterConstants.redHubPose.getX()) {
+        if (swerveDrive.getPose().getY() > ShooterConstants.redHubPose.getY()) {
           return ShooterConstants.redStationPose;
         } else {
           return ShooterConstants.redDepotPose;
@@ -231,7 +228,7 @@ public class Shooter extends SubsystemBase {
     ChassisSpeeds fieldSpeeds = swerveDrive.getDriveSpeedsFieldRelative();
 
     Translation2d aimPoint = targetPose.getTranslation();
-    for(int i = 0; i < 3; i++){
+    for (int i = 0; i < 20; i++) {
       double distance = targetPose.getTranslation().minus(robotPos).getNorm();
       double RPM =
           getInterpolated(Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
@@ -244,10 +241,8 @@ public class Shooter extends SubsystemBase {
       double flightOfTime = distance / exitBallVelX;
       aimPoint =
           new Translation2d(
-              targetPose.getX()
-                  - fieldSpeeds.vxMetersPerSecond * flightOfTime,
-              targetPose.getY()
-                  - fieldSpeeds.vyMetersPerSecond * flightOfTime);
+              targetPose.getX() - fieldSpeeds.vxMetersPerSecond * flightOfTime,
+              targetPose.getY() - fieldSpeeds.vyMetersPerSecond * flightOfTime);
     }
     return aimPoint;
   }
