@@ -492,5 +492,4 @@ public class Drive extends SubsystemBase {
   private boolean isEstimateZero(PoseEstimate estimate) {
     return estimate.pose.equals(new Pose2d());
   }
-
 }

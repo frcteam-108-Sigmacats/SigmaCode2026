@@ -10,9 +10,9 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
- 
+
 package frc.robot.subsystems.drive;
- 
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -28,7 +28,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
- 
+
 /**
  * Provides an interface for asynchronously reading high-frequency measurements to a set of queues.
  *
@@ -42,39 +42,39 @@ public class SparkXPhoenixOdometryThread {
   private final Lock signalsLock = new ReentrantLock();
   private BaseStatusSignal[] phoenixSignals = new BaseStatusSignal[0];
   private final List<Queue<Double>> phoenixQueues = new ArrayList<>();
- 
+
   private final boolean isCANFD = new CANBus("PhoenixBus").isNetworkFD();
- 
+
   // Use this constant consistently everywhere instead of hardcoding 250.
   private final double ODOMETRY_FREQUENCY = isCANFD ? 250 : 100;
- 
+
   private final List<SparkBase> sparks = new ArrayList<>();
   private final List<DoubleSupplier> sparkSignals = new ArrayList<>();
   private final List<DoubleSupplier> genericSignals = new ArrayList<>();
   private final List<Queue<Double>> sparkQueues = new ArrayList<>();
   private final List<Queue<Double>> genericQueues = new ArrayList<>();
   private final List<Queue<Double>> timestampQueues = new ArrayList<>();
- 
+
   private static SparkXPhoenixOdometryThread instance = null;
   private Notifier notifier = new Notifier(this::run);
- 
+
   public static SparkXPhoenixOdometryThread getInstance() {
     if (instance == null) {
       instance = new SparkXPhoenixOdometryThread();
     }
     return instance;
   }
- 
+
   private SparkXPhoenixOdometryThread() {
     notifier.setName("OdometryThread");
   }
- 
+
   public void start() {
     if (timestampQueues.size() > 0) {
       notifier.startPeriodic(1.0 / DriveConstants.odometryFrequency);
     }
   }
- 
+
   /** Registers a Spark signal to be read from the thread. */
   public Queue<Double> registerSignal(SparkBase spark, DoubleSupplier signal) {
     // FIX #5: Queue capacity raised to 20 to match all other queues and prevent
@@ -90,7 +90,7 @@ public class SparkXPhoenixOdometryThread {
     }
     return queue;
   }
- 
+
   /** Registers a generic signal to be read from the thread. */
   public Queue<Double> registerSignal(DoubleSupplier signal) {
     Queue<Double> queue = new ArrayBlockingQueue<>(20);
@@ -103,7 +103,7 @@ public class SparkXPhoenixOdometryThread {
     }
     return queue;
   }
- 
+
   /** Registers a Phoenix status signal to be read from the thread. */
   public Queue<Double> registerSignal(StatusSignal<Angle> signal) {
     // Queue capacity raised to 20 to match all other queues.
@@ -123,7 +123,7 @@ public class SparkXPhoenixOdometryThread {
     }
     return queue;
   }
- 
+
   /** Returns a new queue that returns timestamp values for each sample. */
   public Queue<Double> makeTimestampQueue() {
     Queue<Double> queue = new ArrayBlockingQueue<>(20);
@@ -135,9 +135,9 @@ public class SparkXPhoenixOdometryThread {
     }
     return queue;
   }
- 
+
   private void run() {
-    //Always acquire odometryLock before signalsLock.
+    // Always acquire odometryLock before signalsLock.
     Drive.odometryLock.lock();
     signalsLock.lock();
     try {
@@ -153,10 +153,10 @@ public class SparkXPhoenixOdometryThread {
         Thread.sleep((long) (1000.0 / ODOMETRY_FREQUENCY));
         if (phoenixSignals.length > 0) BaseStatusSignal.refreshAll(phoenixSignals);
       }
- 
+
       // Capture timestamp after signals are ready.
       double timestamp = RobotController.getFPGATime() / 1e6;
- 
+
       // Read and validate Spark signals BEFORE writing anything to any queue.
       // Previously, Phoenix queues were written unconditionally before the Spark validity
       // check, causing Phoenix and Spark/timestamp queues to grow at different rates
@@ -170,7 +170,7 @@ public class SparkXPhoenixOdometryThread {
           isValid = false;
         }
       }
- 
+
       // Gate ALL queues (Phoenix, Spark, generic, timestamp) behind one validity check
       // so all queues always have the same number of samples.
       if (isValid) {
@@ -195,49 +195,6 @@ public class SparkXPhoenixOdometryThread {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // // Copyright 2021-2025 FRC 6328
 // // http://github.com/Mechanical-Advantage
@@ -271,7 +228,8 @@ public class SparkXPhoenixOdometryThread {
 // import java.util.function.DoubleSupplier;
 
 // /**
-//  * Provides an interface for asynchronously reading high-frequency measurements to a set of queues.
+//  * Provides an interface for asynchronously reading high-frequency measurements to a set of
+// queues.
 //  *
 //  * <p>This version includes an overload for Spark signals, which checks for errors to ensure that
 //  * all measurements in the sample are valid.

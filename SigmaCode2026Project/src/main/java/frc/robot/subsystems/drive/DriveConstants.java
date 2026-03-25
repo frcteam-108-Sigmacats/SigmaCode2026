@@ -20,10 +20,8 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -69,14 +67,14 @@ public class DriveConstants {
 
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 50;
-  public static final double wheelRadiusMeters = Units.inchesToMeters(2.53);
+  public static final double wheelRadiusMeters = Units.inchesToMeters(1.5);
   public static final double driveMotorReduction =
       (4.71); // MAXSwerve with 14 pinion teeth and 22 spur teeth
   public static final DCMotor driveGearbox = DCMotor.getKrakenX60(1);
 
   // Drive encoder configuration
   public static final double driveEncoderPositionFactor =
-      2 * Math.PI / driveMotorReduction; // Rotor Rotations -> Wheel Radians
+      driveMotorReduction; // Rotor Rotations -> Wheel Radians
   public static final double driveEncoderVelocityFactor =
       (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
@@ -153,9 +151,8 @@ public class DriveConstants {
   public static boolean useVisionRotation = true;
   public static double autoStdDevScale = 0;
 
-  //Constants for AUTO
+  // Constants for AUTO
   public static PIDController xyLinearPIDController = new PIDController(0, 0, 0);
-  public static ProfiledPIDController thetaPIDController = new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
+  public static ProfiledPIDController thetaPIDController =
+      new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
 }
-
-
