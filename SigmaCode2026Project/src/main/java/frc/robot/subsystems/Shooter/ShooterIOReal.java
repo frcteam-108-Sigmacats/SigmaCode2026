@@ -2,7 +2,9 @@ package frc.robot.subsystems.Shooter;
 
 import static frc.robot.subsystems.Shooter.ShooterConstants.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -25,6 +27,9 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 
 /**
  * Competition / full-robot implementation of {@link ShooterIO}.
@@ -72,6 +77,14 @@ public class ShooterIOReal implements ShooterIO {
   private double turretSetpointRad = 0.0;
   private double shooterSetpointRadPerSec = 0.0;
   private double hoodSetpointDeg = 0.0;
+
+  private final StatusSignal<AngularVelocity> shooterLeftVel;
+  private final StatusSignal<Voltage> shooterLeftVolt;
+  private final StatusSignal<Current> shooterLeftCurrent;
+
+  private final StatusSignal<AngularVelocity> shooterRightVel;
+  private final StatusSignal<Voltage> shooterRightVolt;
+  private final StatusSignal<Current> shooterRightCurrent;
 
   public ShooterIOReal() {
 
@@ -193,13 +206,27 @@ public class ShooterIOReal implements ShooterIO {
 
     // Seed the hood relative encoder to 0 (mechanism assumed to be at rest / home position).
     hoodEncoder.setPosition(0.0);
+
+    shooterLeftVel = shooterLeft.getVelocity();
+    shooterLeftVolt = shooterLeft.getMotorVoltage();
+    shooterLeftCurrent = shooterLeft.getStatorCurrent();
+
+    shooterRightVel = shooterRight.getVelocity();
+    shooterRightVolt = shooterRight.getMotorVoltage();
+    shooterRightCurrent = shooterRight.getStatorCurrent();
   }
 
   // ── updateInputs ──────────────────────────────────────────────────────────
 
   @Override
   public void updateInputs(TurretIOInputs inputs) {
-
+    BaseStatusSignal.refreshAll(
+        shooterLeftVel,
+        shooterLeftVolt,
+        shooterLeftCurrent,
+        shooterRightVel,
+        shooterRightVolt,
+        shooterRightCurrent);
     // Turret – absolute encoder reports [0, 2pi]; wrap to [-pi, pi]
     inputs.turretConnected =
         turretDebounce.calculate(turretMotor.getLastError() == REVLibError.kOk);
@@ -211,12 +238,12 @@ public class ShooterIOReal implements ShooterIO {
     // Shooter wheels
     inputs.shooterLeftConnected = shooterLeft.isConnected();
     inputs.shooterRightConnected = shooterRight.isConnected();
-    inputs.shooterLeftVelocityRadPerSec = shooterLeft.getVelocity().getValueAsDouble() * 60;
-    inputs.shooterRightVelocityRadPerSec = shooterRight.getVelocity().getValueAsDouble() * 60;
-    inputs.shooterLeftAppliedVolts = shooterLeft.getMotorVoltage().getValueAsDouble();
-    inputs.shooterRightAppliedVolts = shooterRight.getMotorVoltage().getValueAsDouble();
-    inputs.shooterLeftCurrentAmps = shooterLeft.getStatorCurrent().getValueAsDouble();
-    inputs.shooterRightCurrentAmps = shooterRight.getStatorCurrent().getValueAsDouble();
+    inputs.shooterLeftVelocityRadPerSec = shooterLeftVel.getValueAsDouble() * 60;
+    inputs.shooterRightVelocityRadPerSec = shooterRightVel.getValueAsDouble() * 60;
+    inputs.shooterLeftAppliedVolts = shooterLeftVolt.getValueAsDouble();
+    inputs.shooterRightAppliedVolts = shooterRightVolt.getValueAsDouble();
+    inputs.shooterLeftCurrentAmps = shooterLeftCurrent.getValueAsDouble();
+    inputs.shooterRightCurrentAmps = shooterRightCurrent.getValueAsDouble();
 
     // Hood
     inputs.hoodConnected = hoodDebounce.calculate(hoodMotor.getLastError() == REVLibError.kOk);

@@ -281,14 +281,12 @@ public class Drive extends SubsystemBase {
               speeds.vxMetersPerSecond * 0.3,
               speeds.vyMetersPerSecond * 0.3,
               speeds.omegaRadiansPerSecond * 0.6);
-      System.out.println("Drive is 40% speed");
     } else if (driveMode.equals("Intake")) {
       speeds =
           new ChassisSpeeds(
               speeds.vxMetersPerSecond * 0.5,
               speeds.vyMetersPerSecond * 0.5,
               speeds.omegaRadiansPerSecond * 0.75);
-      System.out.println("Drive speed is 70%");
     } else {
       speeds.times(1);
     }
