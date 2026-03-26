@@ -113,6 +113,8 @@ public class RobotContainer {
     createAutoChooser();
     bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
+    bRB.whileTrue(new Intaking(intakeMech));
+    bLB.whileTrue(new Outtaking(intakeMech));
   }
 
   /**
@@ -130,8 +132,7 @@ public class RobotContainer {
 
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
 
-    bRB.whileTrue(new Intaking(intakeMech));
-    bLB.whileTrue(new Outtaking(intakeMech));
+  
   }
 
   public void updateSimulation() {}
