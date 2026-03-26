@@ -1,8 +1,6 @@
 package frc.robot.subsystems.Intake;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
@@ -28,10 +26,6 @@ public class IntakeIOReal implements IntakeIO {
   private RelativeEncoder actuaterIntEnc;
   // Creating the configuration objects for the motors
   private SparkMaxConfig actuaterConfig = new SparkMaxConfig();
-  // Control requests for the TalonFX roller
-  private final DutyCycleOut rollerDutyCycle = new DutyCycleOut(0).withEnableFOC(true);
-  private final VoltageOut rollerVoltageOut = new VoltageOut(0).withEnableFOC(true);
-
   public IntakeIOReal() {
     // Assigning the Motors to their respective CAN IDs
     actuation = new SparkMax(IntakeConstants.actuaterID, MotorType.kBrushless);
@@ -95,7 +89,7 @@ public class IntakeIOReal implements IntakeIO {
 
   @Override
   public void setIntakeRollerSpeed(double speed) {
-    roller.setControl(rollerDutyCycle.withOutput(speed));
+    roller.set(speed);
   }
 
   @Override
@@ -105,6 +99,6 @@ public class IntakeIOReal implements IntakeIO {
 
   @Override
   public void setRollerVoltage(double voltage) {
-    roller.setControl(rollerVoltageOut.withOutput(voltage));
+    roller.setVoltage(voltage);
   }
 }
