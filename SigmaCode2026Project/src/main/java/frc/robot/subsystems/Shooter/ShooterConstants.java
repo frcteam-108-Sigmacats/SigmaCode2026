@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -117,6 +118,10 @@ public class ShooterConstants {
   public static final Pose2d blueDepotPose = new Pose2d(2.5, 7, new Rotation2d());
   public static final Pose2d blueStationPose =
       new Pose2d(2.5, 1.06, new Rotation2d()); // Put Station Pose
+
+  public static final Pose2d redHubPose = FlippingUtil.flipFieldPose(blueDepotPose);
+  public static final Pose2d redDepotPose = FlippingUtil.flipFieldPose(blueDepotPose);
+  public static final Pose2d redStationPose = FlippingUtil.flipFieldPose(blueStationPose);
 
   // ── Shooter lookup tables ─────────────────────────────────────────────────
   /**

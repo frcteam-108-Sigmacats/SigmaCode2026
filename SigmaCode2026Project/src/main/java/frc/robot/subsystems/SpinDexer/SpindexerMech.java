@@ -18,7 +18,11 @@ public class SpinDexerMech extends SubsystemBase {
   }
 
   public void setSpinDexerClockwise() {
-    io.setSpinDexerSpeed(SpinDexerConstants.SpinDexerClockWise);
+    io.setSpinDexerSpeed(SpinDexerConstants.KickerForward);
+  }
+
+  public void setKickerReverse() {
+    io.setKickerSpeed(SpinDexerConstants.KickerReverse);
   }
 
   public void setSpinDexerCounterClockwise() {

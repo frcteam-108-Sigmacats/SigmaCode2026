@@ -214,6 +214,17 @@ public class Drive extends SubsystemBase {
           gyroIO.getPitch().getDegrees(),
           0);
 
+      /*  LimelightHelpers.SetRobotOrientation(
+      DriveConstants.kLimelightFrontName,
+      DriverStation.getAlliance().get() == Alliance.Red
+          ? gyroIO.getYaw().getDegrees() + 180
+          : gyroIO.getYaw().getDegrees(),
+      0,
+      gyroIO.getRoll().getDegrees(),
+      0,
+      gyroIO.getPitch().getDegrees(),
+      0); */
+
       PoseEstimate bLMT2 =
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
       PoseEstimate bRMT2 =
@@ -270,14 +281,12 @@ public class Drive extends SubsystemBase {
               speeds.vxMetersPerSecond * 0.3,
               speeds.vyMetersPerSecond * 0.3,
               speeds.omegaRadiansPerSecond * 0.6);
-      System.out.println("Drive is 40% speed");
     } else if (driveMode.equals("Intake")) {
       speeds =
           new ChassisSpeeds(
               speeds.vxMetersPerSecond * 0.5,
               speeds.vyMetersPerSecond * 0.5,
               speeds.omegaRadiansPerSecond * 0.75);
-      System.out.println("Drive speed is 70%");
     } else {
       speeds.times(1);
     }
