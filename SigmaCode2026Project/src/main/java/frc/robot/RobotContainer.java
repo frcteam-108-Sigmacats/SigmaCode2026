@@ -1,20 +1,21 @@
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.Autos.AutoTest;
+import frc.robot.commands.Autos.DepotAuto;
+import frc.robot.commands.Autos.StationAuto;
 import frc.robot.commands.DefaultIntakeCommand;
 import frc.robot.commands.DefaultShooter;
 import frc.robot.commands.DefaultSpinDexerCommand;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.ReverseSpinDexerCommand;
 import frc.robot.commands.Intaking;
 import frc.robot.commands.Outtaking;
+import frc.robot.commands.ReverseSpinDexerCommand;
 import frc.robot.commands.RunAll;
 import frc.robot.commands.RunIntakeCommand;
 import frc.robot.commands.SlowMo;
@@ -53,7 +54,8 @@ public class RobotContainer {
   private boolean slowMoActive = false;
 
   // Dashboard inputs
-  private LoggedDashboardChooser<Command> autoChooser;
+  private LoggedDashboardChooser<Command> autoChooser =
+      new LoggedDashboardChooser<>("Auto Chooser");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -147,7 +149,8 @@ public class RobotContainer {
     dSTART = driver.start();
     dDOWN = driver.povDown(); // climer down
     dUP = driver.povUp(); // climer up
-    dLEFTSTICK = driver.leftStick();    bRB = driver.rightBumper();
+    dLEFTSTICK = driver.leftStick();
+    bRB = driver.rightBumper();
     bLB = driver.leftBumper();
 
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
@@ -165,11 +168,13 @@ public class RobotContainer {
   }
 
   public void createAutoChooser() {
-    NamedCommands.registerCommand("Intake", new RunIntakeCommand(intakeMech, swerveDrive));
-    NamedCommands.registerCommand(
-        "RunAll", new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
-
-    autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
+    autoChooser.addDefaultOption("None", null);
+    autoChooser.addOption(
+        "DepotAuto", new DepotAuto(swerveDrive, intakeMech, spinDexerMech, shooterMech));
+    autoChooser.addOption(
+        "StationAuto", new StationAuto(swerveDrive, shooterMech, intakeMech, spinDexerMech));
+    autoChooser.addOption(
+        "Test", new AutoTest(swerveDrive, intakeMech, spinDexerMech, shooterMech));
   }
 
   /** Exposes the turret subsystem so {@link Robot} can seed its hood encoder on teleop init. */

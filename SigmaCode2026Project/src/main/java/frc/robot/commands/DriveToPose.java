@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -13,8 +14,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.util.TrajectoryMap;
 import java.util.List;
-
-import com.pathplanner.lib.util.FlippingUtil;
+import org.littletonrobotics.junction.Logger;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DriveToPose extends Command {
@@ -26,15 +26,17 @@ public class DriveToPose extends Command {
           DriveConstants.xyLinearPIDController,
           DriveConstants.xyLinearPIDController,
           DriveConstants.thetaPIDController);
-  
+
   private boolean start;
 
   private boolean isFinished;
-  /** Creates a new DefaultIntakeCommand. 
+  /**
+   * Creates a new DefaultIntakeCommand.
+   *
    * @param swerveDrive the subsystem that will be used
    * @param poses the list of poses for this path
    * @param start Indicates if this pose/path is the start for our Auto
-  */
+   */
   public DriveToPose(Drive swerveDrive, List<TrajectoryMap> poses, boolean start) {
     this.swerveDrive = swerveDrive;
     this.poses = poses;
@@ -48,40 +50,38 @@ public class DriveToPose extends Command {
   public void initialize() {
     isFinished = false;
 
-    if(DriverStation.getAlliance().get() == Alliance.Red){
-      for(int i = 0; i < poses.size(); i++){
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
+      for (int i = 0; i < poses.size(); i++) {
         poses.get(i).setPose(FlippingUtil.flipFieldPose(poses.get(i).getPose()));
       }
     }
-    if(start){
+    if (start) {
       poseCount = 1;
       swerveDrive.resetOdometry(poses.get(0).getPose());
-    }
-    else{
+    } else {
       poseCount = 0;
     }
-    
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(poseCount == poses.size()){
+    if (poseCount == poses.size()) {
       isFinished = true;
       return;
     }
-      ChassisSpeeds speeds =
-          swerveDriveController.calculate(
-              swerveDrive.getPose(),
-              poses.get(poseCount).getPose(),
-              poses.get(poseCount).getMaxSpeed(),
-              poses.get(poseCount).getHeading());
-      swerveDrive.runVelocity(speeds);
+    ChassisSpeeds speeds =
+        swerveDriveController.calculate(
+            swerveDrive.getPose(),
+            poses.get(poseCount).getPose(),
+            poses.get(poseCount).getMaxSpeed(),
+            poses.get(poseCount).getHeading());
+    swerveDrive.runVelocity(speeds);
+    Logger.recordOutput("/Auto/CurrentTargetPose", poses.get(poseCount).getPose());
 
-      if (swerveDriveController.atReference()) {
-        poseCount++;
-      }
-  
+    if (swerveDriveController.atReference()) {
+      poseCount++;
+    }
   }
 
   // Called once the command ends or is interrupted.

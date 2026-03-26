@@ -13,15 +13,18 @@ import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 
-public class StationAuto extends SequentialCommandGroup{
-    public StationAuto(Drive swerveDrive, Shooter shooterMech, IntakeMech intakeMech, SpinDexerMech spinDexerMech){
-        addCommands(
-        new ParallelRaceGroup(new DriveToPose(swerveDrive, DriveConstants.stationPath1, true), 
-            new RunIntakeCommand(intakeMech, swerveDrive), new DefaultShooter(shooterMech, swerveDrive, false)), 
-        new DriveToPose(swerveDrive, DriveConstants.stationPath2, false), 
+public class StationAuto extends SequentialCommandGroup {
+  public StationAuto(
+      Drive swerveDrive, Shooter shooterMech, IntakeMech intakeMech, SpinDexerMech spinDexerMech) {
+    addCommands(
+        new ParallelRaceGroup(
+            new DriveToPose(swerveDrive, DriveConstants.stationPath1, true),
+            new RunIntakeCommand(intakeMech, swerveDrive),
+            new DefaultShooter(shooterMech, swerveDrive, false)),
+        new DriveToPose(swerveDrive, DriveConstants.stationPath2, false),
         new DriveToPose(swerveDrive, DriveConstants.stationPath3, false),
-        new ParallelCommandGroup(new DriveToPose(swerveDrive, DriveConstants.stationPath4, false), 
+        new ParallelCommandGroup(
+            new DriveToPose(swerveDrive, DriveConstants.stationPath4, false),
             new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive)));
-    }
-
+  }
 }

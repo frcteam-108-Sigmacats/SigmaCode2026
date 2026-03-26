@@ -28,9 +28,10 @@ public class TrajectoryMap {
   }
   /**
    * Sets the pose in case the poses needs to be flipped for Red Alliance
+   *
    * @param pose the new pose to be set to
    */
-  public void setPose(Pose2d pose){
+  public void setPose(Pose2d pose) {
     this.targetPose = pose;
   }
   /**

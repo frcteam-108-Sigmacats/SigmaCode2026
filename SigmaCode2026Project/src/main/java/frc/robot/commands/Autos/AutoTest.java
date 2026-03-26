@@ -8,12 +8,10 @@ import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 
-public class AutoTest extends SequentialCommandGroup{
+public class AutoTest extends SequentialCommandGroup {
 
-    public AutoTest(Drive swerveDrive, IntakeMech intakeMech, SpinDexerMech spinDexerMech, Shooter shooter){
-        addCommands(
-            new DriveToPose(swerveDrive, DriveConstants.testPath, true)
-        );
-    }
-
+  public AutoTest(
+      Drive swerveDrive, IntakeMech intakeMech, SpinDexerMech spinDexerMech, Shooter shooter) {
+    addCommands(new DriveToPose(swerveDrive, DriveConstants.testPath, true));
+  }
 }
