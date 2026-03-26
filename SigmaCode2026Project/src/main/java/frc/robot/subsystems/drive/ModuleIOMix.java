@@ -135,8 +135,8 @@ public class ModuleIOMix implements ModuleIO {
   public void updateInputs(ModuleIOInputs inputs) {
 
     sparkStickyFault = false;
-    inputs.drivePositionRad = driveMotor.getPosition().getValueAsDouble();
-    inputs.driveVelocityRadPerSec = driveMotor.getVelocity().getValueAsDouble();
+    inputs.drivePositionRad = driveMotor.getPosition().getValueAsDouble() * 2 * Math.PI;
+    inputs.driveVelocityRadPerSec = driveMotor.getVelocity().getValueAsDouble() * 2 * Math.PI;
     inputs.driveAppliedVolts = driveMotor.getMotorVoltage().getValueAsDouble();
     inputs.driveCurrentAmps = driveMotor.getStatorCurrent().getValueAsDouble();
     inputs.driveConnected = driveMotor.isConnected();
@@ -157,7 +157,7 @@ public class ModuleIOMix implements ModuleIO {
     inputs.odometryTimestamps =
         timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.odometryDrivePositionsRad =
-        drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
+        drivePositionQueue.stream().mapToDouble((Double value) -> value * 2 * Math.PI).toArray();
     inputs.odometryTurnPositions =
         turnPositionQueue.stream()
             .map((Double value) -> new Rotation2d(value).minus(zeroRotation))
