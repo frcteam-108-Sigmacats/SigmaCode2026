@@ -21,18 +21,14 @@ public class ReverseSpinDexerCommand extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    counter = 40;
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    counter--;
-    if (counter < 40) {
-      spinDexerMech.setSpinDexerClockwise();
-      spinDexerMech.setKickerReverse();
-    }
+
+    spinDexerMech.setSpinDexerCounterClockwise();
+    spinDexerMech.setKickerReverse();
   }
 
   // Called once the command ends or is interrupted.

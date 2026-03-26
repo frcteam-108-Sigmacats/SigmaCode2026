@@ -5,12 +5,14 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DefaultIntakeCommand;
 import frc.robot.commands.DefaultShooter;
 import frc.robot.commands.DefaultSpinDexerCommand;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ReverseSpinDexerCommand;
 import frc.robot.commands.RunAll;
 import frc.robot.commands.RunIntakeCommand;
 import frc.robot.commands.SlowMo;
@@ -121,6 +123,21 @@ public class RobotContainer {
     createAutoChooser();
     bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
+    bY.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
+    dLEFTSTICK.onTrue(
+        new InstantCommand(
+            () -> {
+              if (!swerveDrive.getDriveState().equals("Shoot")) {
+                swerveDrive.setDriveState("Intake");
+              }
+            }));
+    dLEFTSTICK.onFalse(
+        new InstantCommand(
+            () -> {
+              if (swerveDrive.getDriveState().equals("Intake")) {
+                swerveDrive.setDriveState("Drive");
+              }
+            }));
   }
 
   /**
@@ -138,7 +155,7 @@ public class RobotContainer {
     dUP = driver.povUp(); // climer up
     dLEFTSTICK = driver.leftStick();
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
-
+    bY = driver.y();
   }
 
   public void updateSimulation() {}

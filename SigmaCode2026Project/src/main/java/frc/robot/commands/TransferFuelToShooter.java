@@ -33,7 +33,7 @@ public class TransferFuelToShooter extends Command {
   public void execute() {
     counter--;
     if (counter < 40) {
-      spinDexerMech.setSpinDexerCounterClockwise();
+      spinDexerMech.setSpinDexerClockwise();
       spinDexerMech.setKickerForward();
     }
   }
