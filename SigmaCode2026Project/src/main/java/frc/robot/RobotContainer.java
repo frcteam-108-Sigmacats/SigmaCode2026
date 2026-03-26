@@ -11,6 +11,8 @@ import frc.robot.commands.DefaultIntakeCommand;
 import frc.robot.commands.DefaultShooter;
 import frc.robot.commands.DefaultSpinDexerCommand;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.Intaking;
+import frc.robot.commands.Outtaking;
 import frc.robot.commands.RunAll;
 import frc.robot.commands.RunIntakeCommand;
 import frc.robot.commands.SlowMo;
@@ -45,17 +47,7 @@ public class RobotContainer {
   private SlowMo slowMo;
 
   private CommandXboxController driver = new CommandXboxController(0);
-  private Trigger bLT,
-      bRT,
-      bA,
-      bB,
-      bX,
-      bY,
-      dUP,
-      dLEFTSTICK,
-      dRIGHT,
-      dDOWN,
-      dSTART; // dStart is equal to back trigger
+  private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFTSTICK, dRIGHT, dDOWN, dSTART, bLB, bRB;
   private boolean slowMoActive = false;
 
   // Dashboard inputs
@@ -133,9 +125,13 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     bRT = driver.rightTrigger();
     bLT = driver.leftTrigger();
+    bRB = driver.rightBumper();
+    bLB = driver.leftBumper();
 
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
 
+    bRB.whileTrue(new Intaking(intakeMech));
+    bLB.whileTrue(new Outtaking(intakeMech));
   }
 
   public void updateSimulation() {}
