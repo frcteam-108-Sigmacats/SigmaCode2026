@@ -13,7 +13,7 @@ public class TrajectoryMap {
    *
    * @param targetPose Stores the pose the robot should be going to
    * @param heading The heading of where the pose should be pointing
-   * @param maxSpeed The speed
+   * @param maxSpeed The speed in mps
    */
   public TrajectoryMap(Pose2d targetPose, Rotation2d heading, double maxSpeed) {
     this.targetPose = targetPose;
@@ -25,6 +25,13 @@ public class TrajectoryMap {
    */
   public Pose2d getPose() {
     return targetPose;
+  }
+  /**
+   * Sets the pose in case the poses needs to be flipped for Red Alliance
+   * @param pose the new pose to be set to
+   */
+  public void setPose(Pose2d pose){
+    this.targetPose = pose;
   }
   /**
    * @return the heading the pose should be facing
