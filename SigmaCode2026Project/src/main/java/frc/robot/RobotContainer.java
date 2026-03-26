@@ -136,7 +136,7 @@ public class RobotContainer {
     dSTART = driver.start();
     dDOWN = driver.povDown(); // climer down
     dUP = driver.povUp(); // climer up
-
+    dLEFTSTICK = driver.leftStick();
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
 
   }
