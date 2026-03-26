@@ -1,5 +1,10 @@
 package frc.robot.subsystems.Intake;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
@@ -7,30 +12,30 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class IntakeIOReal implements IntakeIO {
   // Instantiating the Motors for the Mechanism
   private SparkMax actuation;
-  private SparkFlex roller;
+  private TalonFX roller;
   // Instantiating the ClosedLoop Controller for the Actuation
   private SparkClosedLoopController actuaterController;
   // Instantiating the Actuator's Internal Encoder
   private RelativeEncoder actuaterIntEnc;
   // Creating the configuration objects for the motors
   private SparkMaxConfig actuaterConfig = new SparkMaxConfig();
-  private SparkFlexConfig rollerConfig = new SparkFlexConfig();
+  // Control requests for the TalonFX roller
+  private final DutyCycleOut rollerDutyCycle = new DutyCycleOut(0).withEnableFOC(true);
+  private final VoltageOut rollerVoltageOut = new VoltageOut(0).withEnableFOC(true);
 
   public IntakeIOReal() {
     // Assigning the Motors to their respective CAN IDs
     actuation = new SparkMax(IntakeConstants.actuaterID, MotorType.kBrushless);
-    roller = new SparkFlex(IntakeConstants.rollerID, MotorType.kBrushless);
+    roller = new TalonFX(IntakeConstants.rollerID);
 
     // Configuring the actuator motor's Current Limit and Idle Mode
     actuaterConfig.smartCurrentLimit(IntakeConstants.actuaterCurrentLimit);
@@ -48,15 +53,16 @@ public class IntakeIOReal implements IntakeIO {
     actuaterConfig.encoder.positionConversionFactor(IntakeConstants.actuaterPositionConversion);
     // actuaterConfig.encoder.inverted(IntakeConstants.actucaterEncoderInverted);
 
-    // Configuring the Intake Roller Motor's Current Limit and Idle Mode
-    rollerConfig.smartCurrentLimit(IntakeConstants.rollerCurrentLimit);
-    rollerConfig.idleMode(IdleMode.kCoast);
-
     // Applying the Actuator Motor Configurations
     actuation.configure(
         actuaterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    // Applying the Roller Motor Configurations
-    roller.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    // Configuring the TalonFX roller motor
+    TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
+    rollerConfig.CurrentLimits.StatorCurrentLimit = IntakeConstants.rollerCurrentLimit;
+    rollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    rollerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    roller.getConfigurator().apply(rollerConfig);
 
     // Assigning the ClosedLoop Controller and Encoder to the Actuator Motor's ClosedLoopController
     // and Internal Encoder
@@ -72,9 +78,9 @@ public class IntakeIOReal implements IntakeIO {
     inputs.intakeActuaterDisconnected = actuation.getLastError() == REVLibError.kCANDisconnected;
     inputs.intakeActuaterAngle = Rotation2d.fromDegrees(actuaterIntEnc.getPosition());
 
-    inputs.intakeRollerVoltage = roller.getAppliedOutput();
-    inputs.intakeRollerCurrent = roller.getOutputCurrent();
-    inputs.intakeRollerDisconnected = roller.getLastError() == REVLibError.kCANDisconnected;
+    inputs.intakeRollerVoltage = roller.getMotorVoltage().getValueAsDouble();
+    inputs.intakeRollerCurrent = roller.getStatorCurrent().getValueAsDouble();
+    inputs.intakeRollerDisconnected = !roller.isConnected();
   }
 
   @Override
@@ -89,7 +95,7 @@ public class IntakeIOReal implements IntakeIO {
 
   @Override
   public void setIntakeRollerSpeed(double speed) {
-    roller.set(speed);
+    roller.setControl(rollerDutyCycle.withOutput(speed));
   }
 
   @Override
@@ -99,6 +105,6 @@ public class IntakeIOReal implements IntakeIO {
 
   @Override
   public void setRollerVoltage(double voltage) {
-    roller.setVoltage(voltage);
+    roller.setControl(rollerVoltageOut.withOutput(voltage));
   }
 }
