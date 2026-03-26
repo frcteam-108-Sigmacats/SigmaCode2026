@@ -132,7 +132,6 @@ public class RobotContainer {
 
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
 
-  
   }
 
   public void updateSimulation() {}

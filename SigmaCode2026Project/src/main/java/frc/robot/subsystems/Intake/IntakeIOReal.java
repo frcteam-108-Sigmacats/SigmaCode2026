@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Intake;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -8,7 +9,7 @@ public class IntakeIOReal implements IntakeIO {
   private TalonFX roller;
 
   public IntakeIOReal() {
-    roller = new TalonFX(IntakeConstants.rollerID);
+    roller = new TalonFX(IntakeConstants.rollerID, new CANBus("PhoenixBus"));
 
     TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
     rollerConfig.CurrentLimits.StatorCurrentLimit = IntakeConstants.rollerCurrentLimit;
