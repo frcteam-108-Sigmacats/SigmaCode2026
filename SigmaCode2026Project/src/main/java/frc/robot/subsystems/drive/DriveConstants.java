@@ -138,9 +138,9 @@ public class DriveConstants {
                   wheelCOF));
 
   // Limelights
-  // public static final String kLimelightFrontName = "limelight-front"; // not on robot yet
   public static final String kLimelightBackLeftName = "limelight-bl";
   public static final String kLimelightBackRightName = "limelight-br";
+  // public static final String kLimelightFrontName = "limelight-tf"; // tf = front limelight
 
   public static double xyStdDevCoefficient = 0.005;
   public static double thetaStdDevCoefficient = 0.01;

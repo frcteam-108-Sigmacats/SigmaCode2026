@@ -21,16 +21,16 @@ public class SpinDexerMech extends SubsystemBase {
     io.setSpinDexerSpeed(SpinDexerConstants.SpinDexerClockWise);
   }
 
+  public void setKickerReverse() {
+    io.setKickerSpeed(SpinDexerConstants.KickerReverse);
+  }
+
   public void setSpinDexerCounterClockwise() {
     io.setSpinDexerSpeed(SpinDexerConstants.SpinDexerCounterClockWise);
   }
 
   public void setKickerForward() {
     io.setKickerSpeed(SpinDexerConstants.KickerForward);
-  }
-
-  public void setKickerReverse() {
-    io.setKickerSpeed(SpinDexerConstants.KickerReverse);
   }
 
   public void stopSpinDexer() {
