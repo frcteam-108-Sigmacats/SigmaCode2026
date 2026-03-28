@@ -100,8 +100,11 @@ public class RobotContainer {
     }
     // Configure the trigger bindings
     configureBindings();
-
     shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive, false));
+    // Uncomment this if the overrun loop stops showing up and go into the command and follow the
+    // next instructions
+    // shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive::getPose,
+    // swerveDrive::getDriveSpeedsFieldRelative, false));
     spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
     intakeMech.setDefaultCommand(new DefaultIntakeCommand(intakeMech));
     swerveDrive.setDefaultCommand(

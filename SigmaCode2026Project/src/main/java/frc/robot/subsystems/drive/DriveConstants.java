@@ -82,10 +82,10 @@ public class DriveConstants {
       (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Drive PID configuration
-  public static final double driveKp = 0.05;
+  public static final double driveKp = 1.4;
   public static final double driveKd = 0.0;
-  public static final double driveKs = 0.0;
-  public static final double driveKv = 0.1;
+  public static final double driveKs = 0.31;
+  public static final double driveKv = 0.08;
   public static final double driveSimP = 0.1;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
@@ -146,7 +146,7 @@ public class DriveConstants {
   // Limelights
   public static final String kLimelightBackLeftName = "limelight-bl";
   public static final String kLimelightBackRightName = "limelight-br";
-  // public static final String kLimelightFrontName = "limelight-tf"; // tf = front limelight
+  // public static final String kLimelightFrontName = "limelight-front"; // tf = front limelight
 
   public static double xyStdDevCoefficient = 0.005;
   public static double thetaStdDevCoefficient = 0.01;

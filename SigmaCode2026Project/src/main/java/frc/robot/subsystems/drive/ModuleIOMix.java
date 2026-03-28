@@ -95,6 +95,8 @@ public class ModuleIOMix implements ModuleIO {
     driveConfig.Slot0.kP = driveKp;
     driveConfig.Slot0.kI = 0;
     driveConfig.Slot0.kD = driveKd;
+    driveConfig.Slot0.kS = driveKs;
+    driveConfig.Slot0.kV = driveKv;
     driveMotor.getConfigurator().apply(driveConfig);
     driveMotor.setPosition(0);
 
@@ -132,7 +134,7 @@ public class ModuleIOMix implements ModuleIO {
             turnMotor.configure(
                 turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    driveMotor.getPosition().setUpdateFrequency(odometryFrequency);
+    driveMotor.getPosition().setUpdateFrequency(250);
 
     timestampQueue = SparkXPhoenixOdometryThread.getInstance().makeTimestampQueue();
     drivePositionQueue =
@@ -215,7 +217,6 @@ public class ModuleIOMix implements ModuleIO {
     driveMotor.setControl(
         velocity
             .withSlot(0)
-            .withFeedForward(ffVolts)
             .withVelocity(velocityRadPerSec / (2 * Math.PI)));
   }
 
