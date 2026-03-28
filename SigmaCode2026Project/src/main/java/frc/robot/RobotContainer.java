@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.CharacterizationTesting;
 import frc.robot.commands.DefaultIntakeCommand;
 import frc.robot.commands.DefaultShooter;
 import frc.robot.commands.DefaultSpinDexerCommand;
@@ -102,13 +103,14 @@ public class RobotContainer {
     shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive, false));
     spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
     intakeMech.setDefaultCommand(new DefaultIntakeCommand(intakeMech));
-    swerveDrive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            swerveDrive,
-            () -> -driver.getLeftY(),
-            () -> -driver.getLeftX(),
-            () -> -driver.getRightX(),
-            () -> slowMoActive));
+    // swerveDrive.setDefaultCommand(
+    //     DriveCommands.joystickDrive(
+    //         swerveDrive,
+    //         () -> -driver.getLeftY(),
+    //         () -> -driver.getLeftX(),
+    //         () -> -driver.getRightX(),
+    //         () -> slowMoActive));
+    swerveDrive.setDefaultCommand(new CharacterizationTesting(swerveDrive));
 
     // Configure the trigger bindings
     configureBindings();
