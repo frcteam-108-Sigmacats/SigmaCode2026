@@ -66,6 +66,8 @@ public class Drive extends SubsystemBase {
 
   private String driveMode = "Drive";
 
+  private boolean allianceRed;
+
   private static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private static Rotation2d rawGyroRotation = new Rotation2d();
   private static SwerveModulePosition[] lastModulePositions = // For delta tracking
@@ -131,6 +133,11 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
+      allianceRed = true;
+    } else {
+      allianceRed = false;
+    }
   }
 
   @Override
@@ -194,9 +201,7 @@ public class Drive extends SubsystemBase {
     if (Constants.currentMode == Mode.REAL) {
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackLeftName,
-          DriverStation.getAlliance().get() == Alliance.Red
-              ? gyroIO.getYaw().getDegrees() + 180
-              : gyroIO.getYaw().getDegrees(),
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -205,9 +210,7 @@ public class Drive extends SubsystemBase {
 
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackRightName,
-          DriverStation.getAlliance().get() == Alliance.Red
-              ? gyroIO.getYaw().getDegrees() + 180
-              : gyroIO.getYaw().getDegrees(),
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -216,7 +219,7 @@ public class Drive extends SubsystemBase {
 
       /*  LimelightHelpers.SetRobotOrientation(
       DriveConstants.kLimelightFrontName,
-      DriverStation.getAlliance().get() == Alliance.Red
+      allianceRed
           ? gyroIO.getYaw().getDegrees() + 180
           : gyroIO.getYaw().getDegrees(),
       0,

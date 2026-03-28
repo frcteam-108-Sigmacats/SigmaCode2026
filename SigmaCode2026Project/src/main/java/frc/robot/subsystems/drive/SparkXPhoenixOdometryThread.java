@@ -137,6 +137,18 @@ public class SparkXPhoenixOdometryThread {
   }
 
   private void run() {
+
+    // Block OUTSIDE the lock for both bus types
+    try {
+      if (isCANFD && phoenixSignals.length > 0) {
+        BaseStatusSignal.waitForAll(2.0 / ODOMETRY_FREQUENCY, phoenixSignals);
+      } else {
+        Thread.sleep((long) (1000.0 / ODOMETRY_FREQUENCY));
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+      return;
+    }
     // Always acquire odometryLock before signalsLock.
     Drive.odometryLock.lock();
     signalsLock.lock();
@@ -146,12 +158,6 @@ public class SparkXPhoenixOdometryThread {
       // preventing an uncapped spin loop when no Phoenix signals are registered on CAN FD.
       if (isCANFD && phoenixSignals.length > 0) {
         BaseStatusSignal.waitForAll(2.0 / ODOMETRY_FREQUENCY, phoenixSignals);
-      } else {
-        // "waitForAll" does not support blocking on multiple signals with a bus
-        // that is not CAN FD, regardless of Pro licensing. No reasoning for this
-        // behavior is provided by the documentation.
-        Thread.sleep((long) (1000.0 / ODOMETRY_FREQUENCY));
-        if (phoenixSignals.length > 0) BaseStatusSignal.refreshAll(phoenixSignals);
       }
 
       // Capture timestamp after signals are ready.
@@ -187,8 +193,6 @@ public class SparkXPhoenixOdometryThread {
           timestampQueues.get(i).offer(timestamp);
         }
       }
-    } catch (InterruptedException e) {
-      e.printStackTrace();
     } finally {
       signalsLock.unlock();
       Drive.odometryLock.unlock();

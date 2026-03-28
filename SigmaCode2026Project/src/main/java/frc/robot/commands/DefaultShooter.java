@@ -11,9 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.drive.Drive;
-
 import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.Logger;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -33,7 +31,11 @@ public class DefaultShooter extends Command {
     addRequirements(this.shooterMech);
   }
 
-  public DefaultShooter(Shooter shooterMech, Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> speedSupplier, boolean fullSpeed){
+  public DefaultShooter(
+      Shooter shooterMech,
+      Supplier<Pose2d> poseSupplier,
+      Supplier<ChassisSpeeds> speedSupplier,
+      boolean fullSpeed) {
     this.shooterMech = shooterMech;
     this.poseSupplier = poseSupplier;
     this.speedsSupplier = speedSupplier;
@@ -51,8 +53,9 @@ public class DefaultShooter extends Command {
         shooterMech.getAimPoint(shooterMech.getTargetPose(swerveDrive), swerveDrive);
     // Pose2d robotPose = poseSupplier.get();
     // ChassisSpeeds fieldSpeeds = speedsSupplier.get();
-    //TO USE THIS CODE GO BACK AND UNCOMMENT THE NEWER FUNCTIONS
-    // Translation2d aimPoint = shooterMech.getAimPoint(shooterMech.getTargetPose(robotPose), robotPose, fieldSpeeds);
+    // TO USE THIS CODE GO BACK AND UNCOMMENT THE NEWER FUNCTIONS
+    // Translation2d aimPoint = shooterMech.getAimPoint(shooterMech.getTargetPose(robotPose),
+    // robotPose, fieldSpeeds);
     // Translation2d diff = aimPoint.minus(robotPose.getTranslation());
     // Rotation2d desiredAngle = Rotation2d.fromRadians(Math.atan2(diff.getY(), diff.getX()));
     // desiredAngle =

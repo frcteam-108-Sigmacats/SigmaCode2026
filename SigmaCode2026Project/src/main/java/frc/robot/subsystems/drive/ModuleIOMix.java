@@ -132,7 +132,7 @@ public class ModuleIOMix implements ModuleIO {
             turnMotor.configure(
                 turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    driveMotor.getPosition().setUpdateFrequency(odometryFrequency);
+    driveMotor.getPosition().setUpdateFrequency(250);
 
     timestampQueue = SparkXPhoenixOdometryThread.getInstance().makeTimestampQueue();
     drivePositionQueue =
