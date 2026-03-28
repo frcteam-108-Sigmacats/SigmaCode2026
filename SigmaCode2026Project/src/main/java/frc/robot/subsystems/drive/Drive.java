@@ -281,9 +281,9 @@ public class Drive extends SubsystemBase {
     if (driveMode.equals("Shoot")) {
       speeds =
           new ChassisSpeeds(
-              speeds.vxMetersPerSecond * 0.3,
-              speeds.vyMetersPerSecond * 0.3,
-              speeds.omegaRadiansPerSecond * 0.6);
+              speeds.vxMetersPerSecond * 0.2,
+              speeds.vyMetersPerSecond * 0.2,
+              speeds.omegaRadiansPerSecond * 0.5);
     } else if (driveMode.equals("Intake")) {
       speeds =
           new ChassisSpeeds(
@@ -322,6 +322,10 @@ public class Drive extends SubsystemBase {
     return ChassisSpeeds.fromRobotRelativeSpeeds(
         kinematics.toChassisSpeeds(getModuleStates()),
         poseEstimator.getEstimatedPosition().getRotation());
+  }
+
+  public double getPitch() {
+    return gyroIO.getRoll().getDegrees();
   }
 
   public void runVelocityFieldRelative(ChassisSpeeds speeds) {
@@ -465,6 +469,14 @@ public class Drive extends SubsystemBase {
     return 2 * Math.PI;
   }
 
+  public Command resetPoseWithRightLL() {
+    return runOnce(
+        () ->
+            this.resetOdometry(
+                LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName)
+                    .pose));
+  }
+
   private boolean checkPose(PoseEstimate estimate) {
     if (estimate == null) {
       return false;
@@ -503,5 +515,9 @@ public class Drive extends SubsystemBase {
 
   private boolean isEstimateZero(PoseEstimate estimate) {
     return estimate.pose.equals(new Pose2d());
+  }
+
+  public double getRoll() {
+    return gyroIO.getRoll().getDegrees();
   }
 }

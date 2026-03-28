@@ -262,7 +262,7 @@ public class Shooter extends SubsystemBase {
       double exitBallVelX =
           (RPM * ShooterConstants.ballExitVelocityConversion)
               * Math.cos(Math.toRadians(ShooterConstants.hoodStartAngle + hoodAngle));
-      double flightOfTime = (distance / exitBallVelX);
+      double flightOfTime = (distance / exitBallVelX) * 0.9;
       aimPoint =
           new Translation2d(
               targetPose.getX() - fieldSpeeds.vxMetersPerSecond * flightOfTime,

@@ -86,6 +86,7 @@ public class DriveConstants {
   public static final double driveKd = 0.0;
   public static final double driveKs = 0.31;
   public static final double driveKv = 0.08;
+  public static final double driveKa = 2.0;
   public static final double driveSimP = 0.1;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
@@ -155,9 +156,9 @@ public class DriveConstants {
   public static double autoStdDevScale = 0;
 
   // Constants for AUTO
-  public static PIDController xyLinearPIDController = new PIDController(3.5, 0, 0.0);
+  public static PIDController xyLinearPIDController = new PIDController(5.5, 0, 0.0);
   public static ProfiledPIDController thetaPIDController =
-      new ProfiledPIDController(0.000000005, 0, 0, new Constraints(0, 0));
+      new ProfiledPIDController(2.0, 0, 0, new Constraints(6.28, 3.14));
   // Auto Paths
   // Depot Paths
   public static TrajectoryMap depotPath1Pose1 =
@@ -217,11 +218,11 @@ public class DriveConstants {
   public static TrajectoryMap testPath1Pose1 =
       new TrajectoryMap(new Pose2d(0, 0, Rotation2d.kZero), Rotation2d.kZero, 2.0);
   public static TrajectoryMap testPath1Pose2 =
-      new TrajectoryMap(new Pose2d(1, 0, Rotation2d.kZero), Rotation2d.kZero, 2.0);
+      new TrajectoryMap(new Pose2d(2, 0, Rotation2d.kZero), Rotation2d.kZero, 2.0);
   public static TrajectoryMap testPath1Pose3 =
-      new TrajectoryMap(new Pose2d(1, 1, Rotation2d.kZero), Rotation2d.kZero, 2.0);
+      new TrajectoryMap(new Pose2d(2, 2, Rotation2d.kZero), Rotation2d.kZero, 2.0);
   public static TrajectoryMap testPath1Pose4 =
-      new TrajectoryMap(new Pose2d(0, 1, Rotation2d.kZero), Rotation2d.kZero, 2.0);
+      new TrajectoryMap(new Pose2d(0, 2, Rotation2d.kZero), Rotation2d.kZero, 2.0);
   public static TrajectoryMap testPath1Pose5 =
       new TrajectoryMap(new Pose2d(0, 0, Rotation2d.kZero), Rotation2d.kZero, 2.0);
 

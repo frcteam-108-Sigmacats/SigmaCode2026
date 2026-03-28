@@ -6,6 +6,8 @@ package frc.robot.commands;
 
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -61,6 +63,8 @@ public class DriveToPose extends Command {
     } else {
       poseCount = 0;
     }
+
+    swerveDriveController.setTolerance(new Pose2d(0.3, 0.3, Rotation2d.fromDegrees(5)));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
