@@ -198,7 +198,7 @@ public class Shooter extends SubsystemBase {
   public boolean isHoodAtPosition() {
     return Math.abs(inputs.hoodPositionDeg - desiredHoodAngleDeg) < HOOD_TOLERANCE_DEG;
   }
-
+  // ORIGINAL
   public Pose2d getTargetPose(Drive swerveDrive) {
     if (DriverStation.getAlliance().get() == Alliance.Blue) {
       if (swerveDrive.getPose().getX() > ShooterConstants.blueHubPose.getX()) {
@@ -222,7 +222,31 @@ public class Shooter extends SubsystemBase {
       }
     }
   }
-
+  // NEW
+  // public Pose2d getTargetPose(Pose2d robotPose) {
+  //   if (DriverStation.getAlliance().get() == Alliance.Blue) {
+  //     if (robotPose.getX() > ShooterConstants.blueHubPose.getX()) {
+  //       if (robotPose.getY() > ShooterConstants.blueHubPose.getY()) {
+  //         return ShooterConstants.blueDepotPose;
+  //       } else {
+  //         return ShooterConstants.blueStationPose;
+  //       }
+  //     } else {
+  //       return ShooterConstants.blueHubPose;
+  //     }
+  //   } else {
+  //     if (robotPose.getX() < ShooterConstants.redHubPose.getX()) {
+  //       if (robotPose.getY() > ShooterConstants.redHubPose.getY()) {
+  //         return ShooterConstants.redStationPose;
+  //       } else {
+  //         return ShooterConstants.redDepotPose;
+  //       }
+  //     } else {
+  //       return ShooterConstants.redHubPose;
+  //     }
+  //   }
+  // }
+  // Original
   public Translation2d getAimPoint(Pose2d targetPose, Drive swerveDrive) {
     Translation2d robotPos = swerveDrive.getPose().getTranslation();
     ChassisSpeeds fieldSpeeds = swerveDrive.getDriveSpeedsFieldRelative();
@@ -238,7 +262,7 @@ public class Shooter extends SubsystemBase {
       double exitBallVelX =
           (RPM * ShooterConstants.ballExitVelocityConversion)
               * Math.cos(Math.toRadians(ShooterConstants.hoodStartAngle + hoodAngle));
-      double flightOfTime = (distance / exitBallVelX) ;
+      double flightOfTime = (distance / exitBallVelX) * 0.9;
       aimPoint =
           new Translation2d(
               targetPose.getX() - fieldSpeeds.vxMetersPerSecond * flightOfTime,
@@ -246,6 +270,30 @@ public class Shooter extends SubsystemBase {
     }
     return aimPoint;
   }
+  // NEW
+  // public Translation2d getAimPoint(Pose2d targetPose, Pose2d robotPose, ChassisSpeeds
+  // fieldSpeeds) {
+
+  //   Translation2d aimPoint = targetPose.getTranslation();
+  //   for (int i = 0; i < 20; i++) {
+  //     double distance = targetPose.getTranslation().minus(robotPose.getTranslation()).getNorm();
+  //     double RPM =
+  //         getInterpolated(Double.valueOf(distance),
+  // ShooterConstants.ShooterStates.shooterRPMMap);
+  //     double hoodAngle =
+  //         getInterpolated(
+  //             Double.valueOf(distance), ShooterConstants.ShooterStates.shooterHoodAngleMap);
+  //     double exitBallVelX =
+  //         (RPM * ShooterConstants.ballExitVelocityConversion)
+  //             * Math.cos(Math.toRadians(ShooterConstants.hoodStartAngle + hoodAngle));
+  //     double flightOfTime = (distance / exitBallVelX) ;
+  //     aimPoint =
+  //         new Translation2d(
+  //             targetPose.getX() - fieldSpeeds.vxMetersPerSecond * flightOfTime,
+  //             targetPose.getY() - fieldSpeeds.vyMetersPerSecond * flightOfTime);
+  //   }
+  //   return aimPoint;
+  // }
 
   // ── Composite ─────────────────────────────────────────────────────────────
 

@@ -66,6 +66,8 @@ public class Drive extends SubsystemBase {
 
   private String driveMode = "Drive";
 
+  private boolean allianceRed;
+
   private static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private static Rotation2d rawGyroRotation = new Rotation2d();
   private static SwerveModulePosition[] lastModulePositions = // For delta tracking
@@ -131,6 +133,11 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
+      allianceRed = true;
+    } else {
+      allianceRed = false;
+    }
   }
 
   @Override
@@ -194,9 +201,7 @@ public class Drive extends SubsystemBase {
     if (Constants.currentMode == Mode.REAL) {
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackLeftName,
-          DriverStation.getAlliance().get() == Alliance.Red
-              ? gyroIO.getYaw().getDegrees() + 180
-              : gyroIO.getYaw().getDegrees(),
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -205,9 +210,7 @@ public class Drive extends SubsystemBase {
 
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackRightName,
-          DriverStation.getAlliance().get() == Alliance.Red
-              ? gyroIO.getYaw().getDegrees() + 180
-              : gyroIO.getYaw().getDegrees(),
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -216,7 +219,7 @@ public class Drive extends SubsystemBase {
 
       /*  LimelightHelpers.SetRobotOrientation(
       DriveConstants.kLimelightFrontName,
-      DriverStation.getAlliance().get() == Alliance.Red
+      allianceRed
           ? gyroIO.getYaw().getDegrees() + 180
           : gyroIO.getYaw().getDegrees(),
       0,
@@ -278,9 +281,9 @@ public class Drive extends SubsystemBase {
     if (driveMode.equals("Shoot")) {
       speeds =
           new ChassisSpeeds(
-              speeds.vxMetersPerSecond * 0.3,
-              speeds.vyMetersPerSecond * 0.3,
-              speeds.omegaRadiansPerSecond * 0.6);
+              speeds.vxMetersPerSecond * 0.2,
+              speeds.vyMetersPerSecond * 0.2,
+              speeds.omegaRadiansPerSecond * 0.5);
     } else if (driveMode.equals("Intake")) {
       speeds =
           new ChassisSpeeds(
@@ -319,6 +322,10 @@ public class Drive extends SubsystemBase {
     return ChassisSpeeds.fromRobotRelativeSpeeds(
         kinematics.toChassisSpeeds(getModuleStates()),
         poseEstimator.getEstimatedPosition().getRotation());
+  }
+
+  public double getPitch() {
+    return gyroIO.getRoll().getDegrees();
   }
 
   public void runVelocityFieldRelative(ChassisSpeeds speeds) {
@@ -462,6 +469,14 @@ public class Drive extends SubsystemBase {
     return 2 * Math.PI;
   }
 
+  public Command resetPoseWithRightLL() {
+    return runOnce(
+        () ->
+            this.resetOdometry(
+                LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName)
+                    .pose));
+  }
+
   private boolean checkPose(PoseEstimate estimate) {
     if (estimate == null) {
       return false;
@@ -500,5 +515,9 @@ public class Drive extends SubsystemBase {
 
   private boolean isEstimateZero(PoseEstimate estimate) {
     return estimate.pose.equals(new Pose2d());
+  }
+
+  public double getRoll() {
+    return gyroIO.getRoll().getDegrees();
   }
 }

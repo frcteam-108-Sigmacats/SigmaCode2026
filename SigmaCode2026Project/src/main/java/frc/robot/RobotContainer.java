@@ -12,9 +12,9 @@ import frc.robot.commands.DefaultIntakeCommand;
 import frc.robot.commands.DefaultShooter;
 import frc.robot.commands.DefaultSpinDexerCommand;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.ReverseSpinDexerCommand;
-import frc.robot.commands.Intaking;
+import frc.robot.commands.DriveOverTheBump;
 import frc.robot.commands.Outtaking;
+import frc.robot.commands.ReverseSpinDexerCommand;
 import frc.robot.commands.RunAll;
 import frc.robot.commands.RunIntakeCommand;
 import frc.robot.commands.SlowMo;
@@ -53,7 +53,8 @@ public class RobotContainer {
   private boolean slowMoActive = false;
 
   // Dashboard inputs
-  private LoggedDashboardChooser<Command> autoChooser;
+  private LoggedDashboardChooser<Command> autoChooser =
+      new LoggedDashboardChooser<>("Auto Chooser");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -98,8 +99,11 @@ public class RobotContainer {
     }
     // Configure the trigger bindings
     configureBindings();
-
     shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive, false));
+    // Uncomment this if the overrun loop stops showing up and go into the command and follow the
+    // next instructions
+    // shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive::getPose,
+    // swerveDrive::getDriveSpeedsFieldRelative, false));
     spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
     intakeMech.setDefaultCommand(new DefaultIntakeCommand(intakeMech));
     swerveDrive.setDefaultCommand(
@@ -115,9 +119,9 @@ public class RobotContainer {
     createAutoChooser();
     bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
-    bRB.whileTrue(new Intaking(intakeMech));
+    bRB.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
     bLB.whileTrue(new Outtaking(intakeMech));
-    bY.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
+    // bY.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
     dLEFTSTICK.onTrue(
         new InstantCommand(
             () -> {
@@ -147,8 +151,11 @@ public class RobotContainer {
     dSTART = driver.start();
     dDOWN = driver.povDown(); // climer down
     dUP = driver.povUp(); // climer up
-    dLEFTSTICK = driver.leftStick();    bRB = driver.rightBumper();
+    dLEFTSTICK = driver.leftStick();
+    bRB = driver.rightBumper();
     bLB = driver.leftBumper();
+
+    bA = driver.a();
 
     // Start/backpaddle button turns on slow-mo mode (30% speed reduction)
     bY = driver.y();
@@ -168,7 +175,15 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake", new RunIntakeCommand(intakeMech, swerveDrive));
     NamedCommands.registerCommand(
         "RunAll", new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
-
+    NamedCommands.registerCommand("RunOverBump", new DriveOverTheBump(swerveDrive));
+    NamedCommands.registerCommand("ResetPoseRLL", swerveDrive.resetPoseWithRightLL());
+    // autoChooser.addDefaultOption("None", null);
+    // autoChooser.addOption(
+    //     "DepotAuto", new DepotAuto(swerveDrive, intakeMech, spinDexerMech, shooterMech));
+    // autoChooser.addOption(
+    //     "StationAuto", new StationAuto(swerveDrive, shooterMech, intakeMech, spinDexerMech));
+    // autoChooser.addOption(
+    //     "Test", new AutoTest(swerveDrive, intakeMech, spinDexerMech, shooterMech));
     autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
   }
 
