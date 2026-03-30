@@ -42,15 +42,52 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseRLL"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "DepotPath4"
           }
         },
         {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunAll"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 5.0
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "named",
           "data": {
-            "name": "RunAll"
+            "name": "ResetPoseRLL"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depotloop1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of depotloop1"
           }
         }
       ]
