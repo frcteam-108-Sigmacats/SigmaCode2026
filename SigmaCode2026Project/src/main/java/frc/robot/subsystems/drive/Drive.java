@@ -217,27 +217,28 @@ public class Drive extends SubsystemBase {
           gyroIO.getPitch().getDegrees(),
           0);
 
-      /*  LimelightHelpers.SetRobotOrientation(
-      DriveConstants.kLimelightFrontName,
-      allianceRed
-          ? gyroIO.getYaw().getDegrees() + 180
-          : gyroIO.getYaw().getDegrees(),
-      0,
-      gyroIO.getRoll().getDegrees(),
-      0,
-      gyroIO.getPitch().getDegrees(),
-      0); */
+      LimelightHelpers.SetRobotOrientation(
+          DriveConstants.kLimelightFrontName,
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
+          0,
+          gyroIO.getRoll().getDegrees(),
+          0,
+          gyroIO.getPitch().getDegrees(),
+          0);
 
       PoseEstimate bLMT2 =
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
       PoseEstimate bRMT2 =
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName);
-
+      PoseEstimate FMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName);
       if (checkPose(bLMT2)) {
         updatePoseWithStdDev(bLMT2);
       }
       if (checkPose(bRMT2)) {
         updatePoseWithStdDev(bRMT2);
+      }
+      if (checkPose(FMT2)) {
+        updatePoseWithStdDev(FMT2);
       }
     }
   }

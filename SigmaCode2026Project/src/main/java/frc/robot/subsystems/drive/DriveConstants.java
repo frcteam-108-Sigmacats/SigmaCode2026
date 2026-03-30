@@ -147,7 +147,7 @@ public class DriveConstants {
   // Limelights
   public static final String kLimelightBackLeftName = "limelight-bl";
   public static final String kLimelightBackRightName = "limelight-br";
-  // public static final String kLimelightFrontName = "limelight-front"; // tf = front limelight
+  public static final String kLimelightFrontName = "limelight-front"; // tf = front limelight
 
   public static double xyStdDevCoefficient = 0.005;
   public static double thetaStdDevCoefficient = 0.01;

@@ -60,8 +60,8 @@ public class ShooterConstants {
   public static final boolean shooterRightInverted = true;
 
   // Velocity PID / FF (Slot 0 on TalonFX)
-  public static final double shooterKp = 0.01;
-  public static final double shooterKd = 0.0;
+  public static final double shooterKp = 0.7;
+  public static final double shooterKd = 0.09;
   public static final double shooterKs = 0.01; // V
   public static final double shooterKv = 0.12; // V*s/rad
 
