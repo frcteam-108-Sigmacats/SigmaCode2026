@@ -38,7 +38,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": " DepotPath3"
+            "pathName": null
           }
         },
         {
@@ -87,7 +87,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Copy of depotloop1"
+            "pathName": "depotloop2"
           }
         }
       ]
