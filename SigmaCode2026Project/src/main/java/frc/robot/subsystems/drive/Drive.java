@@ -230,15 +230,16 @@ public class Drive extends SubsystemBase {
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
       PoseEstimate bRMT2 =
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName);
-      PoseEstimate FMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName);
+      PoseEstimate FLMT2 =
+          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName);
       if (checkPose(bLMT2)) {
         updatePoseWithStdDev(bLMT2);
       }
       if (checkPose(bRMT2)) {
         updatePoseWithStdDev(bRMT2);
       }
-      if (checkPose(FMT2)) {
-        updatePoseWithStdDev(FMT2);
+      if (checkPose(FLMT2)) {
+        updatePoseWithStdDev(FLMT2);
       }
     }
   }
@@ -469,14 +470,54 @@ public class Drive extends SubsystemBase {
   public double getMaxAngularSpeedRadPerSec() {
     return 2 * Math.PI;
   }
-
-  public Command resetPoseWithRightLL() {
+  // reset poses for auto
+  public Command resetPoseWithLLS() {
     return runOnce(
-        () ->
-            this.resetOdometry(
-                LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName)
-                    .pose));
+        () -> {
+          PoseEstimate leftLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
+          PoseEstimate rightLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName);
+          PoseEstimate frontLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName);
+          PoseEstimate[] poseList = {leftLLMT2, rightLLMT2, frontLLMT2};
+          PoseEstimate bestPose = null;
+          double bestScore = Double.POSITIVE_INFINITY;
+          for (PoseEstimate e : poseList) {
+            if (e.tagCount > 0) {
+              double eScore = e.avgTagDist + 1.0 / e.tagCount;
+              if (eScore < bestScore) {
+                bestScore = eScore;
+                bestPose = e;
+              }
+            }
+          }
+          if (bestPose != null) {
+            resetOdometry(bestPose.pose);
+          }
+        });
   }
+  // public Command resetPoseWithRightLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName)
+  //                   .pose));
+  // }
+  // public Command resetPoseWithLeftLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName)
+  //                   .pose));
+  // }
+  // public Command resetPoseWithFrontLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName)
+  //                   .pose));
+  // }
 
   private boolean checkPose(PoseEstimate estimate) {
     if (estimate == null) {
