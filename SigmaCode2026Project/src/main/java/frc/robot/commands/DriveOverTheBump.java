@@ -4,51 +4,66 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.hal.SimDevice.Direction;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 import frc.robot.subsystems.drive.Drive;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class TransferFuelToShooter extends Command {
-  private SpinDexerMech spinDexerMech;
+public class DriveOverTheBump extends Command {
   private Drive swerveDrive;
-  private int counter;
-  /** Creates a new TransferFuelToShooter. */
-  public TransferFuelToShooter(SpinDexerMech spinDexerMech, Drive swerveDrive) {
-    this.spinDexerMech = spinDexerMech;
+
+  private boolean gyroTilted;
+
+  private double gyroFlatCooldown;
+
+  private String direction = null;
+  /** Creates a new DriveOverTheBump. */
+  public DriveOverTheBump(Drive swerveDrive, String direction) {
     this.swerveDrive = swerveDrive;
+    this.direction = direction;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(this.spinDexerMech);
+    addRequirements(this.swerveDrive);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    swerveDrive.setDriveState("Shoot");
-    counter = 40;
+    gyroTilted = false;
+    gyroFlatCooldown = 20;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    counter--;
-    if (counter < 40) {
-      spinDexerMech.setSpinDexerClockwise();
-      spinDexerMech.setKickerForward();
+    if (Math.abs(swerveDrive.getRoll()) > 8) {
+      gyroTilted = true;
+    }
+    ChassisSpeeds fieldSpeeds = new ChassisSpeeds(5.07, 0, 0);
+    if (direction.equals("back")) {
+      fieldSpeeds.times(-1);
+    }
+
+    swerveDrive.runVelocityFieldRelative(fieldSpeeds);
+
+    if (Math.abs(swerveDrive.getRoll()) < 3) {
+      gyroFlatCooldown--;
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if (swerveDrive.getDriveState().equals("Shoot")) {
-      swerveDrive.setDriveState("Drive");
-    }
+    swerveDrive.stop();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    if (gyroTilted && Math.abs(swerveDrive.getRoll()) < 3 && gyroFlatCooldown < 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

@@ -66,6 +66,8 @@ public class Drive extends SubsystemBase {
 
   private String driveMode = "Drive";
 
+  private boolean allianceRed;
+
   private static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private static Rotation2d rawGyroRotation = new Rotation2d();
   private static SwerveModulePosition[] lastModulePositions = // For delta tracking
@@ -131,6 +133,11 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
+      allianceRed = true;
+    } else {
+      allianceRed = false;
+    }
   }
 
   @Override
@@ -172,8 +179,6 @@ public class Drive extends SubsystemBase {
                     - lastModulePositions[moduleIndex].distanceMeters,
                 modulePositions[moduleIndex].angle);
         lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-
-        modulePositions[moduleIndex] = modules[moduleIndex].getPosition();
       }
 
       // Update gyro angle
@@ -187,8 +192,8 @@ public class Drive extends SubsystemBase {
       }
 
       // Apply update
-      // poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-      poseEstimator.update(rawGyroRotation, modulePositions);
+      poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      // poseEstimator.update(rawGyroRotation, modulePositions);
     }
 
     // Update gyro alert
@@ -196,9 +201,7 @@ public class Drive extends SubsystemBase {
     if (Constants.currentMode == Mode.REAL) {
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackLeftName,
-          DriverStation.getAlliance().get() == Alliance.Red
-              ? gyroIO.getYaw().getDegrees() + 180
-              : gyroIO.getYaw().getDegrees(),
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -207,9 +210,16 @@ public class Drive extends SubsystemBase {
 
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackRightName,
-          DriverStation.getAlliance().get() == Alliance.Red
-              ? gyroIO.getYaw().getDegrees() + 180
-              : gyroIO.getYaw().getDegrees(),
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
+          0,
+          gyroIO.getRoll().getDegrees(),
+          0,
+          gyroIO.getPitch().getDegrees(),
+          0);
+
+      LimelightHelpers.SetRobotOrientation(
+          DriveConstants.kLimelightFrontName,
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -220,12 +230,16 @@ public class Drive extends SubsystemBase {
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
       PoseEstimate bRMT2 =
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName);
-
+      PoseEstimate FLMT2 =
+          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName);
       if (checkPose(bLMT2)) {
         updatePoseWithStdDev(bLMT2);
       }
       if (checkPose(bRMT2)) {
         updatePoseWithStdDev(bRMT2);
+      }
+      if (checkPose(FLMT2)) {
+        updatePoseWithStdDev(FLMT2);
       }
     }
   }
@@ -269,17 +283,15 @@ public class Drive extends SubsystemBase {
     if (driveMode.equals("Shoot")) {
       speeds =
           new ChassisSpeeds(
-              speeds.vxMetersPerSecond * 0.3,
-              speeds.vyMetersPerSecond * 0.3,
-              speeds.omegaRadiansPerSecond * 0.6);
-      System.out.println("Drive is 40% speed");
+              speeds.vxMetersPerSecond * 0.2,
+              speeds.vyMetersPerSecond * 0.2,
+              speeds.omegaRadiansPerSecond * 0.5);
     } else if (driveMode.equals("Intake")) {
       speeds =
           new ChassisSpeeds(
               speeds.vxMetersPerSecond * 0.5,
               speeds.vyMetersPerSecond * 0.5,
               speeds.omegaRadiansPerSecond * 0.75);
-      System.out.println("Drive speed is 70%");
     } else {
       speeds.times(1);
     }
@@ -312,6 +324,10 @@ public class Drive extends SubsystemBase {
     return ChassisSpeeds.fromRobotRelativeSpeeds(
         kinematics.toChassisSpeeds(getModuleStates()),
         poseEstimator.getEstimatedPosition().getRotation());
+  }
+
+  public double getPitch() {
+    return gyroIO.getRoll().getDegrees();
   }
 
   public void runVelocityFieldRelative(ChassisSpeeds speeds) {
@@ -454,6 +470,54 @@ public class Drive extends SubsystemBase {
   public double getMaxAngularSpeedRadPerSec() {
     return 2 * Math.PI;
   }
+  // reset poses for auto
+  public Command resetPoseWithLLS() {
+    return runOnce(
+        () -> {
+          PoseEstimate leftLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
+          PoseEstimate rightLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName);
+          PoseEstimate frontLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName);
+          PoseEstimate[] poseList = {leftLLMT2, rightLLMT2, frontLLMT2};
+          PoseEstimate bestPose = null;
+          double bestScore = Double.POSITIVE_INFINITY;
+          for (PoseEstimate e : poseList) {
+            if (e.tagCount > 0) {
+              double eScore = e.avgTagDist + 1.0 / e.tagCount;
+              if (eScore < bestScore) {
+                bestScore = eScore;
+                bestPose = e;
+              }
+            }
+          }
+          if (bestPose != null) {
+            resetOdometry(bestPose.pose);
+          }
+        });
+  }
+  // public Command resetPoseWithRightLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName)
+  //                   .pose));
+  // }
+  // public Command resetPoseWithLeftLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName)
+  //                   .pose));
+  // }
+  // public Command resetPoseWithFrontLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName)
+  //                   .pose));
+  // }
 
   private boolean checkPose(PoseEstimate estimate) {
     if (estimate == null) {
@@ -495,8 +559,7 @@ public class Drive extends SubsystemBase {
     return estimate.pose.equals(new Pose2d());
   }
 
-  public static boolean leftStick(boolean b) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'leftStick'");
+  public double getRoll() {
+    return gyroIO.getRoll().getDegrees();
   }
 }

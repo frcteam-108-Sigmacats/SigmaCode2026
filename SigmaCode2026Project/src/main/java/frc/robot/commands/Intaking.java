@@ -2,15 +2,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake.IntakeMech;
-import frc.robot.subsystems.drive.Drive;
 
-public class RunIntakeCommand extends Command {
+public class Intaking extends Command {
   private IntakeMech intakeMech;
-  private Drive swerveDrive;
 
-  public RunIntakeCommand(IntakeMech intakeMech, Drive swerveDrive) {
+  public Intaking(IntakeMech intakeMech) {
     this.intakeMech = intakeMech;
-    this.swerveDrive = swerveDrive;
     addRequirements(this.intakeMech);
   }
 
@@ -23,7 +20,9 @@ public class RunIntakeCommand extends Command {
   }
 
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    intakeMech.stopRollerMotor();
+  }
 
   @Override
   public boolean isFinished() {
