@@ -61,9 +61,9 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "DepotPath4"
+            "name": "RunOverBumpBack"
           }
         },
         {
@@ -92,15 +92,40 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "depotloop1"
+            "name": "RunOverBump"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "depotloop2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depotloop3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseLLS"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunAll"
+                }
+              }
+            ]
           }
         }
       ]
