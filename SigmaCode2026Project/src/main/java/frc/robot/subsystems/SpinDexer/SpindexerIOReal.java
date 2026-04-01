@@ -40,11 +40,11 @@ public class SpinDexerIOReal implements SpinDexerIO {
     configSparkFlex.smartCurrentLimit(40);
     configSparkFlex.idleMode(IdleMode.kBrake);
 
-    canRangeConfiguration.ProximityParams.ProximityThreshold = 0.3;
+    canRangeConfiguration.ProximityParams.ProximityThreshold = 0.2;
     canRangeConfiguration.ProximityParams.MinSignalStrengthForValidMeasurement = 4800;
     countingSensor.getConfigurator().apply(canRangeConfiguration);
 
-    countingSensor.getIsDetected().setUpdateFrequency(100);
+    countingSensor.getIsDetected().setUpdateFrequency(250.0);
 
     spinDexer.configure(
         configSpinDexer, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

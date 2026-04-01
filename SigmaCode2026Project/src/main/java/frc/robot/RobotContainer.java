@@ -22,7 +22,6 @@ import frc.robot.subsystems.Intake.IntakeIOReal;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeMech;
 import frc.robot.subsystems.Shooter.Shooter;
-import frc.robot.subsystems.Shooter.ShooterConstants.ShooterStatus;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
 import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
@@ -126,16 +125,15 @@ public class RobotContainer {
     dLEFTSTICK.onTrue(
         new InstantCommand(
             () -> {
-              if (!(swerveDrive.getDriveState() == ShooterStatus.SHOOT)
-                  && !(swerveDrive.getDriveState() == ShooterStatus.PASSING)) {
-                swerveDrive.setDriveState(ShooterStatus.INTAKE);
+              if (!swerveDrive.getDriveState().equals("Shoot")) {
+                swerveDrive.setDriveState("Intake");
               }
             }));
     dLEFTSTICK.onFalse(
         new InstantCommand(
             () -> {
-              if (swerveDrive.getDriveState() == ShooterStatus.INTAKE) {
-                swerveDrive.setDriveState(ShooterStatus.DRIVE);
+              if (swerveDrive.getDriveState().equals("Intake")) {
+                swerveDrive.setDriveState("Drive");
               }
             }));
   }
@@ -182,6 +180,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("RunOverBumpBack", new DriveOverTheBump(swerveDrive, "back"));
     NamedCommands.registerCommand("ResetPoseLLS", swerveDrive.resetPoseWithLLS());
     NamedCommands.registerCommand("StopSpinDexer", new DefaultSpinDexerCommand(spinDexerMech));
+    NamedCommands.registerCommand("ReverseIntake", new Outtaking(intakeMech));
     // autoChooser.addDefaultOption("None", null);
     // autoChooser.addOption(
     //     "DepotAuto", new DepotAuto(swerveDrive, intakeMech, spinDexerMech, shooterMech));
