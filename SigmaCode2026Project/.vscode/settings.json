@@ -69,5 +69,6 @@
   },
   "[java]": {
     "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
-  }
+  },
+  "wpilib.autoSaveOnDeploy": true
 }

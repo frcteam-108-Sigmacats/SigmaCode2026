@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.Intake.IntakeMech;
 import frc.robot.subsystems.Shooter.Shooter;
@@ -23,7 +22,6 @@ public class RunAll extends ParallelCommandGroup {
     addCommands(
         new RunIntakeCommand(intakeMech, swerveDrive),
         new DefaultShooter(shooterMech, swerveDrive, true),
-        new TransferFuelToShooter(spinDexerMech, swerveDrive),
-        new InstantCommand(() -> swerveDrive.setDriveState("Shoot")));
+        new TransferFuelToShooter(spinDexerMech, swerveDrive));
   }
 }

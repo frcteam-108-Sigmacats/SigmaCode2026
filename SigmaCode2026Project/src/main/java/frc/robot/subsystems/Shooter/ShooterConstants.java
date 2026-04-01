@@ -122,7 +122,7 @@ public class ShooterConstants {
   public static final Pose2d blueDepotPose = new Pose2d(3, 5, new Rotation2d());
   public static final Pose2d blueStationPose =
       new Pose2d(3, 3, new Rotation2d()); // Put Station Pose
-    
+
   public static final Pose2d redHubPose = FlippingUtil.flipFieldPose(blueHubPose);
   public static final Pose2d redDepotPose = FlippingUtil.flipFieldPose(blueDepotPose);
   public static final Pose2d redStationPose = FlippingUtil.flipFieldPose(blueStationPose);
@@ -140,10 +140,12 @@ public class ShooterConstants {
   public static double totalInertia =
       (0.5 * brassWheelKG * Math.pow(brassWheelRadiusM, 2))
           + (numOfCompWheels * 0.5 * compWheelKG * Math.pow(compWheelRadM, 2));
-  public static enum ShooterStatus{
+
+  public static enum ShooterStatus {
     SHOOT,
     PASSING,
-    INTAKE
+    INTAKE,
+    DRIVE
   }
 
   // ── Shooter lookup tables ─────────────────────────────────────────────────

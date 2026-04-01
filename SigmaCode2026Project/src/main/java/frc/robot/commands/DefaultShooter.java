@@ -73,7 +73,6 @@ public class DefaultShooter extends Command {
         desiredAngle.minus(swerveDrive.getPose().getRotation().minus(Rotation2d.k180deg));
     if (desiredAngle.getDegrees() > 105) {
       desiredAngle = new Rotation2d(desiredAngle.getRadians() - (2 * Math.PI));
-      System.out.println("Greater than 91");
     } else if (desiredAngle.getDegrees() < -260) {
       desiredAngle = new Rotation2d(desiredAngle.getRadians() - (2 * Math.PI));
     }

@@ -12,6 +12,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import org.littletonrobotics.junction.Logger;
 
 public class SpinDexerIOReal implements SpinDexerIO {
   private SparkMax spinDexer;
@@ -33,13 +34,17 @@ public class SpinDexerIOReal implements SpinDexerIO {
 
     countingSensor = new CANrange(SpinDexerConstants.canRangeID, new CANBus("PhoenixBus"));
 
-    // canRangeConfiguration.ProximityParams.ProximityThreshold = 0.0;
-
     countingSensor.getConfigurator().apply(canRangeConfiguration);
     configSpinDexer.smartCurrentLimit(SpinDexerConstants.spinDexerCurrentLimit);
     configSpinDexer.idleMode(IdleMode.kCoast);
     configSparkFlex.smartCurrentLimit(40);
     configSparkFlex.idleMode(IdleMode.kBrake);
+
+    canRangeConfiguration.ProximityParams.ProximityThreshold = 0.3;
+    canRangeConfiguration.ProximityParams.MinSignalStrengthForValidMeasurement = 4800;
+    countingSensor.getConfigurator().apply(canRangeConfiguration);
+
+    countingSensor.getIsDetected().setUpdateFrequency(100);
 
     spinDexer.configure(
         configSpinDexer, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -59,6 +64,8 @@ public class SpinDexerIOReal implements SpinDexerIO {
     inputs.spinDexerMotorCurrent = kicker1.getOutputCurrent();
 
     inputs.detectBall = countingSensor.getIsDetected().getValue();
+    Logger.recordOutput(
+        "Strength of Proximity", countingSensor.getSignalStrength().getValueAsDouble());
   }
 
   @Override
