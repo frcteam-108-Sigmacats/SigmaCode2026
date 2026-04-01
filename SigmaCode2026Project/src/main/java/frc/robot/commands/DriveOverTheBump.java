@@ -40,7 +40,7 @@ public class DriveOverTheBump extends Command {
       gyroTilted = true;
     }
     ChassisSpeeds fieldSpeeds = new ChassisSpeeds(5.07, 0, 0);
-    if(direction.equals("back")){
+    if (direction.equals("back")) {
       fieldSpeeds.times(-1);
     }
 
