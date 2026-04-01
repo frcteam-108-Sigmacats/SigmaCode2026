@@ -252,8 +252,12 @@ public class Shooter extends SubsystemBase {
     ChassisSpeeds fieldSpeeds = swerveDrive.getDriveSpeedsFieldRelative();
 
     Translation2d aimPoint = targetPose.getTranslation();
-    for (int i = 0; i < 20; i++) {
-      double distance = targetPose.getTranslation().minus(robotPos).getNorm();
+
+    Translation2d turretOffset = ShooterConstants.turretOffset.rotateBy(swerveDrive.getRotation());
+    double flightOfTime = 0;
+    double distance = 0;
+    for (int i = 0; i < 5; i++) {
+      distance = targetPose.getTranslation().minus(robotPos).getNorm();
       double RPM =
           getInterpolated(Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
       double hoodAngle =
@@ -262,12 +266,21 @@ public class Shooter extends SubsystemBase {
       double exitBallVelX =
           (RPM * ShooterConstants.ballExitVelocityConversion)
               * Math.cos(Math.toRadians(ShooterConstants.hoodStartAngle + hoodAngle));
-      double flightOfTime = (distance / exitBallVelX) * 0.9;
+      flightOfTime = (distance / exitBallVelX) * 1.46;
+      Translation2d tangentialTurretVel =
+          new Translation2d(
+              -turretOffset.getY() * fieldSpeeds.omegaRadiansPerSecond,
+              turretOffset.getX() * fieldSpeeds.omegaRadiansPerSecond);
       aimPoint =
           new Translation2d(
-              targetPose.getX() - fieldSpeeds.vxMetersPerSecond * flightOfTime,
-              targetPose.getY() - fieldSpeeds.vyMetersPerSecond * flightOfTime);
+              targetPose.getX()
+                  - (fieldSpeeds.vxMetersPerSecond + tangentialTurretVel.getX()) * flightOfTime,
+              targetPose.getY()
+                  - (fieldSpeeds.vyMetersPerSecond + tangentialTurretVel.getY()) * flightOfTime);
     }
+    Logger.recordOutput("Shooter/Distance", distance);
+    Logger.recordOutput("Shooter/FieldSpeeds", fieldSpeeds);
+    Logger.recordOutput("/Shooter/TimeOfFlight", flightOfTime);
     return aimPoint;
   }
   // NEW
