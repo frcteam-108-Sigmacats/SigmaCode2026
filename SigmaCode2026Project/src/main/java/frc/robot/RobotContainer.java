@@ -22,6 +22,7 @@ import frc.robot.subsystems.Intake.IntakeIOReal;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeMech;
 import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterConstants.ShooterStatus;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
 import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
@@ -122,22 +123,21 @@ public class RobotContainer {
     bRB.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
     bLB.whileTrue(new Outtaking(intakeMech));
     // bY.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
-    dLEFTSTICK.onTrue(
-        new InstantCommand(
+new InstantCommand(
             () -> {
-              if (!swerveDrive.getDriveState().equals("Shoot")) {
-                swerveDrive.setDriveState("Intake");
+              if (!(swerveDrive.getDriveState() == ShooterStatus.SHOOT)
+                  && !(swerveDrive.getDriveState() == ShooterStatus.PASSING)) {
+                swerveDrive.setDriveState(ShooterStatus.INTAKE);
               }
-            }));
+            });
     dLEFTSTICK.onFalse(
         new InstantCommand(
             () -> {
-              if (swerveDrive.getDriveState().equals("Intake")) {
-                swerveDrive.setDriveState("Drive");
+              if (swerveDrive.getDriveState() == ShooterStatus.INTAKE) {
+                swerveDrive.setDriveState(ShooterStatus.DRIVE);
               }
             }));
   }
-
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
