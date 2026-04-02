@@ -5,15 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "race",
           "data": {
-            "name": "RunOverBump"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ReverseIntake"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunOverBump"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ResetPoseRLL"
+            "name": "ResetPoseLLS"
           }
         },
         {
@@ -38,19 +51,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": null
+            "pathName": "DepotPath3"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ResetPoseRLL"
+            "name": "ResetPoseLLS"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "DepotPath4"
+            "name": "RunOverBumpBack"
           }
         },
         {
@@ -75,19 +88,44 @@
         {
           "type": "named",
           "data": {
-            "name": "ResetPoseRLL"
+            "name": "ResetPoseLLS"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "depotloop1"
+            "name": "RunOverBump"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "depotloop2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depotloop3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseLLS"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunAll"
+                }
+              }
+            ]
           }
         }
       ]

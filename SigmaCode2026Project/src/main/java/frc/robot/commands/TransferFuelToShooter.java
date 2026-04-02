@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Shooter.ShooterConstants.ShooterStatus;
 import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 import frc.robot.subsystems.drive.Drive;
 
@@ -24,7 +25,8 @@ public class TransferFuelToShooter extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    swerveDrive.setDriveState("Shoot");
+    swerveDrive.setDriveState(ShooterStatus.SHOOT);
+    spinDexerMech.setShooterStatus(swerveDrive.getDriveState());
     counter = 40;
   }
 
@@ -41,8 +43,9 @@ public class TransferFuelToShooter extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if (swerveDrive.getDriveState().equals("Shoot")) {
-      swerveDrive.setDriveState("Drive");
+    if (swerveDrive.getDriveState() == ShooterStatus.SHOOT) {
+      swerveDrive.setDriveState(ShooterStatus.DRIVE);
+      spinDexerMech.setShooterStatus(swerveDrive.getDriveState());
     }
   }
 

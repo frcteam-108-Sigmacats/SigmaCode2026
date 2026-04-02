@@ -47,6 +47,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
+import frc.robot.subsystems.Shooter.ShooterConstants.ShooterStatus;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -71,7 +72,7 @@ public class Drive extends SubsystemBase {
 
   private ChassisSpeeds robotChassisSpeeds = new ChassisSpeeds();
 
-  private String driveMode = "Drive";
+  private ShooterStatus driveMode = ShooterStatus.DRIVE;
 
   private boolean allianceRed;
 
@@ -291,13 +292,19 @@ public class Drive extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
-    if (driveMode.equals("Shoot")) {
+    if (driveMode == ShooterStatus.SHOOT) {
       speeds =
           new ChassisSpeeds(
               speeds.vxMetersPerSecond * 0.2,
               speeds.vyMetersPerSecond * 0.2,
               speeds.omegaRadiansPerSecond * 0.5);
-    } else if (driveMode.equals("Intake")) {
+    } else if (driveMode == ShooterStatus.PASSING) {
+      speeds =
+          new ChassisSpeeds(
+              speeds.vxMetersPerSecond * 0.3,
+              speeds.vyMetersPerSecond * 0.3,
+              speeds.omegaRadiansPerSecond * 0.5);
+    } else if (driveMode == ShooterStatus.INTAKE) {
       speeds =
           new ChassisSpeeds(
               speeds.vxMetersPerSecond * 0.5,
@@ -558,11 +565,11 @@ public class Drive extends SubsystemBase {
     return true;
   }
 
-  public void setDriveState(String mode) {
+  public void setDriveState(ShooterStatus mode) {
     driveMode = mode;
   }
 
-  public String getDriveState() {
+  public ShooterStatus getDriveState() {
     return driveMode;
   }
 

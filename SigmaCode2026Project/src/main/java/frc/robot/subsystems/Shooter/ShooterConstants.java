@@ -140,6 +140,14 @@ public class ShooterConstants {
   public static double totalInertia =
       (0.5 * brassWheelKG * Math.pow(brassWheelRadiusM, 2))
           + (numOfCompWheels * 0.5 * compWheelKG * Math.pow(compWheelRadM, 2));
+
+  public static enum ShooterStatus {
+    SHOOT,
+    PASSING,
+    INTAKE,
+    DRIVE
+  }
+
   // ── Shooter lookup tables ─────────────────────────────────────────────────
   /**
    * Distance-to-setpoint lookup tables used by {@link frc.robot.commands.TrackHubCommand}.

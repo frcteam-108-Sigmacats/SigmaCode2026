@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Shooter.ShooterConstants.ShooterStatus;
 import frc.robot.subsystems.drive.Drive;
 import java.util.TreeMap;
 import org.littletonrobotics.junction.Logger;
@@ -203,21 +204,27 @@ public class Shooter extends SubsystemBase {
     if (DriverStation.getAlliance().get() == Alliance.Blue) {
       if (swerveDrive.getPose().getX() > ShooterConstants.blueHubPose.getX()) {
         if (swerveDrive.getPose().getY() > ShooterConstants.blueHubPose.getY()) {
+          swerveDrive.setDriveState(ShooterStatus.PASSING);
           return ShooterConstants.blueDepotPose;
         } else {
+          swerveDrive.setDriveState(ShooterStatus.PASSING);
           return ShooterConstants.blueStationPose;
         }
       } else {
+        swerveDrive.setDriveState(ShooterStatus.SHOOT);
         return ShooterConstants.blueHubPose;
       }
     } else {
       if (swerveDrive.getPose().getX() < ShooterConstants.redHubPose.getX()) {
         if (swerveDrive.getPose().getY() > ShooterConstants.redHubPose.getY()) {
+          swerveDrive.setDriveState(ShooterStatus.PASSING);
           return ShooterConstants.redStationPose;
         } else {
+          swerveDrive.setDriveState(ShooterStatus.PASSING);
           return ShooterConstants.redDepotPose;
         }
       } else {
+        swerveDrive.setDriveState(ShooterStatus.SHOOT);
         return ShooterConstants.redHubPose;
       }
     }
