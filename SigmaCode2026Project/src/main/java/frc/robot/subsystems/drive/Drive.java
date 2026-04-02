@@ -22,6 +22,8 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -62,6 +64,11 @@ public class Drive extends SubsystemBase {
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
   private boolean slowSpeedEnable = false;
 
+  // Limelight camera streams
+  private HttpCamera limelightBackLeft;
+  private HttpCamera limelightBackRight;
+  private HttpCamera limelightFront;
+
   private ChassisSpeeds robotChassisSpeeds = new ChassisSpeeds();
 
   private String driveMode = "Drive";
@@ -100,6 +107,10 @@ public class Drive extends SubsystemBase {
 
     // Start odometry thread
     SparkXPhoenixOdometryThread.getInstance().start();
+    // Initialize Limelight camera streams for Elastic dashboard
+    if (Constants.currentMode == Mode.REAL) {
+      setupLimelightStreams();
+    }
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configure(
@@ -217,27 +228,29 @@ public class Drive extends SubsystemBase {
           gyroIO.getPitch().getDegrees(),
           0);
 
-      /*  LimelightHelpers.SetRobotOrientation(
-      DriveConstants.kLimelightFrontName,
-      allianceRed
-          ? gyroIO.getYaw().getDegrees() + 180
-          : gyroIO.getYaw().getDegrees(),
-      0,
-      gyroIO.getRoll().getDegrees(),
-      0,
-      gyroIO.getPitch().getDegrees(),
-      0); */
+      LimelightHelpers.SetRobotOrientation(
+          DriveConstants.kLimelightFrontName,
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
+          0,
+          gyroIO.getRoll().getDegrees(),
+          0,
+          gyroIO.getPitch().getDegrees(),
+          0);
 
       PoseEstimate bLMT2 =
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
       PoseEstimate bRMT2 =
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName);
-
+      PoseEstimate FLMT2 =
+          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName);
       if (checkPose(bLMT2)) {
         updatePoseWithStdDev(bLMT2);
       }
       if (checkPose(bRMT2)) {
         updatePoseWithStdDev(bRMT2);
+      }
+      if (checkPose(FLMT2)) {
+        updatePoseWithStdDev(FLMT2);
       }
     }
   }
@@ -468,14 +481,54 @@ public class Drive extends SubsystemBase {
   public double getMaxAngularSpeedRadPerSec() {
     return 2 * Math.PI;
   }
-
-  public Command resetPoseWithRightLL() {
+  // reset poses for auto
+  public Command resetPoseWithLLS() {
     return runOnce(
-        () ->
-            this.resetOdometry(
-                LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName)
-                    .pose));
+        () -> {
+          PoseEstimate leftLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
+          PoseEstimate rightLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName);
+          PoseEstimate frontLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName);
+          PoseEstimate[] poseList = {leftLLMT2, rightLLMT2, frontLLMT2};
+          PoseEstimate bestPose = null;
+          double bestScore = Double.POSITIVE_INFINITY;
+          for (PoseEstimate e : poseList) {
+            if (e.tagCount > 0) {
+              double eScore = e.avgTagDist + 1.0 / e.tagCount;
+              if (eScore < bestScore) {
+                bestScore = eScore;
+                bestPose = e;
+              }
+            }
+          }
+          if (bestPose != null) {
+            resetOdometry(bestPose.pose);
+          }
+        });
   }
+  // public Command resetPoseWithRightLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName)
+  //                   .pose));
+  // }
+  // public Command resetPoseWithLeftLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName)
+  //                   .pose));
+  // }
+  // public Command resetPoseWithFrontLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName)
+  //                   .pose));
+  // }
 
   private boolean checkPose(PoseEstimate estimate) {
     if (estimate == null) {
@@ -519,5 +572,38 @@ public class Drive extends SubsystemBase {
 
   public double getRoll() {
     return gyroIO.getRoll().getDegrees();
+  }
+
+  /**
+   * Sets up Limelight camera streams for the Elastic dashboard. This publishes the camera feeds to
+   * NetworkTables so they can be viewed in Elastic.
+   */
+  private void setupLimelightStreams() {
+    try {
+      // Back Left Limelight
+      limelightBackLeft =
+          new HttpCamera(
+              kLimelightBackLeftName,
+              "http://" + kLimelightBackLeftName + ".local:5800/stream.mjpg");
+      CameraServer.startAutomaticCapture(limelightBackLeft);
+
+      // Back Right Limelight
+      limelightBackRight =
+          new HttpCamera(
+              kLimelightBackRightName,
+              "http://" + kLimelightBackRightName + ".local:5800/stream.mjpg");
+      CameraServer.startAutomaticCapture(limelightBackRight);
+
+      // Front Limelight
+      limelightFront =
+          new HttpCamera(
+              kLimelightFrontName, "http://" + kLimelightFrontName + ".local:5800/stream.mjpg");
+      CameraServer.startAutomaticCapture(limelightFront);
+
+      Logger.recordOutput("Drive/LimelightStreamsInitialized", true);
+    } catch (Exception e) {
+      Logger.recordOutput("Drive/LimelightStreamError", e.getMessage());
+      System.err.println("Failed to initialize Limelight streams: " + e.getMessage());
+    }
   }
 }

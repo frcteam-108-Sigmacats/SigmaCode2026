@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.leds.LEDConstants.LEDSetting;
 import java.util.Optional;
+import org.littletonrobotics.junction.Logger;
 
 public class LEDs extends SubsystemBase {
 
@@ -32,6 +33,7 @@ public class LEDs extends SubsystemBase {
   private final LEDPattern yellowBlink = yellow.blink(Seconds.of(0.2));
 
   // ── State ──────────────────────────────────────────────────────────────────
+  private double shiftTimer = 0.0;
   private boolean change = false;
   private LEDSetting ledMode = LEDSetting.BLUE;
 
@@ -59,7 +61,7 @@ public class LEDs extends SubsystemBase {
 
   @Override
   public void periodic() {
-
+    getShiftTimer();
     updateHubLEDFromGameData();
 
     currentPattern.applyTo(m_buffer);
@@ -164,5 +166,24 @@ public class LEDs extends SubsystemBase {
 
   public LEDSetting grabLEDMode() {
     return ledMode;
+  }
+  // ── Shift Timer ────────────────────────────────────────────────────────────
+
+  public void getShiftTimer() {
+    double matchTime = DriverStation.getMatchTime();
+    if (matchTime > 130) {
+      shiftTimer = matchTime - 130;
+    } else if (matchTime > 105) {
+      shiftTimer = matchTime - 105;
+    } else if (matchTime > 80) {
+      shiftTimer = matchTime - 80;
+    } else if (matchTime > 55) {
+      shiftTimer = matchTime - 55;
+    } else if (matchTime > 30) {
+      shiftTimer = matchTime - 30;
+    } else {
+      shiftTimer = 0;
+    }
+    Logger.recordOutput("/MatchData/ShiftTimer", shiftTimer);
   }
 }

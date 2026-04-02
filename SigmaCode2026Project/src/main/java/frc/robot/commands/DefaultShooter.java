@@ -22,6 +22,8 @@ public class DefaultShooter extends Command {
 
   private Supplier<Pose2d> poseSupplier;
   private Supplier<ChassisSpeeds> speedsSupplier;
+
+  private double volt = 4;
   /** Creates a new DefaultShooter. */
   public DefaultShooter(Shooter shooterMech, Drive swerveDrive, boolean fullSpeed) {
     this.shooterMech = shooterMech;

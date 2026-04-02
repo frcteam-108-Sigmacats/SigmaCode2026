@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
@@ -15,9 +16,12 @@ public class DriveOverTheBump extends Command {
   private boolean gyroTilted;
 
   private double gyroFlatCooldown;
+
+  private String direction = null;
   /** Creates a new DriveOverTheBump. */
-  public DriveOverTheBump(Drive swerveDrive) {
+  public DriveOverTheBump(Drive swerveDrive, String direction) {
     this.swerveDrive = swerveDrive;
+    this.direction = direction;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(this.swerveDrive);
   }
@@ -36,6 +40,9 @@ public class DriveOverTheBump extends Command {
       gyroTilted = true;
     }
     ChassisSpeeds fieldSpeeds = new ChassisSpeeds(5.07, 0, 0);
+    if (direction.equals("back")) {
+      fieldSpeeds.times(-1);
+    }
 
     swerveDrive.runVelocityFieldRelative(fieldSpeeds);
 

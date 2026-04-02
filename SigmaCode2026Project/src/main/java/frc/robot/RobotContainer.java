@@ -175,8 +175,12 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake", new RunIntakeCommand(intakeMech, swerveDrive));
     NamedCommands.registerCommand(
         "RunAll", new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
-    NamedCommands.registerCommand("RunOverBump", new DriveOverTheBump(swerveDrive));
-    NamedCommands.registerCommand("ResetPoseRLL", swerveDrive.resetPoseWithRightLL());
+    NamedCommands.registerCommand(
+        "RunOverBumpForward", new DriveOverTheBump(swerveDrive, "forward"));
+    NamedCommands.registerCommand("RunOverBumpBack", new DriveOverTheBump(swerveDrive, "back"));
+    NamedCommands.registerCommand("ResetPoseLLS", swerveDrive.resetPoseWithLLS());
+    NamedCommands.registerCommand("StopSpinDexer", new DefaultSpinDexerCommand(spinDexerMech));
+    NamedCommands.registerCommand("ReverseIntake", new Outtaking(intakeMech));
     // autoChooser.addDefaultOption("None", null);
     // autoChooser.addOption(
     //     "DepotAuto", new DepotAuto(swerveDrive, intakeMech, spinDexerMech, shooterMech));

@@ -3,6 +3,7 @@ package frc.robot.subsystems.Shooter;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import java.util.TreeMap;
@@ -60,10 +61,10 @@ public class ShooterConstants {
   public static final boolean shooterRightInverted = true;
 
   // Velocity PID / FF (Slot 0 on TalonFX)
-  public static final double shooterKp = 0.01;
+  public static final double shooterKp = 0.9;
   public static final double shooterKd = 0.0;
-  public static final double shooterKs = 0.01; // V
-  public static final double shooterKv = 0.12; // V*s/rad
+  public static final double shooterKs = 0.31; // V
+  public static final double shooterKv = 0.08856; // V*s/m
 
   // Sim
   public static final double shooterSimKp = 0.5;
@@ -114,6 +115,9 @@ public class ShooterConstants {
   /** Shooter inertia wheel radius (m) – 4 in inertia wheels. */
   public static final double shooterInertiaWheelRadiusMeters = Units.inchesToMeters(4.0);
 
+  public static final Translation2d turretOffset =
+      new Translation2d(Units.inchesToMeters(-6.25), 0);
+
   public static final Pose2d blueHubPose = new Pose2d(4.62, 4.03, new Rotation2d());
   public static final Pose2d blueDepotPose = new Pose2d(3, 5, new Rotation2d());
   public static final Pose2d blueStationPose =
@@ -123,6 +127,19 @@ public class ShooterConstants {
   public static final Pose2d redDepotPose = FlippingUtil.flipFieldPose(blueDepotPose);
   public static final Pose2d redStationPose = FlippingUtil.flipFieldPose(blueStationPose);
 
+  // Shooter intertias and stuff
+  public static double brassWheelKG = 0.7;
+  public static double brassWheelRadiusM = 0.1;
+  public static double numOfCompWheels = 2;
+  public static double compWheelKG = 0.08;
+  public static double compWheelRadM = 0.04;
+  public static double numOfKrakens = 2;
+  public static double krakenRotInertia = 0.00003;
+  public static double ballMassKG = 0.215;
+
+  public static double totalInertia =
+      (0.5 * brassWheelKG * Math.pow(brassWheelRadiusM, 2))
+          + (numOfCompWheels * 0.5 * compWheelKG * Math.pow(compWheelRadM, 2));
   // ── Shooter lookup tables ─────────────────────────────────────────────────
   /**
    * Distance-to-setpoint lookup tables used by {@link frc.robot.commands.TrackHubCommand}.

@@ -38,7 +38,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": " DepotPath3"
+            "pathName": null
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseRLL"
           }
         },
         {
@@ -48,9 +54,40 @@
           }
         },
         {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunAll"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 5.0
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "named",
           "data": {
-            "name": "RunAll"
+            "name": "ResetPoseRLL"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depotloop1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depotloop2"
           }
         }
       ]
