@@ -22,6 +22,8 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -63,6 +65,11 @@ public class Drive extends SubsystemBase {
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
   private boolean slowSpeedEnable = false;
 
+  // Limelight camera streams
+  private HttpCamera limelightBackLeft;
+  private HttpCamera limelightBackRight;
+  private HttpCamera limelightFront;
+
   private ChassisSpeeds robotChassisSpeeds = new ChassisSpeeds();
 
   private ShooterStatus driveMode = ShooterStatus.DRIVE;
@@ -101,6 +108,10 @@ public class Drive extends SubsystemBase {
 
     // Start odometry thread
     SparkXPhoenixOdometryThread.getInstance().start();
+    // Initialize Limelight camera streams for Elastic dashboard
+    if (Constants.currentMode == Mode.REAL) {
+      setupLimelightStreams();
+    }
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configure(
@@ -568,5 +579,38 @@ public class Drive extends SubsystemBase {
 
   public double getRoll() {
     return gyroIO.getRoll().getDegrees();
+  }
+
+  /**
+   * Sets up Limelight camera streams for the Elastic dashboard. This publishes the camera feeds to
+   * NetworkTables so they can be viewed in Elastic.
+   */
+  private void setupLimelightStreams() {
+    try {
+      // Back Left Limelight
+      limelightBackLeft =
+          new HttpCamera(
+              kLimelightBackLeftName,
+              "http://" + kLimelightBackLeftName + ".local:5800/stream.mjpg");
+      CameraServer.startAutomaticCapture(limelightBackLeft);
+
+      // Back Right Limelight
+      limelightBackRight =
+          new HttpCamera(
+              kLimelightBackRightName,
+              "http://" + kLimelightBackRightName + ".local:5800/stream.mjpg");
+      CameraServer.startAutomaticCapture(limelightBackRight);
+
+      // Front Limelight
+      limelightFront =
+          new HttpCamera(
+              kLimelightFrontName, "http://" + kLimelightFrontName + ".local:5800/stream.mjpg");
+      CameraServer.startAutomaticCapture(limelightFront);
+
+      Logger.recordOutput("Drive/LimelightStreamsInitialized", true);
+    } catch (Exception e) {
+      Logger.recordOutput("Drive/LimelightStreamError", e.getMessage());
+      System.err.println("Failed to initialize Limelight streams: " + e.getMessage());
+    }
   }
 }
