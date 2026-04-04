@@ -21,7 +21,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -55,22 +54,11 @@ public class DriveCommands {
   /**
    * Field relative drive command using two joysticks (controlling linear and angular velocities).
    */
-  //  private static final double SLOW_MO_MULTIPLIER = 1.0;
-
   public static Command joystickDrive(
       Drive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       DoubleSupplier omegaSupplier) {
-    return joystickDrive(drive, xSupplier, ySupplier, omegaSupplier, () -> false);
-  }
-
-  public static Command joystickDrive(
-      Drive drive,
-      DoubleSupplier xSupplier,
-      DoubleSupplier ySupplier,
-      DoubleSupplier omegaSupplier,
-      BooleanSupplier slowModeSupplier) {
     return Commands.run(
         () -> {
           // Get linear velocity
@@ -82,9 +70,6 @@ public class DriveCommands {
 
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
-
-          // Apply slow mode multiplier (30% speed reduction) when toggled
-          //    double speedMultiplier = slowModeSupplier.getAsBoolean() ? SLOW_MO_MULTIPLIER : 0.2;
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds =

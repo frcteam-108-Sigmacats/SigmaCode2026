@@ -74,8 +74,6 @@ public class Drive extends SubsystemBase {
 
   private ShooterStatus driveMode = ShooterStatus.DRIVE;
 
-  private boolean allianceRed;
-
   private static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private static Rotation2d rawGyroRotation = new Rotation2d();
   private static SwerveModulePosition[] lastModulePositions = // For delta tracking
@@ -99,9 +97,6 @@ public class Drive extends SubsystemBase {
     modules[1] = new Module(frModuleIO, 1);
     modules[2] = new Module(blModuleIO, 2);
     modules[3] = new Module(brModuleIO, 3);
-
-    // this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
-    // poseEstimator.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(0)));
 
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
@@ -145,11 +140,6 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
-    if (DriverStation.getAlliance().get() == Alliance.Red) {
-      allianceRed = true;
-    } else {
-      allianceRed = false;
-    }
   }
 
   @Override
@@ -205,7 +195,6 @@ public class Drive extends SubsystemBase {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-      // poseEstimator.update(rawGyroRotation, modulePositions);
     }
 
     // Update gyro alert
@@ -213,7 +202,7 @@ public class Drive extends SubsystemBase {
     if (Constants.currentMode == Mode.REAL) {
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackLeftName,
-          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
+          gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -222,7 +211,7 @@ public class Drive extends SubsystemBase {
 
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackRightName,
-          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
+          gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -231,7 +220,7 @@ public class Drive extends SubsystemBase {
 
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightFrontName,
-          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
+          gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -276,14 +265,6 @@ public class Drive extends SubsystemBase {
 
     poseEstimator.addVisionMeasurement(
         estimate.pose, estimate.timestampSeconds, VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev));
-  }
-
-  public void setSlowSpeedBool(boolean enable) {
-    slowSpeedEnable = enable;
-  }
-
-  public boolean isSlowSpeedEnabled() {
-    return slowSpeedEnable;
   }
 
   /**
@@ -454,10 +435,6 @@ public class Drive extends SubsystemBase {
     return output;
   }
 
-  public static Pose2d visionPose() {
-    return poseEstimator.getEstimatedPosition();
-  }
-
   /** Returns the current odometry pose. */
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
@@ -472,11 +449,6 @@ public class Drive extends SubsystemBase {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
-  }
-
-  /** Adds a new timestamped vision measurement. */
-  public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
-    poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, null);
   }
 
   /** Returns the maximum linear speed in meters per sec. */
@@ -515,27 +487,6 @@ public class Drive extends SubsystemBase {
           }
         });
   }
-  // public Command resetPoseWithRightLL() {
-  //   return runOnce(
-  //       () ->
-  //           this.resetOdometry(
-  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName)
-  //                   .pose));
-  // }
-  // public Command resetPoseWithLeftLL() {
-  //   return runOnce(
-  //       () ->
-  //           this.resetOdometry(
-  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName)
-  //                   .pose));
-  // }
-  // public Command resetPoseWithFrontLL() {
-  //   return runOnce(
-  //       () ->
-  //           this.resetOdometry(
-  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName)
-  //                   .pose));
-  // }
 
   private boolean checkPose(PoseEstimate estimate) {
     if (estimate == null) {

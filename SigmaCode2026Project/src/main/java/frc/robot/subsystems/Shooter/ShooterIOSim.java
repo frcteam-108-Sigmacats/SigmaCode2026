@@ -4,6 +4,7 @@ import static frc.robot.subsystems.Shooter.ShooterConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
@@ -76,7 +77,7 @@ public class ShooterIOSim implements ShooterIO {
   }
 
   @Override
-  public void updateInputs(TurretIOInputs inputs) {
+  public void updateInputs(ShooterIOInputs inputs) {
 
     // ── Turret closed-loop ────────────────────────────────────────────────
     if (turretClosedLoop) {
@@ -112,15 +113,15 @@ public class ShooterIOSim implements ShooterIO {
 
     // ── Populate inputs ───────────────────────────────────────────────────
     inputs.turretConnected = true;
-    inputs.turretPositionRad = turretSim.getAngularPositionRad();
+    inputs.turretPosition = Rotation2d.fromRadians(turretSim.getAngularPositionRad());
     inputs.turretVelocityRadPerSec = turretSim.getAngularVelocityRadPerSec();
     inputs.turretAppliedVolts = turretAppliedVolts;
     inputs.turretCurrentAmps = Math.abs(turretSim.getCurrentDrawAmps());
 
     inputs.shooterLeftConnected = true;
     inputs.shooterRightConnected = true;
-    inputs.shooterLeftVelocityRadPerSec = shooterLeftSim.getAngularVelocityRadPerSec();
-    inputs.shooterRightVelocityRadPerSec = shooterRightSim.getAngularVelocityRadPerSec();
+    inputs.shooterLeftVelocityRPM = shooterLeftSim.getAngularVelocityRadPerSec() * 60;
+    inputs.shooterRightVelocityRPM = shooterRightSim.getAngularVelocityRadPerSec() * 60;
     inputs.shooterLeftAppliedVolts = shooterLeftAppliedVolts;
     inputs.shooterRightAppliedVolts = shooterRightAppliedVolts;
     inputs.shooterLeftCurrentAmps = Math.abs(shooterLeftSim.getCurrentDrawAmps());

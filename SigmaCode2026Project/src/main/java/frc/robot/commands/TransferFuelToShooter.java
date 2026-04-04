@@ -4,7 +4,10 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Shooter.ShooterConstants;
 import frc.robot.subsystems.Shooter.ShooterConstants.ShooterStatus;
 import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 import frc.robot.subsystems.drive.Drive;
@@ -25,7 +28,22 @@ public class TransferFuelToShooter extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    swerveDrive.setDriveState(ShooterStatus.SHOOT);
+    // Checks which Alliance color we are on
+    if (DriverStation.getAlliance().get() == Alliance.Blue) {
+      // Checks if the robot position is outside the alliance zone
+      if (swerveDrive.getPose().getX() > ShooterConstants.blueHubPose.getX()) {
+        swerveDrive.setDriveState(ShooterStatus.PASSING);
+      } else {
+        swerveDrive.setDriveState(ShooterStatus.SHOOT);
+      }
+    } else {
+      // Checks if the robot position is outside the alliance zone
+      if (swerveDrive.getPose().getX() < ShooterConstants.redHubPose.getX()) {
+        swerveDrive.setDriveState(ShooterStatus.PASSING);
+      } else {
+        swerveDrive.setDriveState(ShooterStatus.SHOOT);
+      }
+    }
     spinDexerMech.setShooterStatus(swerveDrive.getDriveState());
     counter = 40;
   }

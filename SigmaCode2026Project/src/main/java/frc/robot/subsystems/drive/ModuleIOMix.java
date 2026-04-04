@@ -34,23 +34,25 @@ import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 public class ModuleIOMix implements ModuleIO {
+  // The variable that keeps track of the encoder's zero offset
   private final Rotation2d zeroRotation;
-
+  // Instantiates the speed controllers for the module
   private final TalonFX driveMotor;
   private final SparkBase turnMotor;
-
+  // Instantiates the Absolute Encoder for the module
   private final AbsoluteEncoder turnEncoder;
-
+  // Constructs the velocity voltage controller for the drive motor
   private final VelocityVoltage velocity = new VelocityVoltage(0);
+  // Constructs the PID Controller for the turn motor
   private final SparkClosedLoopController turnController;
-
+  // Queues to keep track of the timestamp, drive positions, and turn positions for better accuracy
   private final Queue<Double> timestampQueue;
   private final Queue<Double> drivePositionQueue;
   private final Queue<Double> turnPositionQueue;
-
+  // Debouncers
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
-
+  // Constructing the caching for the given information that will be taken from the motors
   private final StatusSignal<Angle> drivePos;
   private final StatusSignal<AngularVelocity> driveVel;
   private final StatusSignal<Voltage> driveVolt;
@@ -85,13 +87,16 @@ public class ModuleIOMix implements ModuleIO {
               default -> 0;
             },
             MotorType.kBrushless);
+    // Assigns the Absolute Encoder and PID Controller to the turn motor's internal PID Controller
+    // and the Abs Enc thats connected to the speed controller
     turnEncoder = turnMotor.getAbsoluteEncoder();
     turnController = turnMotor.getClosedLoopController();
-
+    // Drive Motor Configs
     var driveConfig = new TalonFXConfiguration();
     driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     driveConfig.CurrentLimits.StatorCurrentLimit = DriveConstants.driveMotorCurrentLimit;
-    driveConfig.Feedback.SensorToMechanismRatio = driveEncoderPositionFactor;
+    driveConfig.Feedback.SensorToMechanismRatio =
+        driveEncoderPositionFactor; // Gear Ratio only, no conversion to RadiansPerSecond
     driveConfig.Slot0.kP = driveKp;
     driveConfig.Slot0.kI = 0;
     driveConfig.Slot0.kD = driveKd;
@@ -101,7 +106,7 @@ public class ModuleIOMix implements ModuleIO {
     driveConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.0;
     driveMotor.getConfigurator().apply(driveConfig);
     driveMotor.setPosition(0);
-
+    // Turn Motor Configurations
     var turnConfig = new SparkMaxConfig();
     turnConfig
         .inverted(turnInverted)
@@ -129,21 +134,24 @@ public class ModuleIOMix implements ModuleIO {
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
+    // Tries to apply the configurations to the turn motor 5 times
     tryUntilOk(
         turnMotor,
         5,
         () ->
             turnMotor.configure(
                 turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-
+    // Sets the position of the drive motor update frequency to 250HZ
     driveMotor.getPosition().setUpdateFrequency(250);
-
+    // Registers the signals for the drive motor position and turn motor position into the odometry
+    // thread for faster processing
     timestampQueue = SparkXPhoenixOdometryThread.getInstance().makeTimestampQueue();
     drivePositionQueue =
         SparkXPhoenixOdometryThread.getInstance().registerSignal(driveMotor.getPosition());
     turnPositionQueue =
         SparkXPhoenixOdometryThread.getInstance()
             .registerSignal(turnMotor, turnEncoder::getPosition);
+    // Assigns the cache variables to the motors specific Status Signal data
     drivePos = driveMotor.getPosition();
     driveVel = driveMotor.getVelocity();
     driveVolt = driveMotor.getMotorVoltage();
@@ -214,8 +222,6 @@ public class ModuleIOMix implements ModuleIO {
 
   @Override
   public void setDriveVelocity(double velocityRadPerSec) {
-    double ffVolts = driveKs * Math.signum(velocityRadPerSec) + driveKv * velocityRadPerSec;
-
     driveMotor.setControl(velocity.withSlot(0).withVelocity(velocityRadPerSec / (2 * Math.PI)));
   }
 

@@ -17,12 +17,28 @@ public interface SpinDexerIO {
   }
 
   public default void updateInputs(SpinDexerIOInputs inputs) {}
-
+  /**
+   * Setting the speed percentage of the SpinDexer
+   *
+   * @param speed The speed percentage (-1.0 to 1.0)
+   */
   public default void setSpinDexerSpeed(double speed) {}
-
+  /**
+   * Setting the speed percentage of the 2 Kicker Motors
+   *
+   * @param speed The speed percentage (-1.0 to 1.0)
+   */
   public default void setKickerSpeed(double speed) {}
-
+  /**
+   * Setting the voltage of the SpinDexer Motor
+   *
+   * @param volt Voltage between -12V to 12V
+   */
   public default void setSpinDexerVoltage(double volt) {}
-
+  /**
+   * Setting the voltage of the 2 Kicker Motors
+   *
+   * @param volt Voltage between -12V to 12V
+   */
   public default void setKickerVoltage(double volt) {}
 }

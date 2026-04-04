@@ -27,7 +27,6 @@ public class Robot extends LoggedRobot {
 
   private final RobotContainer m_robotContainer;
   private final RobotClock m_robotClock = new RobotClock();
-  // public final LEDs m_leds = LEDs.getInstance();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -102,7 +101,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledInit() {
     m_robotClock.resetRobotTimer();
-    // m_leds.setOff();
   }
 
   @Override
@@ -140,9 +138,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {
-    //  m_leds.setRedBlueSwitch();
-  }
+  public void teleopPeriodic() {}
 
   @Override
   public void testInit() {

@@ -127,20 +127,6 @@ public class ShooterConstants {
   public static final Pose2d redDepotPose = FlippingUtil.flipFieldPose(blueDepotPose);
   public static final Pose2d redStationPose = FlippingUtil.flipFieldPose(blueStationPose);
 
-  // Shooter intertias and stuff
-  public static double brassWheelKG = 0.7;
-  public static double brassWheelRadiusM = 0.1;
-  public static double numOfCompWheels = 2;
-  public static double compWheelKG = 0.08;
-  public static double compWheelRadM = 0.04;
-  public static double numOfKrakens = 2;
-  public static double krakenRotInertia = 0.00003;
-  public static double ballMassKG = 0.215;
-
-  public static double totalInertia =
-      (0.5 * brassWheelKG * Math.pow(brassWheelRadiusM, 2))
-          + (numOfCompWheels * 0.5 * compWheelKG * Math.pow(compWheelRadM, 2));
-
   public static enum ShooterStatus {
     SHOOT,
     PASSING,

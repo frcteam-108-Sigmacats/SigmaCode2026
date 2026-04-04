@@ -50,10 +50,15 @@ public class LEDs extends SubsystemBase {
   // ── Constructor ────────────────────────────────────────────────────────────
 
   public LEDs() {
+    // Constructs the leds that is connected to PWM Slot
     m_led = new AddressableLED(9);
+    // Constructs the buffer for the LEDs using the number of LEDS on the LED Strip
     m_buffer = new AddressableLEDBuffer(LEDConstants.k_stripLength);
+    // Tells the LEDS what the length of the LED Strip is
     m_led.setLength(LEDConstants.k_stripLength);
+    // Starts the LEDS up
     m_led.start();
+    // Sets the current pattern of the LEDS to be solid blue
     currentPattern = blue;
   }
 
@@ -61,10 +66,13 @@ public class LEDs extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Constantly updating the Shift Timer using Game Data
     getShiftTimer();
+    // Updates LEDS based on Game Data
     updateHubLEDFromGameData();
-
+    // Applies the current LED Pattern to the buffer
     currentPattern.applyTo(m_buffer);
+    // Sets the LED patterns from buffer to LEDs
     m_led.setData(m_buffer);
   }
 
@@ -93,16 +101,20 @@ public class LEDs extends SubsystemBase {
         return blue;
     }
   }
-
+  /**
+   * Checks the Status of the match to change LED Mode
+   *
+   * @return
+   */
   private LEDSetting computeHubLEDSetting() {
+    // If Autonomous is underway, HUB is active
     if (DriverStation.isAutonomousEnabled()) {
       return LEDSetting.HUB_ACTIVE;
     }
-
     if (!DriverStation.isTeleopEnabled()) {
       return null;
     }
-
+    // Grabs the match time
     double matchTime = DriverStation.getMatchTime();
     if (matchTime < 0) {
       return LEDSetting.HUB_ACTIVE;

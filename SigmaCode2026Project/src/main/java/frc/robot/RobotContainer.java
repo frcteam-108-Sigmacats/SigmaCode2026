@@ -17,7 +17,6 @@ import frc.robot.commands.Outtaking;
 import frc.robot.commands.ReverseSpinDexerCommand;
 import frc.robot.commands.RunAll;
 import frc.robot.commands.RunIntakeCommand;
-import frc.robot.commands.SlowMo;
 import frc.robot.subsystems.Intake.IntakeIOReal;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeMech;
@@ -47,13 +46,12 @@ public class RobotContainer {
   private Drive swerveDrive;
   private IntakeMech intakeMech;
   private SpinDexerMech spinDexerMech;
-  private SlowMo slowMo;
 
   private CommandXboxController driver = new CommandXboxController(0);
+  // List of Triggers for the driver controller
   private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFTSTICK, dRIGHT, dDOWN, dSTART, bLB, bRB;
-  private boolean slowMoActive = false;
 
-  // Dashboard inputs
+  // Auto Chooser that is logged into AdvantageScope
   private LoggedDashboardChooser<Command> autoChooser =
       new LoggedDashboardChooser<>("Auto Chooser");
 
@@ -100,11 +98,8 @@ public class RobotContainer {
     }
     // Configure the trigger bindings
     configureBindings();
+    // Setting the Default Commands per Subsystem
     shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive, false));
-    // Uncomment this if the overrun loop stops showing up and go into the command and follow the
-    // next instructions
-    // shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive::getPose,
-    // swerveDrive::getDriveSpeedsFieldRelative, false));
     spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
     intakeMech.setDefaultCommand(new DefaultIntakeCommand(intakeMech));
     swerveDrive.setDefaultCommand(
@@ -112,24 +107,25 @@ public class RobotContainer {
             swerveDrive,
             () -> -driver.getLeftY(),
             () -> -driver.getLeftX(),
-            () -> -driver.getRightX(),
-            () -> slowMoActive));
+            () -> -driver.getRightX()));
 
     // Configure the trigger bindings
     configureBindings();
     createAutoChooser();
+
+    // Attaches the Commands to each corresponding button
     bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
     bRB.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
     bLB.whileTrue(new Outtaking(intakeMech));
-    // bY.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
-new InstantCommand(
+    dLEFTSTICK.onTrue(
+        new InstantCommand(
             () -> {
               if (!(swerveDrive.getDriveState() == ShooterStatus.SHOOT)
                   && !(swerveDrive.getDriveState() == ShooterStatus.PASSING)) {
                 swerveDrive.setDriveState(ShooterStatus.INTAKE);
               }
-            });
+            }));
     dLEFTSTICK.onFalse(
         new InstantCommand(
             () -> {
@@ -170,8 +166,9 @@ new InstantCommand(
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
-
+  /** Function that registers any command to pathplanner and creates an autochooser at the end */
   public void createAutoChooser() {
+    // Registers the commands for Pathplanner
     NamedCommands.registerCommand("Intake", new RunIntakeCommand(intakeMech, swerveDrive));
     NamedCommands.registerCommand(
         "RunAll", new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
@@ -181,18 +178,7 @@ new InstantCommand(
     NamedCommands.registerCommand("ResetPoseLLS", swerveDrive.resetPoseWithLLS());
     NamedCommands.registerCommand("StopSpinDexer", new DefaultSpinDexerCommand(spinDexerMech));
     NamedCommands.registerCommand("ReverseIntake", new Outtaking(intakeMech));
-    // autoChooser.addDefaultOption("None", null);
-    // autoChooser.addOption(
-    //     "DepotAuto", new DepotAuto(swerveDrive, intakeMech, spinDexerMech, shooterMech));
-    // autoChooser.addOption(
-    //     "StationAuto", new StationAuto(swerveDrive, shooterMech, intakeMech, spinDexerMech));
-    // autoChooser.addOption(
-    //     "Test", new AutoTest(swerveDrive, intakeMech, spinDexerMech, shooterMech));
+    // Builds the Auto Chooser to put into AdvantageScope
     autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
   }
-
-  /** Exposes the turret subsystem so {@link Robot} can seed its hood encoder on teleop init. */
-  // public Shooter getTurret() {
-  //   return getTurret();
-  // }
 }
