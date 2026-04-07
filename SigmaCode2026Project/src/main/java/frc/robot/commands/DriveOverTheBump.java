@@ -17,6 +17,7 @@ public class DriveOverTheBump extends Command {
   private double gyroFlatCooldown;
 
   private String direction = null;
+  ChassisSpeeds fieldSpeeds;
   /** Creates a new DriveOverTheBump. */
   public DriveOverTheBump(Drive swerveDrive, String direction) {
     this.swerveDrive = swerveDrive;
@@ -29,7 +30,13 @@ public class DriveOverTheBump extends Command {
   @Override
   public void initialize() {
     gyroTilted = false;
-    gyroFlatCooldown = 20;
+    if (direction.equals("back")) {
+      gyroFlatCooldown = 40;
+      fieldSpeeds = new ChassisSpeeds(-5.07, 0, 0);
+    } else {
+      gyroFlatCooldown = 20;
+      fieldSpeeds = new ChassisSpeeds(5.07, 0, 0);
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -37,10 +44,6 @@ public class DriveOverTheBump extends Command {
   public void execute() {
     if (Math.abs(swerveDrive.getRoll()) > 8) {
       gyroTilted = true;
-    }
-    ChassisSpeeds fieldSpeeds = new ChassisSpeeds(5.07, 0, 0);
-    if (direction.equals("back")) {
-      fieldSpeeds.times(-1);
     }
 
     swerveDrive.runVelocityFieldRelative(fieldSpeeds);

@@ -48,10 +48,10 @@ public class RobotContainer {
   private SpinDexerMech spinDexerMech;
 
   private CommandXboxController driver = new CommandXboxController(0);
-  // List of Triggers for the driver controller
   private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFTSTICK, dRIGHT, dDOWN, dSTART, bLB, bRB;
+  private boolean slowMoActive = false;
 
-  // Auto Chooser that is logged into AdvantageScope
+  // Dashboard inputs
   private LoggedDashboardChooser<Command> autoChooser =
       new LoggedDashboardChooser<>("Auto Chooser");
 
@@ -98,8 +98,11 @@ public class RobotContainer {
     }
     // Configure the trigger bindings
     configureBindings();
-    // Setting the Default Commands per Subsystem
     shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive, false));
+    // Uncomment this if the overrun loop stops showing up and go into the command and follow the
+    // next instructions
+    // shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive::getPose,
+    // swerveDrive::getDriveSpeedsFieldRelative, false));
     spinDexerMech.setDefaultCommand(new DefaultSpinDexerCommand(spinDexerMech));
     intakeMech.setDefaultCommand(new DefaultIntakeCommand(intakeMech));
     swerveDrive.setDefaultCommand(
@@ -112,17 +115,16 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     createAutoChooser();
-
-    // Attaches the Commands to each corresponding button
     bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
     bRB.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
     bLB.whileTrue(new Outtaking(intakeMech));
+    // bY.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
     dLEFTSTICK.onTrue(
         new InstantCommand(
             () -> {
               if (!(swerveDrive.getDriveState() == ShooterStatus.SHOOT)
-                  && !(swerveDrive.getDriveState() == ShooterStatus.PASSING)) {
+                  || !(swerveDrive.getDriveState() == ShooterStatus.PASSING)) {
                 swerveDrive.setDriveState(ShooterStatus.INTAKE);
               }
             }));
@@ -134,6 +136,7 @@ public class RobotContainer {
               }
             }));
   }
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -166,9 +169,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
-  /** Function that registers any command to pathplanner and creates an autochooser at the end */
+
   public void createAutoChooser() {
-    // Registers the commands for Pathplanner
     NamedCommands.registerCommand("Intake", new RunIntakeCommand(intakeMech, swerveDrive));
     NamedCommands.registerCommand(
         "RunAll", new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
@@ -178,7 +180,18 @@ public class RobotContainer {
     NamedCommands.registerCommand("ResetPoseLLS", swerveDrive.resetPoseWithLLS());
     NamedCommands.registerCommand("StopSpinDexer", new DefaultSpinDexerCommand(spinDexerMech));
     NamedCommands.registerCommand("ReverseIntake", new Outtaking(intakeMech));
-    // Builds the Auto Chooser to put into AdvantageScope
+    // autoChooser.addDefaultOption("None", null);
+    // autoChooser.addOption(
+    //     "DepotAuto", new DepotAuto(swerveDrive, intakeMech, spinDexerMech, shooterMech));
+    // autoChooser.addOption(
+    //     "StationAuto", new StationAuto(swerveDrive, shooterMech, intakeMech, spinDexerMech));
+    // autoChooser.addOption(
+    //     "Test", new AutoTest(swerveDrive, intakeMech, spinDexerMech, shooterMech));
     autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
   }
+
+  /** Exposes the turret subsystem so {@link Robot} can seed its hood encoder on teleop init. */
+  // public Shooter getTurret() {
+  //   return getTurret();
+  // }
 }

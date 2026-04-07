@@ -76,6 +76,8 @@ public class Drive extends SubsystemBase {
 
   private static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private static Rotation2d rawGyroRotation = new Rotation2d();
+
+  private boolean isFlipped = false;
   private static SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
         new SwerveModulePosition(),
@@ -140,6 +142,9 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
+      isFlipped = true;
+    }
   }
 
   @Override
@@ -282,9 +287,9 @@ public class Drive extends SubsystemBase {
     } else if (driveMode == ShooterStatus.PASSING) {
       speeds =
           new ChassisSpeeds(
-              speeds.vxMetersPerSecond * 0.3,
-              speeds.vyMetersPerSecond * 0.3,
-              speeds.omegaRadiansPerSecond * 0.5);
+              speeds.vxMetersPerSecond * 0.8,
+              speeds.vyMetersPerSecond * 0.8,
+              speeds.omegaRadiansPerSecond * 1.0);
     } else if (driveMode == ShooterStatus.INTAKE) {
       speeds =
           new ChassisSpeeds(
@@ -331,7 +336,9 @@ public class Drive extends SubsystemBase {
 
   public void runVelocityFieldRelative(ChassisSpeeds speeds) {
     // Calculate module setpoints
-    speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, rawGyroRotation);
+    speeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            speeds, isFlipped ? getRotation().plus(Rotation2d.k180deg) : getRotation());
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);

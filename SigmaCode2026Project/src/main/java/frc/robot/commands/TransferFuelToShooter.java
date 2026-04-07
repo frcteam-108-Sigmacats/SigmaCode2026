@@ -61,7 +61,8 @@ public class TransferFuelToShooter extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if (swerveDrive.getDriveState() == ShooterStatus.SHOOT) {
+    if (swerveDrive.getDriveState() == ShooterStatus.SHOOT
+        || swerveDrive.getDriveState() == ShooterStatus.PASSING) {
       swerveDrive.setDriveState(ShooterStatus.DRIVE);
       spinDexerMech.setShooterStatus(swerveDrive.getDriveState());
     }

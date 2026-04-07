@@ -49,21 +49,40 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "DepotPath3"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "ResetPoseLLS"
           }
         },
         {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "DepotPath3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "RunOverBumpBack"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseLLS"
           }
         },
         {
@@ -79,7 +98,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 5.0
+                  "waitTime": 6.0
                 }
               }
             ]
@@ -88,25 +107,7 @@
         {
           "type": "named",
           "data": {
-            "name": "ResetPoseLLS"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "RunOverBump"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "depotloop2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "depotloop3"
           }
         },
         {
@@ -120,12 +121,61 @@
           "data": {
             "commands": [
               {
+                "type": "path",
+                "data": {
+                  "pathName": "depotloop2"
+                }
+              },
+              {
                 "type": "named",
                 "data": {
-                  "name": "RunAll"
+                  "name": "Intake"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseLLS"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "depotloop3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseLLS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RunOverBumpBack"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RunAll"
           }
         }
       ]

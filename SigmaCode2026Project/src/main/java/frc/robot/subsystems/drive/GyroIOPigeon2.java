@@ -37,6 +37,7 @@ public class GyroIOPigeon2 implements GyroIO {
     }
     yaw.setUpdateFrequency(250); // set later idk
     yawVelocity.setUpdateFrequency(250.0);
+    roll.setUpdateFrequency(250);
     pigeon.optimizeBusUtilization();
     yawTimestampQueue = SparkXPhoenixOdometryThread.getInstance().makeTimestampQueue();
     yawPositionQueue = SparkXPhoenixOdometryThread.getInstance().registerSignal(pigeon.getYaw());
@@ -74,7 +75,7 @@ public class GyroIOPigeon2 implements GyroIO {
 
   @Override
   public Rotation2d getRoll() {
-    return Rotation2d.fromDegrees(pigeon.getPitch().getValueAsDouble());
+    return Rotation2d.fromDegrees(roll.getValueAsDouble());
   }
 
   @Override
