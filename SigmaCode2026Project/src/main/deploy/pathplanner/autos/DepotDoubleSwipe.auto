@@ -17,7 +17,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "RunOverBump"
+                  "name": "RunOverBumpForward"
                 }
               }
             ]
@@ -92,6 +92,25 @@
               {
                 "type": "named",
                 "data": {
+                  "name": "DefaultShooter"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.3
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
                   "name": "RunAll"
                 }
               },
@@ -105,9 +124,34 @@
           }
         },
         {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "StopSpinDexer"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.1
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "DepotPathFrontBump"
+          }
+        },
+        {
           "type": "named",
           "data": {
-            "name": "RunOverBump"
+            "name": "RunOverBumpForward"
           }
         },
         {

@@ -180,13 +180,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("ResetPoseLLS", swerveDrive.resetPoseWithLLS());
     NamedCommands.registerCommand("StopSpinDexer", new DefaultSpinDexerCommand(spinDexerMech));
     NamedCommands.registerCommand("ReverseIntake", new Outtaking(intakeMech));
-    // autoChooser.addDefaultOption("None", null);
-    // autoChooser.addOption(
-    //     "DepotAuto", new DepotAuto(swerveDrive, intakeMech, spinDexerMech, shooterMech));
-    // autoChooser.addOption(
-    //     "StationAuto", new StationAuto(swerveDrive, shooterMech, intakeMech, spinDexerMech));
-    // autoChooser.addOption(
-    //     "Test", new AutoTest(swerveDrive, intakeMech, spinDexerMech, shooterMech));
+    NamedCommands.registerCommand(
+        "DefaultShooter", new DefaultShooter(shooterMech, swerveDrive, true));
     autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
   }
 

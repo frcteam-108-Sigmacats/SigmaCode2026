@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
@@ -15,7 +16,7 @@ public class DriveOverTheBump extends Command {
   private boolean gyroTilted;
 
   private double gyroFlatCooldown;
-
+  private Debouncer gyroDebouncer;
   private String direction = null;
   ChassisSpeeds fieldSpeeds;
   /** Creates a new DriveOverTheBump. */
@@ -31,10 +32,10 @@ public class DriveOverTheBump extends Command {
   public void initialize() {
     gyroTilted = false;
     if (direction.equals("back")) {
-      gyroFlatCooldown = 40;
+      gyroDebouncer = new Debouncer(0.3);
       fieldSpeeds = new ChassisSpeeds(-5.07, 0, 0);
     } else {
-      gyroFlatCooldown = 20;
+      gyroDebouncer = new Debouncer(0.12);
       fieldSpeeds = new ChassisSpeeds(5.07, 0, 0);
     }
   }
@@ -48,9 +49,9 @@ public class DriveOverTheBump extends Command {
 
     swerveDrive.runVelocityFieldRelative(fieldSpeeds);
 
-    if (Math.abs(swerveDrive.getRoll()) < 3) {
-      gyroFlatCooldown--;
-    }
+    // if (Math.abs(swerveDrive.getRoll()) < 3) {
+    //   gyroFlatCooldown--;
+    // }
   }
 
   // Called once the command ends or is interrupted.
@@ -62,7 +63,7 @@ public class DriveOverTheBump extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (gyroTilted && Math.abs(swerveDrive.getRoll()) < 3 && gyroFlatCooldown < 0) {
+    if (gyroTilted && gyroDebouncer.calculate(Math.abs(swerveDrive.getRoll()) < 3)) {
       return true;
     } else {
       return false;
