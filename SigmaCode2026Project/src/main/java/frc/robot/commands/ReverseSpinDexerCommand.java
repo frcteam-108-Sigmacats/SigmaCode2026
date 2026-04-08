@@ -5,16 +5,18 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.SpinDexer.SpinDexerMech;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class Shoot extends Command {
-  private Shooter shooterMech;
-  /** Creates a new Shoot. */
-  public Shoot(Shooter shooterMech) {
-    this.shooterMech = shooterMech;
+public class ReverseSpinDexerCommand extends Command {
+  private SpinDexerMech spinDexerMech;
+  private int counter;
+
+  /** Creates a new ReverseSpinDexerCommand. */
+  public ReverseSpinDexerCommand(SpinDexerMech spinDexerMech) {
+    this.spinDexerMech = spinDexerMech;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(this.shooterMech);
+    addRequirements(this.spinDexerMech);
   }
 
   // Called when the command is initially scheduled.
@@ -24,12 +26,17 @@ public class Shoot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooterMech.setShooterOpenLoop(5);
+
+    spinDexerMech.setSpinDexerCounterClockwise();
+    spinDexerMech.setKickerReverse();
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    spinDexerMech.stopSpinDexer();
+    spinDexerMech.stopKickers();
+  }
 
   // Returns true when the command should end.
   @Override

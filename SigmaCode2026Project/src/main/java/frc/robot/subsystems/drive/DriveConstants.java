@@ -29,18 +29,18 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4.8;
+  public static final double maxSpeedMetersPerSec = 5.07; // Max 5.07 m/s
   public static final double slowSpeedMetersPerSec = 1.0;
-  public static final double odometryFrequency = 100.0; // Hz
-  public static final double trackWidth = Units.inchesToMeters(21.564);
-  public static final double wheelBase = Units.inchesToMeters(21.564);
+  public static final double odometryFrequency = 250.0; // Hz
+  public static final double trackWidth = Units.inchesToMeters(21.5);
+  public static final double wheelBase = Units.inchesToMeters(25.5);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
-        new Translation2d(trackWidth / 2.0, wheelBase / 2.0),
-        new Translation2d(trackWidth / 2.0, -wheelBase / 2.0),
-        new Translation2d(-trackWidth / 2.0, wheelBase / 2.0),
-        new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0)
+        new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
+        new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
+        new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
+        new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
       };
 
   // Zeroed rotation values for each module, see setup instructions
@@ -50,7 +50,7 @@ public class DriveConstants {
   public static final Rotation2d backRightZeroRotation = new Rotation2d(Math.PI / 2);
 
   // Device CAN IDs
-  public static final int pigeonCanId = 1;
+  public static final int pigeonCanId = 9;
 
   public static final int frontLeftDriveCanId = 1;
   public static final int backLeftDriveCanId = 5;
@@ -71,15 +71,16 @@ public class DriveConstants {
 
   // Drive encoder configuration
   public static final double driveEncoderPositionFactor =
-      2 * Math.PI / driveMotorReduction; // Rotor Rotations -> Wheel Radians
+      driveMotorReduction; // Rotor Rotations -> Wheel Radians
   public static final double driveEncoderVelocityFactor =
       (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Drive PID configuration
-  public static final double driveKp = 0.1;
+  public static final double driveKp = 1.4;
   public static final double driveKd = 0.0;
-  public static final double driveKs = 0.0;
-  public static final double driveKv = 0.1;
+  public static final double driveKs = 0.31;
+  public static final double driveKv = 0.08;
+  public static final double driveKa = 2.0;
   public static final double driveSimP = 0.1;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
@@ -87,7 +88,7 @@ public class DriveConstants {
 
   // Turn motor configuration
   public static final boolean turnInverted = false;
-  public static final int turnMotorCurrentLimit = 50;
+  public static final int turnMotorCurrentLimit = 40;
   public static final double turnMotorReduction = 9424.0 / 203.0;
   public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
 
@@ -105,16 +106,16 @@ public class DriveConstants {
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
 
   // PathPlanner configuration
-  public static final double robotMassKg = 45.3592; // 110lbs
-  public static final double robotMOI = 4.083;
+  public static final double robotMassKg = 66.86; // 110lbs
+  public static final double robotMOI = 5.318;
   public static final double wheelCOF = 1.6;
   public static final RobotConfig ppConfig =
       new RobotConfig(
           robotMassKg,
           robotMOI,
           new ModuleConfig(
-              wheelRadiusMeters,
-              maxSpeedMetersPerSec,
+              0.038,
+              5.07,
               wheelCOF,
               driveGearbox.withReduction(driveMotorReduction),
               driveMotorCurrentLimit,
@@ -138,9 +139,9 @@ public class DriveConstants {
                   wheelCOF));
 
   // Limelights
-  // public static final String kLimelightFrontName = "limelight-front"; // not on robot yet
   public static final String kLimelightBackLeftName = "limelight-bl";
   public static final String kLimelightBackRightName = "limelight-br";
+  public static final String kLimelightFrontName = "limelight-front"; // tf = front limelight
 
   public static double xyStdDevCoefficient = 0.005;
   public static double thetaStdDevCoefficient = 0.01;

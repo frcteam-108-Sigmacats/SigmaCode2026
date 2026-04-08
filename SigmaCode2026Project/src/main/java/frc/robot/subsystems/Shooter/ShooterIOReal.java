@@ -2,7 +2,9 @@ package frc.robot.subsystems.Shooter;
 
 import static frc.robot.subsystems.Shooter.ShooterConstants.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -22,8 +24,11 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 
 /**
  * Competition / full-robot implementation of {@link ShooterIO}.
@@ -64,13 +69,14 @@ public class ShooterIOReal implements ShooterIO {
   private final Debouncer hoodDebounce = new Debouncer(0.5);
 
   // ── Closed-loop state (mirrors TurretIOSim) ───────────────────────────────
-  private boolean turretClosedLoop = false;
-  private boolean shooterClosedLoop = false;
-  private boolean hoodClosedLoop = false;
 
-  private double turretSetpointRad = 0.0;
-  private double shooterSetpointRadPerSec = 0.0;
-  private double hoodSetpointDeg = 0.0;
+  private final StatusSignal<AngularVelocity> shooterLeftVel;
+  private final StatusSignal<Voltage> shooterLeftVolt;
+  private final StatusSignal<Current> shooterLeftCurrent;
+
+  private final StatusSignal<AngularVelocity> shooterRightVel;
+  private final StatusSignal<Voltage> shooterRightVolt;
+  private final StatusSignal<Current> shooterRightCurrent;
 
   public ShooterIOReal() {
 
@@ -85,7 +91,12 @@ public class ShooterIOReal implements ShooterIO {
         .inverted(turretInverted)
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(turretCurrentLimitAmps)
-        .voltageCompensation(12.0);
+        .voltageCompensation(12.0)
+        .softLimit
+        .forwardSoftLimitEnabled(true)
+        .forwardSoftLimit(ShooterConstants.turretForwardLimit)
+        .reverseSoftLimitEnabled(true)
+        .reverseSoftLimit(ShooterConstants.turretReverseLimit);
     // Relative encoder: motor rotations -> radians at the turret output
     turretCfg
         .encoder
@@ -96,13 +107,14 @@ public class ShooterIOReal implements ShooterIO {
         .absoluteEncoder
         .positionConversionFactor(2.0 * Math.PI)
         .velocityConversionFactor((2.0 * Math.PI) / 60.0)
-        .inverted(false)
+        .zeroCentered(false)
+        .inverted(true)
         .averageDepth(2);
     turretCfg
         .closedLoop
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .positionWrappingEnabled(false)
-        .pid(turretKp, 0.0, turretKd);
+        .pid(turretKp, 0.0, turretKd); // WARNING i DO NOT USE
     turretCfg
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -178,7 +190,7 @@ public class ShooterIOReal implements ShooterIO {
     // Seed the turret relative encoder from the absolute encoder reading.
     // The absolute encoder reports [0, 2π]; if the position exceeds π (180°), subtract 2π
     // so the relative encoder starts in the same [-π, π] convention used elsewhere.
-    double turretAbsPositionRad = turretAbsEncoder.getPosition();
+    double turretAbsPositionRad = turretAbsEncoder.getPosition() - 4.554;
     if (turretAbsPositionRad > Math.PI) {
       turretAbsPositionRad -= 2.0 * Math.PI;
     }
@@ -186,30 +198,44 @@ public class ShooterIOReal implements ShooterIO {
 
     // Seed the hood relative encoder to 0 (mechanism assumed to be at rest / home position).
     hoodEncoder.setPosition(0.0);
+
+    // Caches the data that will constantly be wanting to be grabbed from the Phoenix Components
+    shooterLeftVel = shooterLeft.getVelocity();
+    shooterLeftVolt = shooterLeft.getMotorVoltage();
+    shooterLeftCurrent = shooterLeft.getStatorCurrent();
+
+    shooterRightVel = shooterRight.getVelocity();
+    shooterRightVolt = shooterRight.getMotorVoltage();
+    shooterRightCurrent = shooterRight.getStatorCurrent();
   }
 
   // ── updateInputs ──────────────────────────────────────────────────────────
 
   @Override
-  public void updateInputs(TurretIOInputs inputs) {
-
-    // Turret – absolute encoder reports [0, 2pi]; wrap to [-pi, pi]
+  public void updateInputs(ShooterIOInputs inputs) {
+    BaseStatusSignal.refreshAll(
+        shooterLeftVel,
+        shooterLeftVolt,
+        shooterLeftCurrent,
+        shooterRightVel,
+        shooterRightVolt,
+        shooterRightCurrent);
     inputs.turretConnected =
         turretDebounce.calculate(turretMotor.getLastError() == REVLibError.kOk);
-    inputs.turretPositionRad = MathUtil.angleModulus(turretAbsEncoder.getPosition());
+    inputs.turretPosition = Rotation2d.fromRadians(turretEncoder.getPosition());
     inputs.turretVelocityRadPerSec = turretAbsEncoder.getVelocity();
-    inputs.turretAppliedVolts = turretMotor.getAppliedOutput() * turretMotor.getBusVoltage();
+    inputs.turretAppliedVolts = turretMotor.getAppliedOutput();
     inputs.turretCurrentAmps = turretMotor.getOutputCurrent();
 
     // Shooter wheels
     inputs.shooterLeftConnected = shooterLeft.isConnected();
     inputs.shooterRightConnected = shooterRight.isConnected();
-    inputs.shooterLeftVelocityRadPerSec = shooterLeft.getVelocity().getValueAsDouble();
-    inputs.shooterRightVelocityRadPerSec = shooterRight.getVelocity().getValueAsDouble();
-    inputs.shooterLeftAppliedVolts = shooterLeft.getMotorVoltage().getValueAsDouble();
-    inputs.shooterRightAppliedVolts = shooterRight.getMotorVoltage().getValueAsDouble();
-    inputs.shooterLeftCurrentAmps = shooterLeft.getStatorCurrent().getValueAsDouble();
-    inputs.shooterRightCurrentAmps = shooterRight.getStatorCurrent().getValueAsDouble();
+    inputs.shooterLeftVelocityRPM = shooterLeftVel.getValueAsDouble() * 60;
+    inputs.shooterRightVelocityRPM = shooterRightVel.getValueAsDouble() * 60;
+    inputs.shooterLeftAppliedVolts = shooterLeftVolt.getValueAsDouble();
+    inputs.shooterRightAppliedVolts = shooterRightVolt.getValueAsDouble();
+    inputs.shooterLeftCurrentAmps = shooterLeftCurrent.getValueAsDouble();
+    inputs.shooterRightCurrentAmps = shooterRightCurrent.getValueAsDouble();
 
     // Hood
     inputs.hoodConnected = hoodDebounce.calculate(hoodMotor.getLastError() == REVLibError.kOk);
@@ -223,59 +249,37 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setTurretOpenLoop(double outputVolts) {
-    turretClosedLoop = false;
     turretMotor.setVoltage(outputVolts);
   }
 
   @Override
   public void setTurretPosition(double angleRad) {
-    turretClosedLoop = true;
-    // Clamp to the physical ±180° range – never wrap the setpoint.
-    double clampedRad = MathUtil.clamp(angleRad, -Math.PI, Math.PI);
-    turretSetpointRad = clampedRad;
-    // Absolute encoder reports [0, 2π]. Convert the clamped [-π, π] angle to that space.
-    double encoderSetpoint = clampedRad < 0.0 ? clampedRad + 2.0 * Math.PI : clampedRad;
-    turretController.setSetpoint(encoderSetpoint, ControlType.kPosition);
+    turretController.setSetpoint(angleRad, ControlType.kPosition);
   }
 
   // ── Shooter wheels ────────────────────────────────────────────────────────
 
   @Override
   public void setShooterOpenLoop(double outputVolts) {
-    shooterClosedLoop = false;
     shooterLeft.setVoltage(outputVolts);
     shooterRight.setVoltage(outputVolts);
   }
 
   @Override
-  public void setShooterVelocity(double velocityRadPerSec) {
-    shooterClosedLoop = true;
-    shooterSetpointRadPerSec = velocityRadPerSec;
-    double ff = shooterKs * Math.signum(velocityRadPerSec) + shooterKv * velocityRadPerSec;
-    shooterLeft.setControl(
-        shooterVelocityReq.withSlot(0).withVelocity(velocityRadPerSec).withFeedForward(ff));
-    shooterRight.setControl(
-        shooterVelocityReq.withSlot(0).withVelocity(velocityRadPerSec).withFeedForward(ff));
+  public void setShooterVelocity(double velocityRotPerMin) {
+    shooterLeft.setControl(shooterVelocityReq.withSlot(0).withVelocity(velocityRotPerMin / 60));
+    shooterRight.setControl(shooterVelocityReq.withSlot(0).withVelocity(velocityRotPerMin / 60));
   }
 
   // ── Hood ──────────────────────────────────────────────────────────────────
 
   @Override
   public void setHoodOpenLoop(double outputVolts) {
-    hoodClosedLoop = false;
     hoodMotor.setVoltage(outputVolts);
   }
 
   @Override
   public void setHoodPosition(double angleDeg) {
-    hoodClosedLoop = true;
-    hoodSetpointDeg = MathUtil.clamp(angleDeg, hoodMinDeg, hoodMaxDeg);
-    hoodController.setSetpoint(hoodSetpointDeg, ControlType.kPosition);
-  }
-
-  @Override
-  public void seedHoodEncoderFromAbsolute() {
-    // No absolute encoder on the hood; the relative encoder is seeded to 0 in the constructor.
-    // This method is intentionally a no-op for the real robot.
+    hoodController.setSetpoint(angleDeg, ControlType.kPosition);
   }
 }

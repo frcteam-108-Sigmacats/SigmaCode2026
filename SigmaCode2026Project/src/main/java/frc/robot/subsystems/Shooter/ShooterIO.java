@@ -1,10 +1,11 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 /**
- * Hardware abstraction layer for the Turret subsystem.
+ * Hardware abstraction layer for the Shooter subsystem.
  *
  * <p>Motors on the real robot:
  *
@@ -16,12 +17,12 @@ import org.littletonrobotics.junction.AutoLogOutput;
  */
 public interface ShooterIO {
   @AutoLog
-  public static class TurretIOInputs {
+  public static class ShooterIOInputs {
 
     // ── Turret Rotation ──────────────────────────────────────────────────────
     public boolean turretConnected = false;
     /** Current turret angle in radians (0 = forward). */
-    public double turretPositionRad = 0.0;
+    public Rotation2d turretPosition = new Rotation2d();
 
     public double turretVelocityRadPerSec = 0.0;
     public double turretAppliedVolts = 0.0;
@@ -31,8 +32,8 @@ public interface ShooterIO {
     public boolean shooterLeftConnected = false;
     public boolean shooterRightConnected = false;
 
-    public double shooterLeftVelocityRadPerSec = 0.0;
-    public double shooterRightVelocityRadPerSec = 0.0;
+    public double shooterLeftVelocityRPM = 0.0;
+    public double shooterRightVelocityRPM = 0.0;
     public double shooterLeftAppliedVolts = 0.0;
     public double shooterRightAppliedVolts = 0.0;
     public double shooterLeftCurrentAmps = 0.0;
@@ -53,7 +54,7 @@ public interface ShooterIO {
 
   @AutoLogOutput
   /** Push sensor data into the {@link TurretIOInputs} snapshot. */
-  public default void updateInputs(TurretIOInputs inputs) {}
+  public default void updateInputs(ShooterIOInputs inputs) {}
 
   // ── Turret Rotation Commands ─────────────────────────────────────────────
 
@@ -69,7 +70,7 @@ public interface ShooterIO {
   public default void setShooterOpenLoop(double outputVolts) {}
 
   /** Command both shooter wheels to a target surface velocity (rad/s) using closed-loop control. */
-  public default void setShooterVelocity(double velocityRadPerSec) {}
+  public default void setShooterVelocity(double velocityRotPerMin) {}
 
   // ── Hood Commands ────────────────────────────────────────────────────────
 
@@ -78,10 +79,4 @@ public interface ShooterIO {
 
   /** Command the hood to a target angle (degrees) using closed-loop control. */
   public default void setHoodPosition(double angleDeg) {}
-
-  /**
-   * Seeds the hood's internal (relative) encoder position from the absolute encoder reading. Call
-   * this once at the start of tele-op so the closed-loop controller starts from a known angle.
-   */
-  public default void seedHoodEncoderFromAbsolute() {}
 }

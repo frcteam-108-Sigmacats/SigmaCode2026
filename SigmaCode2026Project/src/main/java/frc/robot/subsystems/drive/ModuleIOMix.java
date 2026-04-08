@@ -3,7 +3,9 @@ package frc.robot.subsystems.drive;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 import static frc.robot.util.SparkUtil.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -23,27 +25,38 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import java.util.Arrays;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 public class ModuleIOMix implements ModuleIO {
+  // The variable that keeps track of the encoder's zero offset
   private final Rotation2d zeroRotation;
-
+  // Instantiates the speed controllers for the module
   private final TalonFX driveMotor;
   private final SparkBase turnMotor;
-
+  // Instantiates the Absolute Encoder for the module
   private final AbsoluteEncoder turnEncoder;
-
+  // Constructs the velocity voltage controller for the drive motor
   private final VelocityVoltage velocity = new VelocityVoltage(0);
+  // Constructs the PID Controller for the turn motor
   private final SparkClosedLoopController turnController;
-
+  // Queues to keep track of the timestamp, drive positions, and turn positions for better accuracy
   private final Queue<Double> timestampQueue;
   private final Queue<Double> drivePositionQueue;
   private final Queue<Double> turnPositionQueue;
-
+  // Debouncers
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
+  // Constructing the caching for the given information that will be taken from the motors
+  private final StatusSignal<Angle> drivePos;
+  private final StatusSignal<AngularVelocity> driveVel;
+  private final StatusSignal<Voltage> driveVolt;
+  private final StatusSignal<Current> driveCurrent;
 
   public ModuleIOMix(int module) {
     zeroRotation =
@@ -74,19 +87,26 @@ public class ModuleIOMix implements ModuleIO {
               default -> 0;
             },
             MotorType.kBrushless);
+    // Assigns the Absolute Encoder and PID Controller to the turn motor's internal PID Controller
+    // and the Abs Enc thats connected to the speed controller
     turnEncoder = turnMotor.getAbsoluteEncoder();
     turnController = turnMotor.getClosedLoopController();
-
+    // Drive Motor Configs
     var driveConfig = new TalonFXConfiguration();
     driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     driveConfig.CurrentLimits.StatorCurrentLimit = DriveConstants.driveMotorCurrentLimit;
-    driveConfig.Feedback.SensorToMechanismRatio = driveEncoderPositionFactor;
+    driveConfig.Feedback.SensorToMechanismRatio =
+        driveEncoderPositionFactor; // Gear Ratio only, no conversion to RadiansPerSecond
     driveConfig.Slot0.kP = driveKp;
     driveConfig.Slot0.kI = 0;
     driveConfig.Slot0.kD = driveKd;
+    driveConfig.Slot0.kS = driveKs;
+    driveConfig.Slot0.kV = driveKv;
+    driveConfig.Slot0.kA = driveKa;
+    driveConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.0;
     driveMotor.getConfigurator().apply(driveConfig);
     driveMotor.setPosition(0);
-
+    // Turn Motor Configurations
     var turnConfig = new SparkMaxConfig();
     turnConfig
         .inverted(turnInverted)
@@ -114,31 +134,38 @@ public class ModuleIOMix implements ModuleIO {
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
+    // Tries to apply the configurations to the turn motor 5 times
     tryUntilOk(
         turnMotor,
         5,
         () ->
             turnMotor.configure(
                 turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-
-    driveMotor.getPosition().setUpdateFrequency(odometryFrequency);
-
+    // Sets the position of the drive motor update frequency to 250HZ
+    driveMotor.getPosition().setUpdateFrequency(250);
+    // Registers the signals for the drive motor position and turn motor position into the odometry
+    // thread for faster processing
     timestampQueue = SparkXPhoenixOdometryThread.getInstance().makeTimestampQueue();
     drivePositionQueue =
         SparkXPhoenixOdometryThread.getInstance().registerSignal(driveMotor.getPosition());
     turnPositionQueue =
         SparkXPhoenixOdometryThread.getInstance()
             .registerSignal(turnMotor, turnEncoder::getPosition);
+    // Assigns the cache variables to the motors specific Status Signal data
+    drivePos = driveMotor.getPosition();
+    driveVel = driveMotor.getVelocity();
+    driveVolt = driveMotor.getMotorVoltage();
+    driveCurrent = driveMotor.getStatorCurrent();
   }
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-
+    BaseStatusSignal.refreshAll(drivePos, driveVel, driveCurrent, driveVolt);
     sparkStickyFault = false;
-    inputs.drivePositionRad = driveMotor.getPosition().getValueAsDouble();
-    inputs.driveVelocityRadPerSec = driveMotor.getVelocity().getValueAsDouble();
-    inputs.driveAppliedVolts = driveMotor.getMotorVoltage().getValueAsDouble();
-    inputs.driveCurrentAmps = driveMotor.getStatorCurrent().getValueAsDouble();
+    inputs.drivePositionRad = drivePos.getValueAsDouble() * 2 * Math.PI;
+    inputs.driveVelocityRadPerSec = driveVel.getValueAsDouble() * 2 * Math.PI;
+    inputs.driveAppliedVolts = driveVolt.getValueAsDouble();
+    inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
     inputs.driveConnected = driveMotor.isConnected();
 
     sparkStickyFault = false;
@@ -157,7 +184,7 @@ public class ModuleIOMix implements ModuleIO {
     inputs.odometryTimestamps =
         timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.odometryDrivePositionsRad =
-        drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
+        drivePositionQueue.stream().mapToDouble((Double value) -> value * 2 * Math.PI).toArray();
     inputs.odometryTurnPositions =
         turnPositionQueue.stream()
             .map((Double value) -> new Rotation2d(value).minus(zeroRotation))
@@ -195,10 +222,7 @@ public class ModuleIOMix implements ModuleIO {
 
   @Override
   public void setDriveVelocity(double velocityRadPerSec) {
-    double ffVolts = driveKs * Math.signum(velocityRadPerSec) + driveKv * velocityRadPerSec;
-
-    driveMotor.setControl(
-        velocity.withSlot(0).withFeedForward(ffVolts).withVelocity(velocityRadPerSec));
+    driveMotor.setControl(velocity.withSlot(0).withVelocity(velocityRadPerSec / (2 * Math.PI)));
   }
 
   @Override

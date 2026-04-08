@@ -11,15 +11,115 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": " StationPath2"
+            "name": "ResetPoseLLS"
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "StationPath3"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "StationPath2"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.78
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "StationPath4"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 3.25
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunAll"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseLLS"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "StationPath5"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 1.9
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "StationPath6"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 2.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunAll"
+                }
+              }
+            ]
           }
         }
       ]
