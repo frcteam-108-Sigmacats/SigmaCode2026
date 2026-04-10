@@ -16,12 +16,14 @@ import frc.robot.commands.DriveOverTheBump;
 import frc.robot.commands.Outtaking;
 import frc.robot.commands.ReverseSpinDexerCommand;
 import frc.robot.commands.RunAll;
+import frc.robot.commands.RunAllTest;
 import frc.robot.commands.RunIntakeCommand;
 import frc.robot.subsystems.Intake.IntakeIOReal;
 import frc.robot.subsystems.Intake.IntakeIOSim;
 import frc.robot.subsystems.Intake.IntakeMech;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterConstants.ShooterStatus;
+import frc.robot.subsystems.Shooter.ShooterConstants.ShooterWheelState;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
 import frc.robot.subsystems.SpinDexer.SpinDexerIOReal;
@@ -32,6 +34,7 @@ import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIOMix;
 import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.leds.LEDs;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -46,6 +49,7 @@ public class RobotContainer {
   private Drive swerveDrive;
   private IntakeMech intakeMech;
   private SpinDexerMech spinDexerMech;
+  private LEDs leds;
 
   private CommandXboxController driver = new CommandXboxController(0);
   private Trigger bLT, bRT, bA, bB, bX, bY, dUP, dLEFTSTICK, dRIGHT, dDOWN, dSTART, bLB, bRB;
@@ -69,6 +73,7 @@ public class RobotContainer {
                 new ModuleIOMix(1),
                 new ModuleIOMix(2),
                 new ModuleIOMix(3));
+        leds = new LEDs();
 
         break;
       case SIM:
@@ -82,6 +87,7 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
+        leds = new LEDs();
       default:
         shooterMech = new Shooter(new ShooterIOReal());
         spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
@@ -93,12 +99,14 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
+        leds = new LEDs();
 
         break;
     }
     // Configure the trigger bindings
     configureBindings();
-    shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive, false));
+    shooterMech.setDefaultCommand(
+        new DefaultShooter(shooterMech, swerveDrive, ShooterWheelState.DEFAULTSPEED));
     // Uncomment this if the overrun loop stops showing up and go into the command and follow the
     // next instructions
     // shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive::getPose,
@@ -119,6 +127,7 @@ public class RobotContainer {
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
     bRB.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
     bLB.whileTrue(new Outtaking(intakeMech));
+    bY.onTrue(new InstantCommand(() -> swerveDrive.zeroHeading()));
     // bY.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
     dLEFTSTICK.onTrue(
         new InstantCommand(
@@ -135,6 +144,7 @@ public class RobotContainer {
                 swerveDrive.setDriveState(ShooterStatus.DRIVE);
               }
             }));
+    dSTART.whileTrue(new RunAllTest(shooterMech, intakeMech, spinDexerMech, swerveDrive));
   }
 
   /**
@@ -180,8 +190,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("ResetPoseLLS", swerveDrive.resetPoseWithLLS());
     NamedCommands.registerCommand("StopSpinDexer", new DefaultSpinDexerCommand(spinDexerMech));
     NamedCommands.registerCommand("ReverseIntake", new Outtaking(intakeMech));
+    NamedCommands.registerCommand("Unjam", new ReverseSpinDexerCommand(spinDexerMech));
     NamedCommands.registerCommand(
-        "DefaultShooter", new DefaultShooter(shooterMech, swerveDrive, true));
+        "DefaultShooter",
+        new DefaultShooter(shooterMech, swerveDrive, ShooterWheelState.FULLSPEED));
     autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
   }
 

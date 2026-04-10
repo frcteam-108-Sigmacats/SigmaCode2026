@@ -70,7 +70,7 @@ public class GyroIOPigeon2 implements GyroIO {
 
   @Override
   public Rotation2d getPitch() {
-    return Rotation2d.fromDegrees(pigeon.getPitch().getValueAsDouble());
+    return Rotation2d.fromDegrees(pitch.getValueAsDouble());
   }
 
   @Override
@@ -81,5 +81,14 @@ public class GyroIOPigeon2 implements GyroIO {
   @Override
   public double getRate() {
     return pigeon.getAngularVelocityZDevice().getValueAsDouble();
+  }
+
+  @Override
+  public void resetGyro() {
+    if (DriverStation.getAlliance().get() == Alliance.Blue) {
+      pigeon.setYaw(0);
+    } else {
+      pigeon.setYaw(180);
+    }
   }
 }

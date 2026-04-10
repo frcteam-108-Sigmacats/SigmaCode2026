@@ -134,6 +134,12 @@ public class ShooterConstants {
     DRIVE
   }
 
+  public static enum ShooterWheelState {
+    TESTING,
+    FULLSPEED,
+    DEFAULTSPEED
+  }
+
   // ── Shooter lookup tables ─────────────────────────────────────────────────
   /**
    * Distance-to-setpoint lookup tables used by {@link frc.robot.commands.TrackHubCommand}.
@@ -166,6 +172,10 @@ public class ShooterConstants {
       shooterRPMMap.put((double) 5.2, 3450.0);
       shooterRPMMap.put((double) 6.149, 3600.0);
       shooterRPMMap.put((double) 7.63, 3800.0);
+      shooterRPMMap.put((double) 9.00, 4020.0);
+      shooterRPMMap.put((double) 11.00, 4328.0);
+      shooterRPMMap.put((double) 12.00, 4559.0);
+      shooterRPMMap.put((double) 14.00, 4790.0);
     }
 
     /**

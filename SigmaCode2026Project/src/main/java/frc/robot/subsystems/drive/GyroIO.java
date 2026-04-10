@@ -37,4 +37,6 @@ public interface GyroIO {
   public default double getRate() {
     return 0;
   }
+
+  public default void resetGyro() {}
 }

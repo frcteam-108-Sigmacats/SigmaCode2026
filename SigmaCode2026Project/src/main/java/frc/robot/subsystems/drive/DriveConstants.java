@@ -147,5 +147,5 @@ public class DriveConstants {
   public static double thetaStdDevCoefficient = 0.01;
   public static double stdDevFactor = 0.5;
   public static boolean useVisionRotation = true;
-  public static double autoStdDevScale = 0;
+  public static double autoStdDevScale = 1;
 }

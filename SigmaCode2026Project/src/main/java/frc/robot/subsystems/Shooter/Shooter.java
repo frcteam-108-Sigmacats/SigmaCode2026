@@ -7,6 +7,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Shooter.ShooterConstants.ShooterWheelState;
 import frc.robot.subsystems.drive.Drive;
 import java.util.TreeMap;
 import org.littletonrobotics.junction.Logger;
@@ -59,9 +60,13 @@ public class Shooter extends SubsystemBase {
   // ── Turret Rotation API ───────────────────────────────────────────────────
 
   /** Command the turret to a target angle */
-  public void setTurretAngle(Rotation2d angle) {
+  public void setTurretAngle(Rotation2d angle, ShooterWheelState state) {
     desiredTurretAngleRad = angle.getRadians();
-    io.setTurretPosition(desiredTurretAngleRad);
+    if (state != ShooterWheelState.TESTING) {
+      io.setTurretPosition(desiredTurretAngleRad);
+    } else {
+      io.setTurretPosition(0);
+    }
   }
 
   /** Run the turret rotation motor open-loop (volts). */
@@ -93,13 +98,15 @@ public class Shooter extends SubsystemBase {
    * @param distance The distance that the robot is from the target
    * @param fullSpeed indicates whether we should go at full speed or not
    */
-  public void setShooterSpeed(double distance, boolean fullSpeed) {
+  public void setShooterSpeed(double distance, ShooterConstants.ShooterWheelState state) {
     double rpm =
         getInterpolated(Double.valueOf(distance), ShooterConstants.ShooterStates.shooterRPMMap);
-    if (fullSpeed) {
+    if (state == ShooterWheelState.FULLSPEED) {
       io.setShooterVelocity(rpm);
-    } else {
+    } else if (state == ShooterWheelState.DEFAULTSPEED) {
       io.setShooterVelocity(2500);
+    } else {
+      io.setShooterVelocity(700);
     }
   }
 
@@ -160,11 +167,15 @@ public class Shooter extends SubsystemBase {
    *
    * @param angleDeg angle in [0°, 27°]
    */
-  public void setHoodAngle(double distance) {
+  public void setHoodAngle(double distance, ShooterConstants.ShooterWheelState hoodstate) {
     double angle =
         getInterpolated(
             Double.valueOf(distance), ShooterConstants.ShooterStates.shooterHoodAngleMap);
-    io.setHoodPosition(angle); // auto
+    if (hoodstate != ShooterWheelState.TESTING) {
+      io.setHoodPosition(angle);
+    } else {
+      io.setHoodPosition(20);
+    } // auto
   }
 
   /** Run hood motor open-loop (volts). */

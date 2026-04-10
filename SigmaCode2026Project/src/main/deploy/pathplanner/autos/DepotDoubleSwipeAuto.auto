@@ -24,44 +24,13 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "ResetPoseLLS"
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "DepotPath2"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ResetPoseLLS"
-          }
-        },
-        {
           "type": "race",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "DepotPath3"
+                  "pathName": "depotswipe1Path"
                 }
               },
               {
@@ -74,32 +43,39 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "RunOverBumpBack"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ResetPoseLLS"
-          }
-        },
-        {
           "type": "race",
           "data": {
             "commands": [
               {
                 "type": "named",
                 "data": {
-                  "name": "DefaultShooter"
+                  "name": "Unjam"
                 }
               },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunOverBumpBack"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
               {
                 "type": "wait",
                 "data": {
                   "waitTime": 0.3
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "DefaultShooter"
+                }
               }
             ]
           }
@@ -108,16 +84,35 @@
           "type": "race",
           "data": {
             "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 2.0
+                }
+              },
               {
                 "type": "named",
                 "data": {
                   "name": "RunAll"
                 }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "DepotScorePath"
+                }
               },
               {
-                "type": "wait",
+                "type": "named",
                 "data": {
-                  "waitTime": 6.0
+                  "name": "RunAll"
                 }
               }
             ]
@@ -127,93 +122,76 @@
           "type": "race",
           "data": {
             "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunOverBumpForward"
+                }
+              },
               {
                 "type": "named",
                 "data": {
                   "name": "StopSpinDexer"
                 }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
               },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "depotSwipe2"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Unjam"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunOverBumpBack"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 0.1
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "DepotPathFrontBump"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "RunOverBumpForward"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ResetPoseLLS"
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "depotloop2"
+                  "waitTime": 0.3
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "DefaultShooter"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ResetPoseLLS"
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "depotloop3"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ResetPoseLLS"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "RunOverBumpBack"
           }
         },
         {

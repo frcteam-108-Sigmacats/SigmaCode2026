@@ -40,6 +40,8 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -77,6 +79,8 @@ public class Drive extends SubsystemBase {
   private static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private static Rotation2d rawGyroRotation = new Rotation2d();
 
+  private Field2d field = new Field2d();
+
   private boolean isFlipped = false;
   private static SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
@@ -106,9 +110,9 @@ public class Drive extends SubsystemBase {
     // Start odometry thread
     SparkXPhoenixOdometryThread.getInstance().start();
     // Initialize Limelight camera streams for Elastic dashboard
-    if (Constants.currentMode == Mode.REAL) {
-      setupLimelightStreams();
-    }
+    // if (Constants.currentMode == Mode.REAL) {
+    //   setupLimelightStreams();
+    // }
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configure(
@@ -200,6 +204,9 @@ public class Drive extends SubsystemBase {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+
+      field.setRobotPose(getPose());
+      SmartDashboard.putData("Field", field);
     }
 
     // Update gyro alert
@@ -372,6 +379,10 @@ public class Drive extends SubsystemBase {
   public void resetOdometry(Pose2d pose) {
     // resetSimulationPoseCallBack.accept(pose);
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+  }
+
+  public void zeroHeading() {
+    gyroIO.resetGyro();
   }
 
   /**
