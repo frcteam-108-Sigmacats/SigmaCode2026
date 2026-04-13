@@ -8,6 +8,10 @@ public interface IntakeIO {
     public boolean intakeRollerDisconnected = false;
     public double intakeRollerCurrent = 0.0;
     public double intakeRollerVoltage = 0.0;
+
+    public boolean intakeRoller2Disconnected = false;
+    public double intakeRoller2Current = 0.0;
+    public double intakeRoller2Voltage = 0.0;
   }
   /**
    * Updates all the loggable inputs with the given values

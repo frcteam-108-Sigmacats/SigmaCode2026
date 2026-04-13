@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterConstants.ShooterWheelState;
 import frc.robot.subsystems.drive.Drive;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -18,17 +19,17 @@ import org.littletonrobotics.junction.Logger;
 public class DefaultShooter extends Command {
   private Shooter shooterMech;
   private Drive swerveDrive;
-  private boolean fullSpeed;
+  private ShooterWheelState wheelState;
 
   private Supplier<Pose2d> poseSupplier;
   private Supplier<ChassisSpeeds> speedsSupplier;
 
   private double volt = 4;
   /** Creates a new DefaultShooter. */
-  public DefaultShooter(Shooter shooterMech, Drive swerveDrive, boolean fullSpeed) {
+  public DefaultShooter(Shooter shooterMech, Drive swerveDrive, ShooterWheelState wheelState) {
     this.shooterMech = shooterMech;
     this.swerveDrive = swerveDrive;
-    this.fullSpeed = fullSpeed;
+    this.wheelState = wheelState;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(this.shooterMech);
   }
@@ -41,7 +42,7 @@ public class DefaultShooter extends Command {
     this.shooterMech = shooterMech;
     this.poseSupplier = poseSupplier;
     this.speedsSupplier = speedSupplier;
-    this.fullSpeed = fullSpeed;
+    this.wheelState = wheelState;
   }
 
   // Called when the command is initially scheduled.
@@ -79,9 +80,9 @@ public class DefaultShooter extends Command {
     Logger.recordOutput("DESIRED TURRET ANGLE", desiredAngle.getDegrees());
     Logger.recordOutput("ROBOT DISTANCE FROM HUB", diff.getNorm());
     Logger.recordOutput("Aim Point", new Pose2d(aimPoint, new Rotation2d()));
-    shooterMech.setTurretAngle(desiredAngle);
-    shooterMech.setShooterSpeed(diff.getNorm(), fullSpeed);
-    shooterMech.setHoodAngle(diff.getNorm());
+    shooterMech.setTurretAngle(desiredAngle, wheelState);
+    shooterMech.setShooterSpeed(diff.getNorm(), wheelState);
+    shooterMech.setHoodAngle(diff.getNorm(), wheelState);
   }
 
   // Called once the command ends or is interrupted.

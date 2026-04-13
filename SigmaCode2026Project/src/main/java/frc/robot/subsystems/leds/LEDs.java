@@ -2,8 +2,6 @@ package frc.robot.subsystems.leds;
 
 import static edu.wpi.first.units.Units.Seconds;
 
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.LEDPattern;
@@ -16,8 +14,8 @@ import org.littletonrobotics.junction.Logger;
 public class LEDs extends SubsystemBase {
 
   // ── Hardware ───────────────────────────────────────────────────────────────
-  private final AddressableLED m_led;
-  private final AddressableLEDBuffer m_buffer;
+  // private final AddressableLED m_led;
+  // private final AddressableLEDBuffer m_buffer;
 
   // ── Base solid patterns ────────────────────────────────────────────────────
   private final LEDPattern blue = LEDPattern.solid(Color.kBlue);
@@ -47,19 +45,22 @@ public class LEDs extends SubsystemBase {
 
   private static final double ACTIVE_WARNING_WINDOW = 2.5;
 
+  private String autoWon = "➖";
+
   // ── Constructor ────────────────────────────────────────────────────────────
 
   public LEDs() {
     // Constructs the leds that is connected to PWM Slot
-    m_led = new AddressableLED(9);
+    // m_led = new AddressableLED(9);
     // Constructs the buffer for the LEDs using the number of LEDS on the LED Strip
-    m_buffer = new AddressableLEDBuffer(LEDConstants.k_stripLength);
+    // m_buffer = new AddressableLEDBuffer(LEDConstants.k_stripLength);
     // Tells the LEDS what the length of the LED Strip is
-    m_led.setLength(LEDConstants.k_stripLength);
+    // m_led.setLength(LEDConstants.k_stripLength);
     // Starts the LEDS up
-    m_led.start();
+    // m_led.start();
     // Sets the current pattern of the LEDS to be solid blue
     currentPattern = blue;
+    Logger.recordOutput("MatchData/HubActive", false);
   }
 
   // ── Periodic ───────────────────────────────────────────────────────────────
@@ -71,9 +72,32 @@ public class LEDs extends SubsystemBase {
     // Updates LEDS based on Game Data
     updateHubLEDFromGameData();
     // Applies the current LED Pattern to the buffer
-    currentPattern.applyTo(m_buffer);
+    // currentPattern.applyTo(m_buffer);
     // Sets the LED patterns from buffer to LEDs
-    m_led.setData(m_buffer);
+    // m_led.setData(m_buffer);
+    String gameData = DriverStation.getGameSpecificMessage();
+    if (!gameData.isEmpty() && gameData != null) {
+      if (DriverStation.getAlliance().get() == Alliance.Red) {
+        if (gameData.charAt(0) == 'R') {
+          autoWon = "WON";
+        } else if (gameData.charAt(0) == 'B') {
+          autoWon = "X";
+        } else {
+          autoWon = "...";
+        }
+      } else {
+        if (gameData.charAt(0) == 'R') {
+          autoWon = "X";
+        } else if (gameData.charAt(0) == 'B') {
+          autoWon = "WON";
+        } else {
+          autoWon = "...";
+        }
+      }
+    } else {
+      autoWon = "...";
+    }
+    Logger.recordOutput("MatchData/AutoWon", autoWon);
   }
 
   // ── Hub state detection ────────────────────────────────────────────────────
@@ -142,6 +166,7 @@ public class LEDs extends SubsystemBase {
     }
 
     boolean currentlyActive = isHubActiveInCurrentShift(matchTime, shift1Active);
+    Logger.recordOutput("MatchData/HubActive", currentlyActive);
 
     if (!currentlyActive && isWithinActiveWarningWindow(matchTime, shift1Active)) {
       return LEDSetting.HUB_WARNING;
@@ -196,6 +221,6 @@ public class LEDs extends SubsystemBase {
     } else {
       shiftTimer = 0;
     }
-    Logger.recordOutput("/MatchData/ShiftTimer", shiftTimer);
+    Logger.recordOutput("MatchData/ShiftTimer", shiftTimer);
   }
 }
