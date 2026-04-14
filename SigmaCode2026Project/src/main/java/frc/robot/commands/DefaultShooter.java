@@ -42,7 +42,8 @@ public class DefaultShooter extends Command {
     this.shooterMech = shooterMech;
     this.poseSupplier = poseSupplier;
     this.speedsSupplier = speedSupplier;
-    this.wheelState = wheelState;
+    this.wheelState = fullSpeed ? ShooterWheelState.FULLSPEED : ShooterWheelState.DEFAULTSPEED;
+    addRequirements(this.shooterMech);
   }
 
   // Called when the command is initially scheduled.
@@ -52,6 +53,13 @@ public class DefaultShooter extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    Pose2d robotPose;
+    if (poseSupplier != null) {
+      robotPose = poseSupplier.get();
+    } else {
+      robotPose = swerveDrive.getPose();
+    }
+
     Translation2d aimPoint =
         shooterMech.getAimPoint(shooterMech.getTargetPose(swerveDrive), swerveDrive);
     // Pose2d robotPose = poseSupplier.get();

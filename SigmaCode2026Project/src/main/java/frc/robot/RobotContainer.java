@@ -88,6 +88,7 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim());
         leds = new LEDs();
+        break;
       default:
         shooterMech = new Shooter(new ShooterIOReal());
         spinDexerMech = new SpinDexerMech(new SpinDexerIOSim());
@@ -106,7 +107,9 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     shooterMech.setDefaultCommand(
-        new DefaultShooter(shooterMech, swerveDrive, ShooterWheelState.DEFAULTSPEED));
+      /*old new needs to be tested */
+       // new DefaultShooter(shooterMech, swerveDrive::, ShooterWheelState.DEFAULTSPEED, false));
+        new DefaultShooter(shooterMech, swerveDrive::getPose, swerveDrive::getDriveSpeedsFieldRelative, false));
     // Uncomment this if the overrun loop stops showing up and go into the command and follow the
     // next instructions
     // shooterMech.setDefaultCommand(new DefaultShooter(shooterMech, swerveDrive::getPose,
