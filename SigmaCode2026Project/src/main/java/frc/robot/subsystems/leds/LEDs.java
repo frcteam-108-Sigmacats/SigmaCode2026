@@ -16,8 +16,8 @@ import org.littletonrobotics.junction.Logger;
 public class LEDs extends SubsystemBase {
 
   // ── Hardware ───────────────────────────────────────────────────────────────
-  // private final AddressableLED m_led;
-  // private final AddressableLEDBuffer m_buffer;
+  private final AddressableLED m_led;
+  private final AddressableLEDBuffer m_buffer;
 
   // ── Base solid patterns ────────────────────────────────────────────────────
   private final LEDPattern blue = LEDPattern.solid(Color.kBlue);
@@ -53,13 +53,13 @@ public class LEDs extends SubsystemBase {
 
   public LEDs() {
     // Constructs the leds that is connected to PWM Slot
-    // m_led = new AddressableLED(9);
+    m_led = new AddressableLED(9);
     // Constructs the buffer for the LEDs using the number of LEDS on the LED Strip
-    // m_buffer = new AddressableLEDBuffer(LEDConstants.k_stripLength);
+    m_buffer = new AddressableLEDBuffer(LEDConstants.k_stripLength);
     // Tells the LEDS what the length of the LED Strip is
-    // m_led.setLength(LEDConstants.k_stripLength);
+    m_led.setLength(LEDConstants.k_stripLength);
     // Starts the LEDS up
-    // m_led.start();
+    m_led.start();
     // Sets the current pattern of the LEDS to be solid blue
     currentPattern = blue;
     Logger.recordOutput("MatchData/HubActive", false);
@@ -74,9 +74,9 @@ public class LEDs extends SubsystemBase {
     // Updates LEDS based on Game Data
     updateHubLEDFromGameData();
     // Applies the current LED Pattern to the buffer
-    // currentPattern.applyTo(m_buffer);
+    currentPattern.applyTo(m_buffer);
     // Sets the LED patterns from buffer to LEDs
-    // m_led.setData(m_buffer);
+    m_led.setData(m_buffer);
     String gameData = DriverStation.getGameSpecificMessage();
     if (!gameData.isEmpty() && gameData != null) {
       if (DriverStation.getAlliance().get() == Alliance.Red) {
