@@ -67,6 +67,8 @@ public class Drive extends SubsystemBase {
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
   private boolean slowSpeedEnable = false;
 
+  private boolean hasStoppedModules = false;
+
   // Limelight camera streams
   private HttpCamera limelightBackLeft;
   private HttpCamera limelightBackRight;
@@ -163,9 +165,14 @@ public class Drive extends SubsystemBase {
 
     // Stop moving when disabled
     if (DriverStation.isDisabled()) {
-      for (var module : modules) {
-        module.stop();
+      if (!hasStoppedModules) {
+        for (var module : modules) {
+          module.stop();
+        }
+        hasStoppedModules = true;
       }
+    } else {
+      hasStoppedModules = false;
     }
 
     // Log empty setpoint states when disabled
