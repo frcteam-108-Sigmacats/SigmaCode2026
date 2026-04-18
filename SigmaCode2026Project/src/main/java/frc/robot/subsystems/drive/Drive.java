@@ -301,8 +301,8 @@ public class Drive extends SubsystemBase {
     } else if (driveMode == ShooterStatus.PASSING) {
       speeds =
           new ChassisSpeeds(
-              speeds.vxMetersPerSecond * 0.8,
-              speeds.vyMetersPerSecond * 0.8,
+              speeds.vxMetersPerSecond * 0.4,
+              speeds.vyMetersPerSecond * 0.4,
               speeds.omegaRadiansPerSecond * 1.0);
     } else if (driveMode == ShooterStatus.INTAKE) {
       speeds =
