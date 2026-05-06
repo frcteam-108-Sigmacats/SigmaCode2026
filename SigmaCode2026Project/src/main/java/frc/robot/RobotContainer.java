@@ -123,7 +123,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     createAutoChooser();
-    bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
+    // bLT.whileTrue(new RunAll(shooterMech, intakeMech, spinDexerMech, swerveDrive));
     bRT.whileTrue(new RunIntakeCommand(intakeMech, swerveDrive));
     bRB.whileTrue(new ReverseSpinDexerCommand(spinDexerMech));
     bLB.whileTrue(new Outtaking(intakeMech));
@@ -156,7 +156,7 @@ public class RobotContainer {
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     bRT = driver.rightTrigger();
-    bLT = driver.leftTrigger();
+    // bLT = driver.leftTrigger();
     dSTART = driver.start();
     dDOWN = driver.povDown(); // climer down
     dUP = driver.povUp(); // climer up

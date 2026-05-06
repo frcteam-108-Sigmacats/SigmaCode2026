@@ -11,7 +11,7 @@ public class SpinDexerConstants {
   public static int spinDexerCurrentLimit = 40;
 
   // Speeds for all components in the mechanism (Units: Percentages)
-  public static double SpinDexerClockWise = 1.0;
+  public static double SpinDexerClockWise = 0.5;
   public static double SpinDexerCounterClockWise = -0.75;
   public static double KickerForward = 1.0;
   public static double KickerReverse = -0.75;

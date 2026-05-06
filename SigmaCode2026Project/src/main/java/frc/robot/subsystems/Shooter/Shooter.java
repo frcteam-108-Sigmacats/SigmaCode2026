@@ -106,7 +106,7 @@ public class Shooter extends SubsystemBase {
     } else if (state == ShooterWheelState.DEFAULTSPEED) {
       io.setShooterVelocity(2500);
     } else {
-      io.setShooterVelocity(700);
+      io.setShooterVelocity(2200);
     }
   }
 
@@ -174,7 +174,7 @@ public class Shooter extends SubsystemBase {
     if (hoodstate != ShooterWheelState.TESTING) {
       io.setHoodPosition(angle);
     } else {
-      io.setHoodPosition(20);
+      io.setHoodPosition(18);
     } // auto
   }
 
