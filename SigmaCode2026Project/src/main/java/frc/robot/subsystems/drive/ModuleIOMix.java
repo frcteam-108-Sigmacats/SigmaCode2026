@@ -160,7 +160,7 @@ public class ModuleIOMix implements ModuleIO {
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    BaseStatusSignal.refreshAll(drivePos, driveVel, driveCurrent, driveVolt);
+    BaseStatusSignal.waitForAll(0.0, drivePos, driveVel, driveCurrent, driveVolt);
     sparkStickyFault = false;
     inputs.drivePositionRad = drivePos.getValueAsDouble() * 2 * Math.PI;
     inputs.driveVelocityRadPerSec = driveVel.getValueAsDouble() * 2 * Math.PI;
