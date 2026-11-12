@@ -20,10 +20,16 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import frc.robot.util.TrajectoryMap;
+import java.util.List;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
@@ -64,22 +70,23 @@ public class DriveConstants {
 
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 50;
-  public static final double wheelRadiusMeters = Units.inchesToMeters(2.53);
+  public static final double wheelRadiusMeters = Units.inchesToMeters(1.5);
   public static final double driveMotorReduction =
       (4.71); // MAXSwerve with 14 pinion teeth and 22 spur teeth
   public static final DCMotor driveGearbox = DCMotor.getKrakenX60(1);
 
   // Drive encoder configuration
   public static final double driveEncoderPositionFactor =
-      2 * Math.PI / driveMotorReduction; // Rotor Rotations -> Wheel Radians
+      driveMotorReduction; // Rotor Rotations -> Wheel Radians
   public static final double driveEncoderVelocityFactor =
       (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
   // Drive PID configuration
-  public static final double driveKp = 0.05;
+  public static final double driveKp = 1.4;
   public static final double driveKd = 0.0;
-  public static final double driveKs = 0.0;
-  public static final double driveKv = 0.1;
+  public static final double driveKs = 0.31;
+  public static final double driveKv = 0.08;
+  public static final double driveKa = 2.0;
   public static final double driveSimP = 0.1;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
@@ -138,20 +145,87 @@ public class DriveConstants {
                   wheelCOF));
 
   // Limelights
-  // public static final String kLimelightFrontName = "limelight-front"; // not on robot yet
   public static final String kLimelightBackLeftName = "limelight-bl";
   public static final String kLimelightBackRightName = "limelight-br";
+  public static final String kLimelightFrontName = "limelight-front"; // tf = front limelight
 
   public static double xyStdDevCoefficient = 0.005;
   public static double thetaStdDevCoefficient = 0.01;
   public static double stdDevFactor = 0.5;
   public static boolean useVisionRotation = true;
   public static double autoStdDevScale = 0;
+
+  // Constants for AUTO
+  public static PIDController xyLinearPIDController = new PIDController(5.5, 0, 0.0);
+  public static ProfiledPIDController thetaPIDController =
+      new ProfiledPIDController(2.0, 0, 0, new Constraints(6.28, 3.14));
+  // Auto Paths
+  // Depot Paths
+  public static TrajectoryMap depotPath1Pose1 =
+      new TrajectoryMap(
+          new Pose2d(3.5, 5.6, Rotation2d.fromDegrees(-45)), Rotation2d.fromDegrees(-45), 1.5);
+  public static TrajectoryMap depotPath1Pose2 =
+      new TrajectoryMap(
+          new Pose2d(6.3, 5.6, Rotation2d.fromDegrees(-45)), Rotation2d.fromDegrees(-45), 1.5);
+  public static TrajectoryMap depotPath2Pose1 =
+      new TrajectoryMap(
+          new Pose2d(7.495, 6.684, Rotation2d.fromDegrees(-45)), Rotation2d.fromDegrees(-45), 3);
+  public static TrajectoryMap depotPath2Pose2 =
+      new TrajectoryMap(
+          new Pose2d(7.8, 4.5, Rotation2d.fromDegrees(-90)), Rotation2d.fromDegrees(-90), 0.75);
+  public static TrajectoryMap depotPath3Pose1 =
+      new TrajectoryMap(
+          new Pose2d(6.0, 5.5, Rotation2d.fromDegrees(-135)), Rotation2d.fromDegrees(-135), 4.8);
+  public static TrajectoryMap depotPath3Pose2 =
+      new TrajectoryMap(
+          new Pose2d(2.0, 5.5, Rotation2d.fromDegrees(-135)), Rotation2d.fromDegrees(-135), 1.5);
+  // Station Paths
+  public static TrajectoryMap stationPath1Pose1 =
+      new TrajectoryMap(
+          new Pose2d(3.418, 2.407, Rotation2d.fromDegrees(45)), Rotation2d.fromDegrees(45), 3.0);
+  public static TrajectoryMap stationPath1Pose2 =
+      new TrajectoryMap(
+          new Pose2d(6.048, 2.407, Rotation2d.fromDegrees(45)), Rotation2d.fromDegrees(45), 3.0);
+  public static TrajectoryMap stationPath2Pose1 =
+      new TrajectoryMap(
+          new Pose2d(7.605, 0.944, Rotation2d.fromDegrees(90)), Rotation2d.fromDegrees(45), 3.0);
+  public static TrajectoryMap stationPath2Pose2 =
+      new TrajectoryMap(
+          new Pose2d(7.848, 3.394, Rotation2d.fromDegrees(90)), Rotation2d.fromDegrees(45), 0.75);
+  public static TrajectoryMap stationPath3Pose1 =
+      new TrajectoryMap(
+          new Pose2d(6.177, 2.549, Rotation2d.fromDegrees(-135)),
+          Rotation2d.fromDegrees(-135),
+          4.8);
+  public static TrajectoryMap stationPath3Pose2 =
+      new TrajectoryMap(
+          new Pose2d(3.5, 2.549, Rotation2d.fromDegrees(-135)), Rotation2d.fromDegrees(-135), 2);
+  public static TrajectoryMap stationPath4Pose1 =
+      new TrajectoryMap(
+          new Pose2d(0.806, 0.652, Rotation2d.fromDegrees(180)), Rotation2d.fromDegrees(180), 2.0);
+
+  // Path Groups
+  public static List<TrajectoryMap> depotPath1 = List.of(depotPath1Pose1, depotPath1Pose2);
+  public static List<TrajectoryMap> depotPath2 = List.of(depotPath2Pose1, depotPath2Pose2);
+  public static List<TrajectoryMap> depotPath3 = List.of(depotPath3Pose1, depotPath3Pose2);
+
+  public static List<TrajectoryMap> stationPath1 = List.of(stationPath1Pose1, stationPath1Pose2);
+  public static List<TrajectoryMap> stationPath2 = List.of(stationPath2Pose1, stationPath2Pose2);
+  public static List<TrajectoryMap> stationPath3 = List.of(stationPath3Pose1, stationPath3Pose2);
+  public static List<TrajectoryMap> stationPath4 = List.of(stationPath4Pose1);
+
+  // Paths to test and modify PID Controllers for Holonomic Drive
+  public static TrajectoryMap testPath1Pose1 =
+      new TrajectoryMap(new Pose2d(0, 0, Rotation2d.kZero), Rotation2d.kZero, 2.0);
+  public static TrajectoryMap testPath1Pose2 =
+      new TrajectoryMap(new Pose2d(2, 0, Rotation2d.kZero), Rotation2d.kZero, 2.0);
+  public static TrajectoryMap testPath1Pose3 =
+      new TrajectoryMap(new Pose2d(2, 2, Rotation2d.kZero), Rotation2d.kZero, 2.0);
+  public static TrajectoryMap testPath1Pose4 =
+      new TrajectoryMap(new Pose2d(0, 2, Rotation2d.kZero), Rotation2d.kZero, 2.0);
+  public static TrajectoryMap testPath1Pose5 =
+      new TrajectoryMap(new Pose2d(0, 0, Rotation2d.kZero), Rotation2d.kZero, 2.0);
+
+  public static List<TrajectoryMap> testPath =
+      List.of(testPath1Pose1, testPath1Pose2, testPath1Pose3, testPath1Pose4, testPath1Pose5);
 }
-// old
- /*wheelRadiusMeters,
- maxSpeedMetersPerSec,
- wheelCOF,
- driveGearbox.withReduction(driveMotorReduction),
- driveMotorCurrentLimit,
- 1*/

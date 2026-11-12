@@ -4,9 +4,11 @@ public class SpinDexerConstants {
   public static int spinDexerID = 12;
   public static int kicker1ID = 13;
   public static int kicker2ID = 14;
+  public static int canRangeID = 19;
   public static int spinDexerCurrentLimit = 40;
 
-  public static double SpinDexerClockWise = 0.6;
-  public static double SpinDexerCounterClockWise = -1.0;
+  public static double SpinDexerClockWise = 1.0;
+  public static double SpinDexerCounterClockWise = -0.75;
   public static double KickerForward = 1.0;
+  public static double KickerReverse = -0.75;
 }
