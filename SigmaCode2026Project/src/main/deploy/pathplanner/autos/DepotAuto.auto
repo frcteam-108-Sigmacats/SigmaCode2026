@@ -5,9 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "DepotPath1"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ReverseIntake"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunOverBump"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseLLS"
           }
         },
         {
@@ -32,19 +51,81 @@
         {
           "type": "path",
           "data": {
-            "pathName": " DepotPath3"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "DepotPath4"
+            "pathName": "DepotPath3"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "RunAll"
+            "name": "ResetPoseLLS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RunOverBumpBack"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunAll"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 5.0
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseLLS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RunOverBump"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depotloop2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depotloop3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseLLS"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunAll"
+                }
+              }
+            ]
           }
         }
       ]

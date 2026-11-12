@@ -12,6 +12,8 @@ public interface SpinDexerIO {
     public boolean spinDexerKickerDisconnected = false;
     public double spinDexerKickerMotorVoltage = 0.0;
     public double spinDexerKickerMotorCurrent = 0.0;
+
+    public boolean detectBall = false;
   }
 
   public default void updateInputs(SpinDexerIOInputs inputs) {}

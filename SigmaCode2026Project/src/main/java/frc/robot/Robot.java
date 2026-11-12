@@ -8,6 +8,7 @@ import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 // import frc.robot.subsystems.leds.LEDs;
+import frc.robot.subsystems.clock.RobotClock;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -25,6 +26,7 @@ public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+  private final RobotClock m_robotClock = new RobotClock();
   // public final LEDs m_leds = LEDs.getInstance();
 
   /**
@@ -99,6 +101,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
+    m_robotClock.resetRobotTimer();
     // m_leds.setOff();
   }
 

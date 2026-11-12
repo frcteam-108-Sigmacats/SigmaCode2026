@@ -22,6 +22,8 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -45,6 +47,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
+import frc.robot.subsystems.Shooter.ShooterConstants.ShooterStatus;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -62,9 +65,16 @@ public class Drive extends SubsystemBase {
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
   private boolean slowSpeedEnable = false;
 
+  // Limelight camera streams
+  private HttpCamera limelightBackLeft;
+  private HttpCamera limelightBackRight;
+  private HttpCamera limelightFront;
+
   private ChassisSpeeds robotChassisSpeeds = new ChassisSpeeds();
 
-  private String driveMode = "Drive";
+  private ShooterStatus driveMode = ShooterStatus.DRIVE;
+
+  private boolean allianceRed;
 
   private static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private static Rotation2d rawGyroRotation = new Rotation2d();
@@ -98,6 +108,10 @@ public class Drive extends SubsystemBase {
 
     // Start odometry thread
     SparkXPhoenixOdometryThread.getInstance().start();
+    // Initialize Limelight camera streams for Elastic dashboard
+    if (Constants.currentMode == Mode.REAL) {
+      setupLimelightStreams();
+    }
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configure(
@@ -131,6 +145,11 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
+      allianceRed = true;
+    } else {
+      allianceRed = false;
+    }
   }
 
   @Override
@@ -172,8 +191,6 @@ public class Drive extends SubsystemBase {
                     - lastModulePositions[moduleIndex].distanceMeters,
                 modulePositions[moduleIndex].angle);
         lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-
-        modulePositions[moduleIndex] = modules[moduleIndex].getPosition();
       }
 
       // Update gyro angle
@@ -187,8 +204,8 @@ public class Drive extends SubsystemBase {
       }
 
       // Apply update
-      // poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-      poseEstimator.update(rawGyroRotation, modulePositions);
+      poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      // poseEstimator.update(rawGyroRotation, modulePositions);
     }
 
     // Update gyro alert
@@ -196,9 +213,7 @@ public class Drive extends SubsystemBase {
     if (Constants.currentMode == Mode.REAL) {
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackLeftName,
-          DriverStation.getAlliance().get() == Alliance.Red
-              ? gyroIO.getYaw().getDegrees() + 180
-              : gyroIO.getYaw().getDegrees(),
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -207,9 +222,16 @@ public class Drive extends SubsystemBase {
 
       LimelightHelpers.SetRobotOrientation(
           DriveConstants.kLimelightBackRightName,
-          DriverStation.getAlliance().get() == Alliance.Red
-              ? gyroIO.getYaw().getDegrees() + 180
-              : gyroIO.getYaw().getDegrees(),
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
+          0,
+          gyroIO.getRoll().getDegrees(),
+          0,
+          gyroIO.getPitch().getDegrees(),
+          0);
+
+      LimelightHelpers.SetRobotOrientation(
+          DriveConstants.kLimelightFrontName,
+          allianceRed ? gyroIO.getYaw().getDegrees() + 180 : gyroIO.getYaw().getDegrees(),
           0,
           gyroIO.getRoll().getDegrees(),
           0,
@@ -220,12 +242,16 @@ public class Drive extends SubsystemBase {
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
       PoseEstimate bRMT2 =
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName);
-
+      PoseEstimate FLMT2 =
+          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName);
       if (checkPose(bLMT2)) {
         updatePoseWithStdDev(bLMT2);
       }
       if (checkPose(bRMT2)) {
         updatePoseWithStdDev(bRMT2);
+      }
+      if (checkPose(FLMT2)) {
+        updatePoseWithStdDev(FLMT2);
       }
     }
   }
@@ -266,20 +292,24 @@ public class Drive extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
-    if (driveMode.equals("Shoot")) {
+    if (driveMode == ShooterStatus.SHOOT) {
+      speeds =
+          new ChassisSpeeds(
+              speeds.vxMetersPerSecond * 0.2,
+              speeds.vyMetersPerSecond * 0.2,
+              speeds.omegaRadiansPerSecond * 0.5);
+    } else if (driveMode == ShooterStatus.PASSING) {
       speeds =
           new ChassisSpeeds(
               speeds.vxMetersPerSecond * 0.3,
               speeds.vyMetersPerSecond * 0.3,
-              speeds.omegaRadiansPerSecond * 0.6);
-      System.out.println("Drive is 40% speed");
-    } else if (driveMode.equals("Intake")) {
+              speeds.omegaRadiansPerSecond * 0.5);
+    } else if (driveMode == ShooterStatus.INTAKE) {
       speeds =
           new ChassisSpeeds(
               speeds.vxMetersPerSecond * 0.5,
               speeds.vyMetersPerSecond * 0.5,
               speeds.omegaRadiansPerSecond * 0.75);
-      System.out.println("Drive speed is 70%");
     } else {
       speeds.times(1);
     }
@@ -312,6 +342,10 @@ public class Drive extends SubsystemBase {
     return ChassisSpeeds.fromRobotRelativeSpeeds(
         kinematics.toChassisSpeeds(getModuleStates()),
         poseEstimator.getEstimatedPosition().getRotation());
+  }
+
+  public double getPitch() {
+    return gyroIO.getRoll().getDegrees();
   }
 
   public void runVelocityFieldRelative(ChassisSpeeds speeds) {
@@ -454,6 +488,54 @@ public class Drive extends SubsystemBase {
   public double getMaxAngularSpeedRadPerSec() {
     return 2 * Math.PI;
   }
+  // reset poses for auto
+  public Command resetPoseWithLLS() {
+    return runOnce(
+        () -> {
+          PoseEstimate leftLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName);
+          PoseEstimate rightLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName);
+          PoseEstimate frontLLMT2 =
+              LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName);
+          PoseEstimate[] poseList = {leftLLMT2, rightLLMT2, frontLLMT2};
+          PoseEstimate bestPose = null;
+          double bestScore = Double.POSITIVE_INFINITY;
+          for (PoseEstimate e : poseList) {
+            if (e.tagCount > 0) {
+              double eScore = e.avgTagDist + 1.0 / e.tagCount;
+              if (eScore < bestScore) {
+                bestScore = eScore;
+                bestPose = e;
+              }
+            }
+          }
+          if (bestPose != null) {
+            resetOdometry(bestPose.pose);
+          }
+        });
+  }
+  // public Command resetPoseWithRightLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackRightName)
+  //                   .pose));
+  // }
+  // public Command resetPoseWithLeftLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightBackLeftName)
+  //                   .pose));
+  // }
+  // public Command resetPoseWithFrontLL() {
+  //   return runOnce(
+  //       () ->
+  //           this.resetOdometry(
+  //               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightFrontName)
+  //                   .pose));
+  // }
 
   private boolean checkPose(PoseEstimate estimate) {
     if (estimate == null) {
@@ -483,11 +565,11 @@ public class Drive extends SubsystemBase {
     return true;
   }
 
-  public void setDriveState(String mode) {
+  public void setDriveState(ShooterStatus mode) {
     driveMode = mode;
   }
 
-  public String getDriveState() {
+  public ShooterStatus getDriveState() {
     return driveMode;
   }
 
@@ -495,8 +577,40 @@ public class Drive extends SubsystemBase {
     return estimate.pose.equals(new Pose2d());
   }
 
-  public static boolean leftStick(boolean b) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'leftStick'");
+  public double getRoll() {
+    return gyroIO.getRoll().getDegrees();
+  }
+
+  /**
+   * Sets up Limelight camera streams for the Elastic dashboard. This publishes the camera feeds to
+   * NetworkTables so they can be viewed in Elastic.
+   */
+  private void setupLimelightStreams() {
+    try {
+      // Back Left Limelight
+      limelightBackLeft =
+          new HttpCamera(
+              kLimelightBackLeftName,
+              "http://" + kLimelightBackLeftName + ".local:5800/stream.mjpg");
+      CameraServer.startAutomaticCapture(limelightBackLeft);
+
+      // Back Right Limelight
+      limelightBackRight =
+          new HttpCamera(
+              kLimelightBackRightName,
+              "http://" + kLimelightBackRightName + ".local:5800/stream.mjpg");
+      CameraServer.startAutomaticCapture(limelightBackRight);
+
+      // Front Limelight
+      limelightFront =
+          new HttpCamera(
+              kLimelightFrontName, "http://" + kLimelightFrontName + ".local:5800/stream.mjpg");
+      CameraServer.startAutomaticCapture(limelightFront);
+
+      Logger.recordOutput("Drive/LimelightStreamsInitialized", true);
+    } catch (Exception e) {
+      Logger.recordOutput("Drive/LimelightStreamError", e.getMessage());
+      System.err.println("Failed to initialize Limelight streams: " + e.getMessage());
+    }
   }
 }
