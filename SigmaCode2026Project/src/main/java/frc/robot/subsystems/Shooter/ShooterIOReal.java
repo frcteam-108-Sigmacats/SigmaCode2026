@@ -63,7 +63,7 @@ public class ShooterIOReal implements ShooterIO {
   // ── Connection debounce ───────────────────────────────────────────────────
   private final Debouncer turretDebounce = new Debouncer(0.5);
   private final Debouncer hoodDebounce = new Debouncer(0.5);
-
+         
   // ── Closed-loop state (mirrors TurretIOSim) ───────────────────────────────
   private boolean turretClosedLoop = false;
   private boolean shooterClosedLoop = false;
